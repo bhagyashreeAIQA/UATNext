@@ -1,0 +1,19 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+/.auth/
+
+# Secrets / local config — never commit credentials
+.env
+.env.local
+
+# playwright-cli snapshot & console artifacts
+/.playwright-cli/
+
+# Local run logs
+*.log

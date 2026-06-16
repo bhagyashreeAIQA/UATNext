@@ -1,0 +1,76 @@
+/**
+ * Feature      : Execute Test Case
+ * Sub-Feature  : Test Run Execution Details – Test Step Status
+ * Test Case ID : TC-074
+ * Test Case Name: Validate Test Step Status Options Are Displayed
+ *
+ * Description  : As a Test Engineer, I want to validate that each test step displays execution
+ *                status options, so that I can mark the result of every step.
+ *
+ * Pre-conditions:
+ *   1. User has valid login credentials.
+ *   2. User is logged into the UATNext application.
+ *   3. User has access to qTest.
+ *
+ * Dependencies : Follows TC-068 (the execution details panel is open with a steps grid).
+ *
+ * Steps:
+ *   1. Follow TC-068.
+ *   2. Open any test run using the Run button.
+ *   3. Navigate to the Test Logs section.
+ *   4. Validate the Status column for a test step.
+ *   5. Validate multiple test steps.
+ *   6. Validate the default state of step status.
+ *
+ * Note: each step's Status dropdown offers the documented values (the live app renders
+ *       "InProgress" without a space — see EXPECTED.executionStatusOptions) and additionally
+ *       offers "Unexecuted". Steps default to the "Unexecuted" state. Executing a step is
+ *       irreversible (the dropdown stops offering "Unexecuted" once a real status is set), so
+ *       this test uses a run row that the mutating tests do NOT touch — TC-075 executes a step
+ *       on row 1, so this validates the default-Unexecuted state on row 2 (a clean run).
+ */
+
+import { test } from '@playwright/test';
+import {
+  loginAndOpenExecuteTab,
+  switchProjectAndLoadReleases,
+  reachTestSuiteGrid,
+} from './executeNavHelpers';
+import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { EXPECTED } from '../../utils/testData';
+
+// Validate the default state on a run the mutating tests leave untouched (TC-075 uses row 1).
+const RUN_ROW_INDEX = 2;
+
+test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Test Step Status', () => {
+
+  test('TC-074 | Validate Test Step Status Options Are Displayed', async ({ page }) => {
+    test.setTimeout(300000);
+
+    // ─── Steps 1-2 (follows TC-068): reach the grid and open a run ───────────────
+    const { executeTabPage } = await loginAndOpenExecuteTab(page);
+    await switchProjectAndLoadReleases(executeTabPage);
+    await reachTestSuiteGrid(executeTabPage, { viewAll: true });
+    await executeTabPage.verifyTotalEntriesPositive();
+
+    await executeTabPage.clickRunButton(RUN_ROW_INDEX);
+
+    const executionPage = new TestRunExecutionPage(page);
+    await executionPage.verifyDetailsPageOpen();
+
+    // ─── Step 3: Navigate to / locate the Test Logs (steps) grid ─────────────────
+    await executionPage.verifyStepsGridVisible();
+    await executionPage.verifyStepsLoaded();
+
+    // ─── Steps 4-5: validate the Status options for multiple steps ───────────────
+    const stepCount = await executionPage.getStepRowCount();
+    const sample = Math.min(stepCount, 3); // validate up to the first three steps
+    for (let i = 0; i < sample; i++) {
+      await executionPage.verifyStepStatusOptions(i, EXPECTED.executionStatusOptions);
+    }
+
+    // ─── Step 6: validate the default state — all steps Unexecuted ───────────────
+    await executionPage.verifyAllStepsUnexecuted();
+  });
+
+});

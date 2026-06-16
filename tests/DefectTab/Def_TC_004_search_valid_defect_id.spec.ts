@@ -1,0 +1,52 @@
+/**
+ * Feature      : Defect
+ * Sub-Feature  : Defect Search
+ * Test Case ID : Def_TC_004
+ * Test Name    : Verify Defect Search by Valid Defect ID
+ *
+ * Description  : As a Test Engineer, I want to verify defect search functionality using
+ *                a valid Defect ID, so that I can locate a specific defect.
+ *
+ * Pre-conditions:
+ *   1. User has valid login credentials.
+ *   2. User is logged into the UATNext application.
+ *   3. Business Unit / project with defect data is selected (see testData note).
+ *   4. Test data is available.
+ *
+ * Steps:
+ *   1. Click on the Defect tab.
+ *   2. Select a valid project.
+ *   3. Enter a valid Defect ID in the Summary/Defect ID field.
+ *   4. Click the Search button.
+ */
+
+import { test, expect } from '@playwright/test';
+import { loginAndOpenDefectTab } from './defectNavHelpers';
+
+test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
+
+  test('Def_TC_004 | Verify Defect Search by Valid Defect ID', async ({ page }) => {
+    // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
+    // Expected: Defect page displayed; project defects loaded
+    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    await defectTabPage.verifyDefectPageDisplayed();
+    await defectTabPage.verifyDefectsLoaded();
+
+    // A real Defect ID is read from the loaded list so the search is data-independent.
+    const validDefectId = await defectTabPage.getFirstDefectId();
+    expect(validDefectId).toMatch(/^DF-\d+$/);
+
+    // ─── Step 3: Enter a valid Defect ID in the Summary/Defect ID field ───────
+    // Expected: Entered Defect ID should be visible in the field
+    await defectTabPage.fillSummaryOrId(validDefectId);
+    await expect(defectTabPage.summaryDefectIdInput).toHaveValue(validDefectId);
+
+    // ─── Step 4: Click the Search button ──────────────────────────────────────
+    // Expected: Matching defect should be displayed in the right panel
+    await defectTabPage.clickSearch();
+
+    await defectTabPage.verifyDefectVisible(validDefectId);
+    expect(await defectTabPage.getDefectIdsOnPage()).toContain(validDefectId);
+  });
+
+});

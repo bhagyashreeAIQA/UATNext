@@ -1,0 +1,242 @@
+import fs from 'fs';
+import path from 'path';
+
+// Load a local, gitignored `.env` (KEY=VALUE per line) at the project root if present, so
+// credentials never live in source control. Real environment variables take precedence,
+// so CI can inject them directly. Copy `.env.example` to `.env` to run locally.
+(() => {
+  const envPath = path.resolve(__dirname, '../.env');
+  if (!fs.existsSync(envPath)) return;
+  for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!match) continue;
+    const key = match[1];
+    let value = match[2].trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (!(key in process.env)) process.env[key] = value;
+  }
+})();
+
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable "${name}". ` +
+        'Copy .env.example to .env and fill in your UATNext credentials (see README).',
+    );
+  }
+  return value;
+}
+
+export const CREDENTIALS = {
+  email: requiredEnv('UATNEXT_EMAIL'),
+  password: requiredEnv('UATNEXT_PASSWORD'),
+};
+
+export const URLS = {
+  base: process.env.UATNEXT_BASE_URL ?? 'https://webapp-v1-blazor-uatnext-dev.azurewebsites.net',
+};
+
+export const EXPECTED = {
+  workspaceValue: 'ADO Requirement',
+  activeProject: 'qConnect - Sample Project',
+  appTitle: 'UATNext',
+  // Test-run grid columns expected by the spec (TC-008). The live grid also renders
+  // a "Business User" column between "Assigned To" and "Status"; it is validated
+  // separately so this list stays aligned with the documented test case.
+  gridColumns: [
+    'Test Run ID',
+    'Test Case ID',
+    'Name',
+    'Assigned To',
+    'Status',
+    'Execution Date',
+    'Planned Start Date',
+    'Planned End Date',
+    'Action',
+  ],
+  // Execution statuses offered by the grid's Status dropdown. The live app renders
+  // "InProgress" without a space (the documented spec writes it as "In Progress").
+  statusOptions: [
+    'Passed',
+    'Failed',
+    'Retest',
+    'Blocked',
+    'InProgress',
+    'Incomplete',
+    'Unexecuted',
+  ],
+  // A deliberately non-existent but validly-formatted Test Run ID. The grid's search
+  // only acts on recognised TR-/TC- identifiers, so this reliably yields zero matches.
+  nonMatchingSearchId: 'TR-99999999',
+
+  // ── Test Run Execution Details page (TC-068 onward) ────────────────────────
+  // Column headers of the Test Logs / test-steps grid. The live app labels the
+  // spec's "Step No" as "Step Number" and "Test Step" as "Description"; the spec's
+  // wording is mapped to the rendered labels here.
+  executionStepColumns: [
+    'Step Number',
+    'UAT Category',
+    'Description',
+    'Expected Result',
+    'Actual Result',
+    'Status',
+  ],
+  // Statuses offered by the test-run-level Status dropdown on the execution page.
+  // As in the grid filter, the live app renders "InProgress" without a space (the
+  // documented spec writes "In Progress").
+  executionStatusOptions: [
+    'Passed',
+    'Failed',
+    'Retest',
+    'Blocked',
+    'InProgress',
+    'Incomplete',
+  ],
+  // Toast shown after saving a test run. The live app renders "Test log updated
+  // successfully" (the documented spec writes "Testlog Updated Successfully."); matched
+  // case-insensitively so the wording deviation does not break the assertion.
+  saveSuccessMessage: 'Test log updated successfully',
+  // Toast shown after saving a test run that has a newly-attached file. The documented
+  // spec writes "Testlog Updated Successfully With Attachment." — the live wording is
+  // verified at runtime and matched case-insensitively.
+  saveWithAttachmentMessage: 'with attachment',
+  // The accept filter on the Test Run attachment file input.
+  attachmentAcceptedTypes: ['.xlsx', '.xls', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.pdf', '.mp4'],
+
+  // ── Link Defect (TC-083, TC-084, TC-085) ───────────────────────────────────
+  // Existing qTest defect IDs that the Link Defect search reliably returns and that
+  // can be linked to a UATNext-Dev test run / step. The link-defect specs pick the
+  // first of these that is NOT already linked (a defect already linked to the target
+  // leaves the LINK button disabled), link it, assert, then unlink it again so the
+  // suite is repeatable and does not accumulate links. Defect IDs persist in qTest,
+  // so this pool only needs a couple of spare entries beyond what one run uses.
+  linkDefectCandidates: ['DF-140', 'DF-232', 'DF-233', 'DF-236', 'DF-237', 'DF-264'],
+  // Confirmation shown when unlinking a defect (YES/NO).
+  unlinkConfirmMessage: 'unlinking of Defect',
+  // A validly-formatted but non-existent Defect ID — the Link Defect search returns
+  // "No matching records found." and leaves LINK disabled (TC-134).
+  invalidDefectId: 'DF-99999999',
+
+  // ── Create Defect form (TC-105 to TC-110) ───────────────────────────────────
+  createDefect: {
+    // Mandatory fields, each marked with a "*" in the form. The documented spec listed
+    // Module as mandatory, but the live form no longer marks it: Module is auto-populated
+    // from the test case's qTest mapping (validated separately by TC-110), so it is not a
+    // user-entered required field and carries no "*". The live form additionally marks Team*.
+    mandatoryFields: [
+      'Summary',
+      'Affected Release/Build',
+      'Severity',
+      'Priority',
+      'Status',
+      'Type',
+      'Description',
+    ],
+    defaultStatus: 'New',   // Status field pre-populated value (TC-108)
+    defaultType: 'Bug',     // Type field pre-populated value (TC-109)
+    // ── Create Defect dropdown fields (TC-111 to TC-121) ──────────────────────
+    // Each dropdown is an `input.searchable-dropdown-input` identified by its unique
+    // "-- Select X --" placeholder.
+    dropdownPlaceholders: {
+      module:        '-- Select Module --',
+      environment:   '-- Select Environment --',
+      severity:      '-- Select Severity --',
+      type:          '-- Select Type --',
+      category:      '-- Select Category --',
+      team:          '-- Select Team --',
+      priority:      '-- Select Priority --',
+      status:        '-- Select Status --',
+      reason:        '-- Select Reason --',
+      businessUser:  '-- Select Business User --',
+      rootCause:     '-- Select Root Cause --',
+      targetRelease: '-- Select Target Release --',
+      assignedTo:    '-- Select Assigned To User --',
+    },
+    defaultSeverity: '3 - Medium',  // Severity default (TC-132)
+    defaultPriority: '3 - Medium',  // Priority default (TC-133)
+    // Sections the pre-populated Description template must contain (TC-128).
+    descriptionTemplateSections: ['Business Impact', 'Steps to Reproduce', 'Expected Result', 'Actual Result'],
+    // Toast shown after a successful Create Defect SAVE (TC-131). The documented wording is
+    // "Defect Created Successfully"; the live build shows "Defect created and linked successfully."
+    // (the new defect is auto-linked to the run). Matched leniently to cover both.
+    defectCreatedMessage: /defect created.*successfully/i,
+    // Documented Type values (live list matches these exactly).
+    typeOptions: ['Bug', 'Enhancement', 'Change Request', 'Other'],
+    // Documented Status values. The live workflow exposes a superset (15), so these are asserted
+    // as a subset that must be present rather than an exact list.
+    statusOptions: [
+      'New', 'Rejected', 'Deferred', 'Open', 'Assigned', 'Remediation Started', 'Fixed', 'Ready To Retest',
+    ],
+    // Module is pre-populated with the mapped qTest module code. The documented spec example is
+    // "MD-6078 SET Dealer CRM"; the live mapping for this test data is "MD-6111 Testdata_Module"
+    // — both match this "MD-<id> <name>" shape, which is what the test asserts.
+    modulePattern: /^MD-\d+\s+\S/,
+    // Validation shown when SAVE is clicked with a blank Summary. The documented spec writes
+    // "Please fill all mandatory fields"; the live build shows the field-specific message below.
+    summaryBlankError: /summary cannot be blank/i,
+    summaryMaxLength: 255,
+  },
+
+  // ── Defect tab (Def_TC_001 to Def_TC_010) ───────────────────────────────────
+  // The Defect tab is verified against the project that carries seeded defect data
+  // (the default-loaded "qConnect - Sample Project" exposes 2783 defects). The
+  // documented precondition names Business Unit "UATNext Dev", but that BU's Defect
+  // tab holds 0 entries, so the data-dependent search/list cases would have nothing
+  // to assert against; the project that owns the seeded defects is used instead so
+  // the list, search and filter behaviours are exercisable.
+  defect: {
+    // Left-panel filter controls expected by Def_TC_001, in top-to-bottom order. The
+    // SEARCH/CLEAR buttons are present but rendered disabled until a filter is entered.
+    leftPanelControls: [
+      'SEARCH',
+      'CLEAR',
+      'Projects',
+      'Summary / Defect ID',
+      'Affected Release',
+      'Status',
+      'Team',
+      'Severity',
+      'Priority',
+      'Assigned To',
+      'Business User',
+      'Created By',
+      'Submitted After',
+      'Submitted Before',
+    ],
+    // Right-panel grid columns expected by Def_TC_002, in left-to-right order.
+    gridColumns: [
+      'Defect ID',
+      'Summary',
+      'Affected Release/Build',
+      'Status',
+      'Team',
+      'Severity',
+      'Priority',
+      'Assigned To',
+      'Business User',
+    ],
+    // Empty-state message shown in the right panel when a search yields no defects
+    // (Def_TC_005 / Def_TC_007). Verified verbatim against the live app.
+    noDefectsMessage: 'No defects found. Use the filters to search for defects.',
+    // A validly-formatted but non-existent Defect ID — search returns 0 results and
+    // the no-defects message (Def_TC_005).
+    invalidDefectId: 'DF-99999999',
+    // A summary string that matches no defect — search returns 0 results (Def_TC_007).
+    invalidSummary: 'zzz-no-such-defect-summary-qwerty',
+    // A value not present in the Affected Release dropdown — typing it shows the
+    // dropdown's "No results found" state and leaves only "Please Select" (Def_TC_009).
+    invalidRelease: 'ZZZ-invalid-release-xyz',
+    // Text the Affected Release dropdown renders when a typed value matches nothing.
+    dropdownNoResultsText: 'No results found',
+    // A Status value present in the Status dropdown, used for the valid-filter case
+    // (Def_TC_010). Live Status options: New, Assigned, Resolved, Reopened, Closed,
+    // Deferred.
+    validStatus: 'Resolved',
+  },
+};
