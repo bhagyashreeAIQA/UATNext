@@ -240,12 +240,28 @@ export class DefectTabPage {
 
   /** Opens the named dropdown and selects the option whose text exactly matches `value`. */
   async selectDropdownValue(label: string, value: string): Promise<void> {
-    await this.openDropdown(label);
-    await this.sidebarField(label)
-      .locator('.searchable-dropdown-item')
-      .filter({ hasText: new RegExp(`^${value}$`) })
-      .first()
-      .click();
+    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const field = this.sidebarField(label);
+    const list = field.locator('.searchable-dropdown-list');
+    const item = field.locator('.searchable-dropdown-item').filter({ hasText: new RegExp(`^${escaped}$`) });
+
+    // The options stream in from qTest when the dropdown opens; under load that fetch can
+    // briefly return nothing ("No results found"). (Re)open and wait until the target
+    // option is actually present, toggling closed between attempts so each pass re-fetches.
+    await expect(async () => {
+      if (!(await list.isVisible().catch(() => false))) {
+        await this.sidebarInput(label).click();
+        await list.waitFor({ state: 'visible', timeout: 5000 });
+      }
+      await this.page.waitForTimeout(500);
+      if ((await item.count()) === 0) {
+        await this.sidebarInput(label).click().catch(() => {});
+        await list.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
+        throw new Error(`Dropdown "${label}" has not loaded option "${value}" yet`);
+      }
+    }).toPass({ timeout: 25000 });
+
+    await item.first().click();
     // The list collapses once a value is committed.
     await expect(this.sidebarInput(label)).toHaveValue(value);
   }
@@ -335,6 +351,52 @@ export class DefectTabPage {
           .locator('> *')
           .nth(3);
         expect((await cell.innerText()).trim()).toMatch(new RegExp(status, 'i'));
+      }
+    }).toPass({ timeout: 15000 });
+  }
+
+  // Zero-based index of each filterable column among a data row's direct children
+  // (`.testlistrow > *`): DF-id[0], Summary[1], Affected Release[2], Status[3], Team[4],
+  // Severity[5], Priority[6], Assigned To[7], Business User[8].
+  private static readonly COLUMN_INDEX: Record<string, number> = {
+    Status: 3,
+    Team: 4,
+    Severity: 5,
+    Priority: 6,
+    'Assigned To': 7,
+    'Business User': 8,
+  };
+
+  /**
+   * Reads the named column's value for the first loaded defect row that has a non-empty
+   * value, so a "valid" filter can be driven by a value that genuinely owns defects
+   * (returns null if no loaded row has a value in that column).
+   */
+  async getFirstNonEmptyColumnValue(label: string): Promise<string | null> {
+    const idx = DefectTabPage.COLUMN_INDEX[label];
+    for (const id of await this.getDefectIdsOnPage()) {
+      const cell = this.mainArea
+        .locator('.testlistrow', { has: this.page.locator(`.text-wrapper-14[title="${id}"]`) })
+        .locator('> *')
+        .nth(idx);
+      const value = (await cell.innerText()).trim();
+      if (value) return value;
+    }
+    return null;
+  }
+
+  /** Every loaded defect row reports `value` in the named column (retries while the grid settles). */
+  async verifyAllRowsMatchColumn(label: string, value: string): Promise<void> {
+    const idx = DefectTabPage.COLUMN_INDEX[label];
+    await expect(async () => {
+      const ids = await this.getDefectIdsOnPage();
+      expect(ids.length).toBeGreaterThan(0);
+      for (const id of ids) {
+        const cell = this.mainArea
+          .locator('.testlistrow', { has: this.page.locator(`.text-wrapper-14[title="${id}"]`) })
+          .locator('> *')
+          .nth(idx);
+        expect((await cell.innerText()).trim()).toBe(value);
       }
     }).toPass({ timeout: 15000 });
   }

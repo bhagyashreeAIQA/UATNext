@@ -219,7 +219,9 @@
       "Bash(rm -f suite_run.log)",
       "Bash(grep -iA30 \"Status\")",
       "Bash(grep -iA2 -B1 \"Projects\\\\|Summary\\\\|input-with\\\\|textbox\\\\|Loading\")",
-      "Bash(git --version)"
+      "Bash(git --version)",
+      "Bash(git config *)",
+      "Bash(grep -iA4 -B1 \"team\\\\|searchable-dropdown\\\\|No results\\\\|Please Select\")"
     ]
   }
 }

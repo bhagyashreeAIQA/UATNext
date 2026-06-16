@@ -232,8 +232,13 @@ export const EXPECTED = {
     // A value not present in the Affected Release dropdown — typing it shows the
     // dropdown's "No results found" state and leaves only "Please Select" (Def_TC_009).
     invalidRelease: 'ZZZ-invalid-release-xyz',
-    // Text the Affected Release dropdown renders when a typed value matches nothing.
+    // Text a searchable dropdown renders when a typed value matches no option (shared by
+    // every filter dropdown — Affected Release, Status, Team, Severity, Priority,
+    // Assigned To, Business User).
     dropdownNoResultsText: 'No results found',
+    // A value not present in any filter dropdown — typing it shows the "No results found"
+    // state and leaves only "Please Select" (Def_TC_011/013/015/017/019/021).
+    invalidDropdownValue: 'ZZZ-invalid-xyz-123',
     // A Status value present in the Status dropdown, used for the valid-filter case
     // (Def_TC_010). Live Status options: New, Assigned, Resolved, Reopened, Closed,
     // Deferred.
