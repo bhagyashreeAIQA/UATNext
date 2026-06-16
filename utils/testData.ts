@@ -243,5 +243,15 @@ export const EXPECTED = {
     // (Def_TC_010). Live Status options: New, Assigned, Resolved, Reopened, Closed,
     // Deferred.
     validStatus: 'Resolved',
+    // Candidate Created By value for Def_TC_022. NOTE: no selectable Created By value
+    // actually owns defects — the seeded defects were created by a qTest integration
+    // account that is not present in the ~852-user Created By dropdown (verified by
+    // sampling), so Def_TC_022 is test.fixme. This value is kept for when such data exists.
+    validCreatedBy: 'Teresa Amand',
+    // Submitted After / Submitted Before dates (yyyy-mm-dd) chosen wide enough that every
+    // defect qualifies, so the valid date-filter cases reliably return matches
+    // (Def_TC_024 / Def_TC_025).
+    submittedAfterDate: '2000-01-01',
+    submittedBeforeDate: '2035-12-31',
   },
 };

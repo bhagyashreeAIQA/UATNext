@@ -273,6 +273,73 @@ export class DefectTabPage {
     await this.page.waitForTimeout(800); // let the dropdown re-filter its options
   }
 
+  /**
+   * Sets a native date input (Submitted After / Submitted Before) and commits it to the
+   * Blazor model. `fill()` alone updates the value but does not raise the `change` event
+   * Blazor binds to, so SEARCH stays disabled and no filter is applied — the input/change/
+   * blur dispatch below mimics a real user edit so the SEARCH button enables.
+   */
+  private async setDateField(input: Locator, date: string): Promise<void> {
+    await input.fill(date);
+    await input.evaluate((el) => {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      (el as HTMLElement).blur();
+    });
+    await this.page.waitForTimeout(300);
+  }
+
+  async setSubmittedAfter(date: string): Promise<void> {
+    await this.setDateField(this.submittedAfterInput, date);
+  }
+
+  async setSubmittedBefore(date: string): Promise<void> {
+    await this.setDateField(this.submittedBeforeInput, date);
+  }
+
+  // ─── Pagination ─────────────────────────────────────────────────────────────
+
+  private static readonly PAGE_SIZE = 10;
+
+  /** Last page number for the current result set (page size 10). */
+  async getLastPageNumber(): Promise<number> {
+    return Math.ceil((await this.getTotalEntries()) / DefectTabPage.PAGE_SIZE);
+  }
+
+  /** A pagination control is disabled when the app renders it with `cursor: default`. */
+  async isPaginationControlDisabled(alt: 'First Page' | 'Previous' | 'Next' | 'Last Page'): Promise<boolean> {
+    const cursor = await this.pagination
+      .getByAltText(alt, { exact: true })
+      .evaluate((el) => getComputedStyle(el).cursor);
+    return cursor === 'default';
+  }
+
+  private async waitForPageNumber(n: number): Promise<void> {
+    await expect.poll(() => this.getCurrentPageNumber(), { timeout: 15000 }).toBe(n);
+  }
+
+  async goToNextPage(): Promise<void> {
+    const current = await this.getCurrentPageNumber();
+    await this.nextButton.click();
+    await this.waitForPageNumber(current + 1);
+  }
+
+  async goToPreviousPage(): Promise<void> {
+    const current = await this.getCurrentPageNumber();
+    await this.previousButton.click();
+    await this.waitForPageNumber(current - 1);
+  }
+
+  async goToLastPage(): Promise<void> {
+    await this.lastPageButton.click();
+    await this.waitForPageNumber(await this.getLastPageNumber());
+  }
+
+  async goToFirstPage(): Promise<void> {
+    await this.firstPageButton.click();
+    await this.waitForPageNumber(1);
+  }
+
   async getDropdownListText(label: string): Promise<string> {
     return (await this.sidebarField(label).locator('.searchable-dropdown-list').innerText()).trim();
   }

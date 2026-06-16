@@ -221,7 +221,8 @@
       "Bash(grep -iA2 -B1 \"Projects\\\\|Summary\\\\|input-with\\\\|textbox\\\\|Loading\")",
       "Bash(git --version)",
       "Bash(git config *)",
-      "Bash(grep -iA4 -B1 \"team\\\\|searchable-dropdown\\\\|No results\\\\|Please Select\")"
+      "Bash(grep -iA4 -B1 \"team\\\\|searchable-dropdown\\\\|No results\\\\|Please Select\")",
+      "Bash(grep -iA3 -B1 \"Created By\\\\|pagination-text\\\\|Total\\\\|No defects\\\\|Please Select\")"
     ]
   }
 }
