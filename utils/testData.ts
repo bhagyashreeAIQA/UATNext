@@ -254,4 +254,40 @@ export const EXPECTED = {
     submittedAfterDate: '2000-01-01',
     submittedBeforeDate: '2035-12-31',
   },
+
+  // ── DEFECT-tab Create / View-Modify Defect form (Def_TC_036 to Def_TC_051) ──
+  // The DEFECT tab's CREATE DEFECT button opens a "New Defect" form that replaces the grid. It
+  // shares its DOM with the execution-page Create-Defect popup, but here there is NO test-case
+  // context, so (unlike that popup) none of the dropdowns are pre-populated and only Affected
+  // Release/Build carries a "*". Verified live 2026-06-17.
+  createDefectPage: {
+    // The fields the New Defect / details form must expose (Def_TC_036 / Def_TC_041). The dropdowns
+    // are verified by their placeholders (see CreateDefectPage.PLACEHOLDER); this list documents the
+    // human-readable expectation from the spec.
+    expectedFields: [
+      'Save Button', 'Close Button', 'Summary', 'Affected Release/Build', 'Fixed Release/Build',
+      'Severity', 'Type', 'Module', 'Reason', 'Category', 'Environment', 'Target Release/Build',
+      'Status', 'Priority', 'Assigned To', 'Team', 'Business User', 'Root Cause', 'Description',
+      'Browse File', 'Linked Test Run Section',
+    ],
+    // The ONLY field marked mandatory ("*") on the DEFECT-tab form for the default project/BU.
+    // The documented spec also lists Summary/Severity/Status/Priority/Team as mandatory, but this
+    // build marks none of those with "*"; instead it enforces several fields (Affected Release/Build,
+    // Reason, Business User, …) via field-by-field "Please select a valid X." validation on save.
+    markedMandatoryField: 'Affected Release/Build',
+    // Team is NOT marked mandatory for the default BU (Def_TC_046 — Team optional).
+    teamOptionalForDefaultBu: true,
+    // Unsaved-changes confirmation popup text (verified verbatim, Def_TC_038).
+    unsavedChangesMessage: 'You have unsaved changes. Are you sure you want to proceed?',
+    // Toast after a successful create (Def_TC_037 / 047) — live wording "Defect created successfully."
+    createdSuccessMessage: /defect created successfully/i,
+    // Toast after a successful update (Def_TC_042) — live wording "Defect updated successfully."
+    updatedSuccessMessage: /defect updated successfully/i,
+    // Over-10MB attachment rejection (Def_TC_039): toast "Error: File '<name>' exceeds the 10MB
+    // limit." plus the same message inline in the drop zone.
+    fileTooLargeMessage: /exceeds the 10\s*mb limit/i,
+    // Date-range coupling on the left filter panel (Def_TC_050): setting Submitted After applies its
+    // value as the `min` of Submitted Before, so earlier dates are disabled in the picker.
+    dateValidation: { after: '2027-04-20', beforeEarlier: '2026-04-20' },
+  },
 };

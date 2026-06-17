@@ -182,6 +182,18 @@ export class DefectTabPage {
     return (await this.headerLabels.allInnerTexts()).map(t => t.trim());
   }
 
+  /** Opens the New Defect form via the right-panel CREATE DEFECT button. */
+  async openCreateDefectForm(): Promise<void> {
+    await this.createDefectButton.click();
+    await this.page.locator('.defect-breadcrumbs').waitFor({ state: 'visible', timeout: 20000 });
+  }
+
+  /** Opens an existing defect's details by clicking its Defect-ID cell. */
+  async openDefectById(defectId: string): Promise<void> {
+    await this.mainArea.locator(`.text-wrapper-14[title="${defectId}"]`).click();
+    await this.page.locator('.defect-breadcrumbs').waitFor({ state: 'visible', timeout: 20000 });
+  }
+
   async getCurrentPageNumber(): Promise<number> {
     return Number((await this.pageNumber.innerText()).trim());
   }
@@ -189,7 +201,17 @@ export class DefectTabPage {
   // ─── Actions ──────────────────────────────────────────────────────────────
 
   async fillSummaryOrId(value: string): Promise<void> {
-    await this.summaryDefectIdInput.fill(value);
+    // Blazor enables SEARCH off the input's change binding. A plain `fill()` raises `input` but not
+    // always `change` (notably right after the grid re-renders following a create), which can leave
+    // SEARCH disabled. Clearing then typing real keystrokes generates the trusted input/change
+    // events Blazor reliably handles, so the button enables; a final dispatch is belt-and-braces.
+    await this.summaryDefectIdInput.click();
+    await this.summaryDefectIdInput.fill('');
+    await this.summaryDefectIdInput.pressSequentially(value, { delay: 10 });
+    await this.summaryDefectIdInput.evaluate((el) => {
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      (el as HTMLElement).blur();
+    });
   }
 
   /** Clicks SEARCH (must be enabled) and waits for the grid to settle on results or the empty state. */
@@ -212,6 +234,25 @@ export class DefectTabPage {
   async searchBySummaryOrId(value: string): Promise<void> {
     await this.fillSummaryOrId(value);
     await this.clickSearch();
+  }
+
+  /**
+   * Searches by an (assumed unique) summary and returns the matching defect's ID, RE-ISSUING the
+   * search until the grid actually settles on the filtered result. This is deliberately robust for
+   * just-created defects: (a) the grid keeps the previous (stale) rows mounted while the filtered set
+   * streams in over SignalR, and (b) a freshly-created defect can take a few seconds to become
+   * searchable in qTest. Each attempt clears the box and re-types the summary so Blazor re-binds the
+   * value (re-typing the same text would not re-enable SEARCH), then checks the first row's summary.
+   */
+  async searchAndGetDefectIdBySummary(summary: string): Promise<string> {
+    await expect(async () => {
+      await this.fillSummaryOrId(summary);
+      await this.clickSearch();
+      const id = await this.getFirstDefectId();
+      expect(id).toMatch(/^DF-\d+$/);
+      expect(await this.getSummaryForDefect(id)).toContain(summary);
+    }).toPass({ timeout: 90000, intervals: [3000, 5000, 8000] });
+    return this.getFirstDefectId();
   }
 
   /** Waits until the grid has either at least one defect row or the no-defects message. */
