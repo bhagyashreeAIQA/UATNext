@@ -230,7 +230,11 @@
       "Bash(echo \"frame=$\\(npx --no-install playwright-cli --raw eval \"!!document.querySelector\\('.test-logs-frame'\\)\" 2>&1)",
       "Bash(netstat -ano)",
       "Bash(git add *)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)",
+      "Bash(git ls-remote *)",
+      "Bash(git branch *)"
     ]
   }
 }
