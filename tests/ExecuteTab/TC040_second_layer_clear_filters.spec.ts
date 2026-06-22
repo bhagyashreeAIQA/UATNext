@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachSecondLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – Reset / Clear Filters', () => {
 
@@ -50,17 +51,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyViewAllIsDefaultSelected();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-034): reach a populated grid under View All");
 
     // ─── Step 3: Enter a keyword in Search and click Search ──────────────────────
     const searchTerm = await executeTabPage.getFirstRowTestCaseId();
     await executeTabPage.searchTestRun(searchTerm);
     await executeTabPage.verifySearchResultsMatch(searchTerm);
+    await captureScreenshot(page, "Step 3: Enter a keyword in Search and click Search");
 
     // ─── Step 4: Click the Reset/Clear Filters option ────────────────────────────
     await executeTabPage.clearFilters();
+    await captureScreenshot(page, "Step 4: Click the Reset/Clear Filters option");
 
     // ─── Step 5: Validate the filter section (default restored) ──────────────────
     await executeTabPage.verifyDefaultStateRestored();
+    await captureScreenshot(page, "Step 5: Validate the filter section (default restored)");
 
     // ─── Step 6: Validate the test run grid (default view) ───────────────────────
     await executeTabPage.verifyGridPresent();
@@ -71,6 +76,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
       await executeTabPage.verifyEachRowHasReadableData();
     }
     expect(await executeTabPage.getSearchValue()).toBe('');
+    await captureScreenshot(page, "Step 6: Validate the test run grid (default view)");
   });
 
 });

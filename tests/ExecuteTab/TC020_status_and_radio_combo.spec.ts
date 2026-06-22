@@ -40,6 +40,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assignee Filter', () => {
 
@@ -51,18 +52,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assig
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-006): reach a populated grid under View All");
 
     // ─── Steps 3 & 4: Open Status dropdown and validate the available statuses ────
     // Expected: Dropdown displays all execution statuses
 
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open Status dropdown and validate the available statuses");
 
     // ─── Step 5: Select a specific status (Passed) ───────────────────────────────
     // Expected: Grid shows only test runs with the selected status
 
     await executeTabPage.selectStatus('Passed');
     await executeTabPage.verifyAllRowsHaveStatus('Passed');
+    await captureScreenshot(page, "Step 5: Select a specific status (Passed)");
 
     // ─── Step 6: Change the selected status (Failed) ─────────────────────────────
     // Expected: Grid shows only test runs matching the newly selected status
@@ -70,6 +74,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assig
     await executeTabPage.selectStatus('Failed');
     await executeTabPage.verifyAllRowsHaveStatus('Failed');
     const viewAllStatusTotal = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Step 6: Change the selected status (Failed)");
 
     // ─── Step 7: Switch to "Assigned to me" (Failed status persists) ─────────────
     // Expected: Grid shows only the user's test runs with the selected status
@@ -78,6 +83,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assig
     expect(await executeTabPage.getCurrentStatusValue()).toBe('Failed'); // status persisted
     const assignedStatusTotal = await executeTabPage.getTotalEntries();
     expect(assignedStatusTotal).toBeLessThanOrEqual(viewAllStatusTotal);
+    await captureScreenshot(page, "Step 7: Switch to \"Assigned to me\" (Failed status persists)");
 
     // ─── Step 8: Switch back to View All (Failed status still applied) ────────────
     // Expected: Grid shows all test runs matching the selected status
@@ -85,12 +91,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assig
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     expect(await executeTabPage.getCurrentStatusValue()).toBe('Failed');
     expect(await executeTabPage.getTotalEntries()).toBe(viewAllStatusTotal);
+    await captureScreenshot(page, "Step 8: Switch back to View All (Failed status still applied)");
 
     // ─── Step 9: Test runs not assigned to the user are displayed ─────────────────
     // Expected: Grid includes test runs assigned to other users
 
     expect(viewAllStatusTotal).toBeGreaterThan(assignedStatusTotal);
     await executeTabPage.verifyAllRowsHaveStatus('Failed');
+    await captureScreenshot(page, "Step 9: Test runs not assigned to the user are displayed");
 
     // ─── Step 10: Validate grid columns ──────────────────────────────────────────
     // Expected: All columns should display correct data for the filtered test runs
@@ -98,6 +106,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Status + Assig
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 10: Validate grid columns");
   });
 
 });

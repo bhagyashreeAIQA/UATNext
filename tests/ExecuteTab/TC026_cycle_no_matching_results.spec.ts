@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Empty State', () => {
 
@@ -48,19 +49,23 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – E
     // loginAndOpenExecuteTab verifies the qTest-synced Workspace value.
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-001): login + Execute tab + workspace auto-fill");
 
     // ─── Step 3: Select a Release + first-layer Cycle with no runs ───────────────
     // Expected: Grid refreshes automatically (default "Assigned to me" → no runs)
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 3: Select a Release + first-layer Cycle with no runs");
 
     // ─── Step 4: Validate the test run grid ──────────────────────────────────────
     // Expected: Grid displays "No matching results found"
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 4: Validate the test run grid");
 
     // ─── Step 5: Enter a non-matching search keyword ─────────────────────────────
     // Expected: Grid continues displaying "No matching results found"
     await executeTabPage.searchTestRun(EXPECTED.nonMatchingSearchId);
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 5: Enter a non-matching search keyword");
   });
 
 });

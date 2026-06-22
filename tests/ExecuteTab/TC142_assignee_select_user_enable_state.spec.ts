@@ -35,6 +35,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -48,14 +49,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     // ─── Steps 2-3 / Expected 1-2: default Assigned To Me → Select User disabled ─
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     await executeTabPage.verifySelectUserDisabled();
+    await captureScreenshot(page, "Steps 2-3 / Expected 1-2: default Assigned To Me → Select User disabled");
 
     // ─── Steps 4-5 / Expected 3: View All → Select User stays disabled ───────────
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     await executeTabPage.verifySelectUserDisabled();
+    await captureScreenshot(page, "Steps 4-5 / Expected 3: View All → Select User stays disabled");
 
     // ─── Steps 6-7 / Expected 4: Others → Select User becomes enabled ────────────
     await executeTabPage.selectAssignedToBusinessUser();
     await executeTabPage.verifySelectUserEnabled();
+    await captureScreenshot(page, "Steps 6-7 / Expected 4: Others → Select User becomes enabled");
   });
 
 });

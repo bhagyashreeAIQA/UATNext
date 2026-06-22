@@ -255,6 +255,53 @@ export const EXPECTED = {
     submittedBeforeDate: '2035-12-31',
   },
 
+  // ── Coordinator → Generate Test Log (GTL_TC_001 to GTL_TC_014) ───────────────
+  // The COORDINATOR tab is permission-gated and runs on the default qConnect - Sample Project BU,
+  // which exposes approved test cases with runs (the documented "UATNext Dev" BU has no executable
+  // test data — the same deviation the Defect-tab specs note). Values verified live 2026-06-18.
+  generateTestLog: {
+    // An approved test case (under qConnect) with multiple associated test runs. Read at use; if
+    // the seed data changes, update this PID. Version auto-populates to "6.0".
+    validTestCasePid: 'TC-3017',
+    // The latest approved version auto-populated for validTestCasePid.
+    expectedVersion: '6.0',
+    // A test run id belonging to validTestCasePid (its Test Runs dropdown lists TR-2235/2251/2267/2283).
+    validTestRun: 'TR-2235',
+    // A validly-formatted but non-existent Test Case PID — search returns no version/runs and an
+    // error message (GTL_TC_004). NOTE: the live message is "Error fetching test runs. Please try
+    // again." (the spec wording is "No test runs found"), matched leniently below.
+    invalidTestCasePid: 'TC-99999999',
+    noRunsMessage: /error fetching test runs|no test runs found|not found/i,
+    // New Log step Status options (live build). The documented spec lists a 7-item superset that
+    // also includes "Retest" and "In Progress"; this build exposes only these five.
+    newLogStatusOptions: ['Passed', 'Failed', 'Incomplete', 'Blocked', 'Unexecuted'],
+    // Default per-step / overall status on a fresh New Log.
+    defaultStatus: 'Unexecuted',
+    // Documented log-grid columns (both Last Log and New Log).
+    gridColumns: ['Step Number', 'UAT Category', 'Description', 'Expected Result', 'Actual Result', 'Status'],
+    // Enabled GENERATE button colour (orange call-to-action) — rgb form for a robust assertion.
+    generateEnabledColor: 'rgb(255, 183, 0)',
+    // Toast shown after a successful New Log SAVE.
+    saveSuccessMessage: /test log created successfully/i,
+  },
+
+  // ── Coordinator → Bulk Execution (BE_TC_001) ─────────────────────────────────
+  // Bulk Execution renders its Release tree + Test Run grid on the UATNext Dev workspace (under the
+  // default qConnect BU the panel does not render). Values verified live 2026-06-19.
+  bulkExecution: {
+    // Workspace that exposes Bulk Execution releases with test runs.
+    workspace: 'UATNext Dev',
+    // Project pre-selected in the left-panel Projects dropdown for that workspace.
+    expectedProject: 'Testdata_Module',
+    // A Release node that loads a populated Test Run grid when clicked.
+    releaseWithRuns: 'Testdata_Release_P03',
+    // Test Run grid columns (left-to-right) shown after selecting a Release.
+    gridColumns: [
+      'Test Run ID', 'Test Case PID', 'Test Case Version', 'Name', 'Status',
+      'Execution Date', 'Assign To', 'Business User',
+    ],
+  },
+
   // ── DEFECT-tab Create / View-Modify Defect form (Def_TC_036 to Def_TC_051) ──
   // The DEFECT tab's CREATE DEFECT button opens a "New Defect" form that replaces the grid. It
   // shares its DOM with the execution-page Create-Defect popup, but here there is NO test-case

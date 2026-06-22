@@ -34,6 +34,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Status Dropdown Filter', () => {
 
@@ -78,6 +79,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Status Dropdown Filter'
     await executeTabPage.expandFirstReleaseWithTestCycles();
     await executeTabPage.verifyReleaseExpanded();
     await executeTabPage.verifyTestCyclesVisible();
+    await captureScreenshot(page, "Step 1 (follows TC-006): reach a populated grid (View All)");
 
     // ─── Step 2: Select the View All radio button ────────────────────────────────
     // Expected: Grid refreshes and displays all test runs for the selected filters
@@ -88,6 +90,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Status Dropdown Filter'
     await executeTabPage.waitForGridContainerReady();
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 2: Select the View All radio button");
 
     // ─── Steps 3 & 4: Open the Status dropdown and validate the available statuses ─
     // Expected: Dropdown displays all execution statuses
@@ -95,18 +98,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Status Dropdown Filter'
 
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open the Status dropdown and validate the available statuses");
 
     // ─── Step 5: Select a specific status (Passed) ───────────────────────────────
     // Expected: Grid refreshes and displays only test runs with the selected status
 
     await executeTabPage.selectStatus('Passed');
     await executeTabPage.verifyAllRowsHaveStatus('Passed');
+    await captureScreenshot(page, "Step 5: Select a specific status (Passed)");
 
     // ─── Step 6: Change the selected status to another value (Failed) ─────────────
     // Expected: Grid refreshes and displays only test runs matching the new status
 
     await executeTabPage.selectStatus('Failed');
     await executeTabPage.verifyAllRowsHaveStatus('Failed');
+    await captureScreenshot(page, "Step 6: Change the selected status to another value (Failed)");
   });
 
 });

@@ -41,6 +41,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const LARGE_FILE = path.resolve(__dirname, '../fixtures/large_over_10mb.pdf');
@@ -60,6 +61,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Steps 3-4: select an oversized file → rejection message, no upload ──────
     await executionPage.attachFile(LARGE_FILE);
@@ -67,6 +69,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     // The oversized file must not have been added (other attachments may pre-exist on the run).
     await executionPage.verifyAttachmentNotListed('large_over_10mb');
+    await captureScreenshot(page, "Steps 3-4: select an oversized file → rejection message, no upload");
   });
 
 });

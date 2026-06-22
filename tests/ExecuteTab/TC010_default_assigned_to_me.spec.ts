@@ -36,6 +36,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Default Assignee Filter', () => {
 
@@ -83,12 +84,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Default Assignee Filter
 
     await executeTabPage.clickFirstTestCycle();
     await executeTabPage.waitForGridContainerReady();
+    await captureScreenshot(page, "Step 1 (follows TC-006): reach the cycle grid (default Assignee intact)");
 
     // ─── Steps 2 & 3: Default filter is "Assigned to me" ─────────────────────────
     // Expected: Assigned To Me should be selected by default
 
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeCount = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Steps 2 & 3: Default filter is \"Assigned to me\"");
 
     // ─── Step 4: No test runs that are NOT assigned to the user are displayed ─────
     // Expected: Grid shows only the user's runs and excludes everyone else's. Here the
@@ -104,6 +107,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Default Assignee Filter
     if (assignedToMeCount === 0) {
       await executeTabPage.verifyNoResultsMessageVisible();
     }
+    await captureScreenshot(page, "Step 4: No test runs that are NOT assigned to the user are displayed");
 
     // ─── Step 5: Refresh the page while "Assigned to me" is selected ─────────────
     // Expected: Grid continues displaying only test runs assigned to the logged-in user
@@ -119,12 +123,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Default Assignee Filter
 
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     expect(await executeTabPage.getTotalEntries()).toBe(assignedToMeCount);
+    await captureScreenshot(page, "Step 5: Refresh the page while \"Assigned to me\" is selected");
 
     // ─── Step 6: Validate grid columns ───────────────────────────────────────────
     // Expected: All columns should display correctly for the filtered test runs
 
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 6: Validate grid columns");
   });
 
 });

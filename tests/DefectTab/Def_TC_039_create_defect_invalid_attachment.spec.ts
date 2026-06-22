@@ -37,6 +37,7 @@ import path from 'path';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const LARGE_FILE = path.resolve(__dirname, '../fixtures/large_over_10mb.pdf');
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
@@ -54,19 +55,23 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the Create Defect form");
 
     // ─── Step 4: enter valid data in the mandatory fields ─────────────────────
     await createDefect.fillRequiredForSave({ summary });
+    await captureScreenshot(page, "Step 4: enter valid data in the mandatory fields");
 
     // ─── Step 5: upload a file > 10 MB → rejected ─────────────────────────────
     // Expected 1: toast + inline validation; the oversized file is not attached.
     await createDefect.attachFile(LARGE_FILE);
     await createDefect.verifyFileTooLargeMessage(path.basename(LARGE_FILE));
+    await captureScreenshot(page, "Step 5: upload a file > 10 MB → rejected");
 
     // ─── Step 6: upload a valid file → accepted ───────────────────────────────
     // Expected 2: the valid file is listed in the drop zone.
     await createDefect.attachFile(SMALL_FILE);
     await createDefect.verifyAttachmentListed(path.basename(SMALL_FILE));
+    await captureScreenshot(page, "Step 6: upload a valid file → accepted");
 
     // ─── Step 7: Save → success + appears in list ─────────────────────────────
     await createDefect.clickCreateSave();
@@ -75,6 +80,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     await defectTabPage.waitForResults();
     const newId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.verifyDefectVisible(newId);
+    await captureScreenshot(page, "Step 7: Save → success + appears in list");
   });
 
 });

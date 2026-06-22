@@ -37,6 +37,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -63,6 +64,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     }
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Expected 2-3: Description is pre-populated with the template + sections");
   });
 
 });

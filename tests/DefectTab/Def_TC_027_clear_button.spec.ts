@@ -24,6 +24,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -34,17 +35,20 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     await defectTabPage.verifyDefectsLoaded();
 
     const project = (await defectTabPage.projectsDropdown.inputValue()).trim();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter values in multiple filters ─────────────────────────────
     const status = await defectTabPage.getFirstNonEmptyColumnValue('Status');
     const summaryDefectId = await defectTabPage.getFirstDefectId();
     await defectTabPage.selectDropdownValue('Status', status!);
     await defectTabPage.fillSummaryOrId(summaryDefectId);
+    await captureScreenshot(page, "Step 3: Enter values in multiple filters");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed after search
     await defectTabPage.clickSearch();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Step 4: Click the Search button");
 
     // ─── Step 5: Click the Clear button ───────────────────────────────────────
     // Expected: All filter fields reset; Project unchanged; default list restored
@@ -62,6 +66,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // Default defect list restored in the right panel
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 5: Click the Clear button");
   });
 
 });

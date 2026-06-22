@@ -32,6 +32,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle Filter', () => {
 
@@ -42,10 +43,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle Filte
     // Expected: Releases should be visible based on the selected project
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Step 1 (follows TC-005): login, switch project, load releases");
 
     // ─── Steps 2-5: Expand a release and select a first-layer cycle ──────────────
     // Expected: Release list opens, cycle list opens, and the test run list refreshes
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
+    await captureScreenshot(page, "Steps 2-5: Expand a release and select a first-layer cycle");
 
     // ─── Step 6: Validate displayed records ──────────────────────────────────────
     // Expected: Only test runs belonging to the selected Cycle should be displayed
@@ -53,6 +56,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle Filte
     await executeTabPage.verifyTestRunTableVisible();
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 6: Validate displayed records");
   });
 
 });

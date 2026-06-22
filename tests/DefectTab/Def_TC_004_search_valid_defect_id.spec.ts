@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -35,11 +36,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // A real Defect ID is read from the loaded list so the search is data-independent.
     const validDefectId = await defectTabPage.getFirstDefectId();
     expect(validDefectId).toMatch(/^DF-\d+$/);
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter a valid Defect ID in the Summary/Defect ID field ───────
     // Expected: Entered Defect ID should be visible in the field
     await defectTabPage.fillSummaryOrId(validDefectId);
     await expect(defectTabPage.summaryDefectIdInput).toHaveValue(validDefectId);
+    await captureScreenshot(page, "Step 3: Enter a valid Defect ID in the Summary/Defect ID field");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defect should be displayed in the right panel
@@ -47,6 +50,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
     await defectTabPage.verifyDefectVisible(validDefectId);
     expect(await defectTabPage.getDefectIdsOnPage()).toContain(validDefectId);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

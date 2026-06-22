@@ -23,6 +23,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Combined Filter', () => {
 
@@ -65,18 +66,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Filter', () =>
     await executeTabPage.waitForReleasesLoad();
     await executeTabPage.verifyReleasesVisible();
     await executeTabPage.verifyAtLeastOneRelease();
+    await captureScreenshot(page, "Step 1 (follows TC-005): Login, navigate, verify workspace + project");
 
     // ─── Step 2: Click on a release from the list ────────────────────────────
     // Expected: Release should be selected and the test run list should refresh
 
     await executeTabPage.expandFirstReleaseWithTestCycles();
     await executeTabPage.verifyReleaseExpanded();
+    await captureScreenshot(page, "Step 2: Click on a release from the list");
 
     // ─── Step 3: Validate Cycle list is enabled and select a cycle ──────────
     // Expected: Cycle should be selected and the grid should refresh
 
     await executeTabPage.verifyCycleListIsEnabled();
     await executeTabPage.expandFirstCycleWithSuites();
+    await captureScreenshot(page, "Step 3: Validate Cycle list is enabled and select a cycle");
 
     // ─── Step 4: Validate Nested cycle list is enabled and select a suite ────
     // Expected: Suite should be selected and the grid should refresh
@@ -86,6 +90,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Filter', () =>
     await executeTabPage.clickFirstSuiteWithTestRuns();
     await executeTabPage.waitForTestRunsToRefresh();
     await executeTabPage.verifyTestRunTableVisible();
+    await captureScreenshot(page, "Step 4: Validate Nested cycle list is enabled and select a suite");
 
     // ─── Step 5: Validate the test run grid ──────────────────────────────────
     // Expected: Only test runs matching the selected Project + Release + Cycle + Suite
@@ -93,6 +98,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Filter', () =>
 
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 5: Validate the test run grid");
 
     // ─── Step 6: Change the selected Release, Cycle and Suite ────────────────
     // Expected: Test run list should update according to the new selection
@@ -110,6 +116,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Combined Filter', () =>
     await executeTabPage.verifyTestRunTableVisible();
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 6: Change the selected Release, Cycle and Suite");
   });
 
 });

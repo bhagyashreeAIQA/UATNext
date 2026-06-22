@@ -40,6 +40,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details', () => {
 
@@ -58,10 +59,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.verifyTestRunId(rowRunId);
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Steps 3-4: open the Status dropdown and validate available values ───────
     await executionPage.openStatusDropdown();
     await executionPage.verifyStatusOptions(EXPECTED.executionStatusOptions);
+    await captureScreenshot(page, "Steps 3-4: open the Status dropdown and validate available values");
 
     // ─── Step 5: select a status different from the current one ──────────────────
     const currentStatus = await executionPage.getStatusValue();
@@ -69,9 +72,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       currentStatus,
       EXPECTED.executionStatusOptions,
     );
+    await captureScreenshot(page, "Step 5: select a status different from the current one");
 
     // ─── Step 6: click Save ──────────────────────────────────────────────────────
     await executionPage.save();
+    await captureScreenshot(page, "Step 6: click Save");
 
     // ─── Step 7: reopen the same run and confirm the status persisted ────────────
     // Close back to the grid (same filtered view) and reopen the same row. The TR-id assertion
@@ -82,6 +87,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     await executionPage.verifyTestRunId(rowRunId);
     await executionPage.verifyStatusValuePersisted(newStatus);
+    await captureScreenshot(page, "Step 7: reopen the same run and confirm the status persisted");
   });
 
 });

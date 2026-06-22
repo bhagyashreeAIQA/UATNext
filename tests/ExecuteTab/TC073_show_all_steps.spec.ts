@@ -35,6 +35,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Test Step Filter', () => {
 
@@ -52,6 +53,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.verifyStepsGridVisible();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Step 3: validate the default selection (actual default = "Show All Steps") ─
     await executionPage.verifyStepFilterOptionsVisible();
@@ -61,9 +63,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.selectShowBusinessSteps();
     await executionPage.verifyAllStepsAreBusiness();
     const businessCount = (await executionPage.getStepUatCategories()).length;
+    await captureScreenshot(page, "Step 3: validate the default selection (actual default = \"Show All Steps\")");
 
     // ─── Step 4: Click on "Show All Steps" → it becomes selected, grid refreshes ─
     await executionPage.selectShowAllSteps();
+    await captureScreenshot(page, "Step 4: Click on \"Show All Steps\" → it becomes selected, grid refreshes");
 
     // ─── Step 5: validate "Show All" reveals at least every Business step, plus any
     // non-Business steps the run has. Which run lands at grid row 0 varies per session and
@@ -79,6 +83,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         expect(allCats.some(c => c !== 'Business')).toBe(true);
       }
     }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
+    await captureScreenshot(page, "Step 5: validate \"Show All\" reveals at least every Business step, plus any");
   });
 
 });

@@ -19,6 +19,7 @@ import { LoginPage } from '../../pages/LoginPage';
 import { HomePage } from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
 
@@ -36,6 +37,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
     }
     await homePage.waitForPageLoad();
     await homePage.verifyHomePageLoaded();
+    await captureScreenshot(page, "Step 1: Login to UATNext application");
 
     // ─── Step 2: Navigate to Execute Test Cases tab ───────────────────────────
     // Expected: Workspace dropdown is displayed
@@ -44,11 +46,13 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
 
     await executeTabPage.verifyWorkspaceLabelVisible();
     await executeTabPage.verifyWorkspaceDropdownVisible();
+    await captureScreenshot(page, "Step 2: Navigate to Execute Test Cases tab");
 
     // ─── Step 3: Validate Workspace field value ───────────────────────────────
     // Expected: Workspace field should be auto-filled with qTest synced value
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyWorkspaceNotEmpty();
+    await captureScreenshot(page, "Step 3: Validate Workspace field value");
   });
 
 });

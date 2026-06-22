@@ -29,6 +29,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -38,6 +39,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter an invalid release value in the Affected Release dropdown ─
     // Expected: Entered value visible; dropdown shows "Please Select" + "No results found"
@@ -50,12 +52,14 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
       .poll(() => defectTabPage.getDropdownListText('Affected Release'), { timeout: 10000 })
       .toContain(EXPECTED.defect.dropdownNoResultsText);
     expect(await defectTabPage.getDropdownListText('Affected Release')).toContain('Please Select');
+    await captureScreenshot(page, "Step 3: Enter an invalid release value in the Affected Release dropdown");
 
     // ─── Step 4: No valid release is committed → no release filter is applied ──
     // The typed text matches no option, so no release value is selected; the dropdown
     // input retains the typed value rather than a real release.
     expect(await defectTabPage.affectedReleaseDropdown.inputValue())
       .toBe(EXPECTED.defect.invalidRelease);
+    await captureScreenshot(page, "Step 4: No valid release is committed → no release filter is applied");
   });
 
 });

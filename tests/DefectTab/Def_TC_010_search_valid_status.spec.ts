@@ -23,6 +23,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -40,11 +41,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
       options.find(o => o.toLowerCase() === EXPECTED.defect.validStatus.toLowerCase()) ??
       options.find(o => o && !/please select/i.test(o));
     expect(status, 'Status dropdown should expose at least one status').toBeTruthy();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid Status value ──────────────────────────────────
     // Expected: Selected Status value should be displayed in the field
     await defectTabPage.selectDropdownValue('Status', status!);
     await expect(defectTabPage.statusDropdown).toHaveValue(status!);
+    await captureScreenshot(page, "Step 3: Select a valid Status value");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
@@ -54,6 +57,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
     // Every returned defect should carry the selected status.
     await defectTabPage.verifyAllRowsHaveStatus(status!);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

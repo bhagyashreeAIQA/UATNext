@@ -34,6 +34,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Status Filter Empty State', () => {
 
@@ -45,15 +46,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – S
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-021): reach a populated grid under View All");
 
     // ─── Steps 3 & 4: Open the Status dropdown and select a status with no runs ───
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
     await executeTabPage.selectFirstEmptyStatus(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open the Status dropdown and select a status with no runs");
 
     // ─── Step 5: Validate the test run grid ──────────────────────────────────────
     // Expected: Grid should display "No Matching Results Found"
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 5: Validate the test run grid");
   });
 
 });

@@ -40,6 +40,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details', () => {
 
@@ -57,10 +58,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Step 3: Validate Test Run ID and Test Case Name ─────────────────────────
     await executionPage.verifyTestRunId(rowRunId);
     await executionPage.verifyTestCaseNameNotEmpty();
+    await captureScreenshot(page, "Step 3: Validate Test Run ID and Test Case Name");
 
     // ─── Steps 4-5: Project context + Tester (Assigned To) ───────────────────────
     // The run's Project remains shown in the header selector; Release/Test Cycle/Test Suite
@@ -68,12 +71,15 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     // tester via the "Assigned To" field (validated with the mapped fields below).
     await executeTabPage.verifyProjectTextVisible();
     await executionPage.verifyMappedFieldsVisible();
+    await captureScreenshot(page, "Steps 4-5: Project context + Tester (Assigned To)");
 
     // ─── Step 6: Validate the Precondition field ─────────────────────────────────
     await executionPage.verifyPreconditionVisible();
+    await captureScreenshot(page, "Step 6: Validate the Precondition field");
 
     // ─── Step 7: Validate the Status dropdown (current status shown) ─────────────
     await executionPage.verifyStatusDisplayed();
+    await captureScreenshot(page, "Step 7: Validate the Status dropdown (current status shown)");
   });
 
 });

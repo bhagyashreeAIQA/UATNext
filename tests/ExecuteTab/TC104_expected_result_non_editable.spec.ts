@@ -38,6 +38,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -56,15 +57,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: Navigate to Test Logs ───────────────────────────────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, "Step 3: Navigate to Test Logs");
 
     // ─── Steps 4-6 / Expected 1-3: click, attempt to type, blur — content unchanged ─
     const before = await executionPage.getExpectedResultText(STEP_INDEX);
     expect(before).not.toBe('');
     await executionPage.verifyExpectedResultNotEditable(STEP_INDEX);
+    await captureScreenshot(page, "Steps 4-6 / Expected 1-3: click, attempt to type, blur — content unchanged");
   });
 
 });

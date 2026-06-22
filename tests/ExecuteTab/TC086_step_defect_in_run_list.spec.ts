@@ -28,6 +28,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -64,6 +65,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         'LINK should enable for a not-yet-linked defect').toBe(true);
       await executionPage.confirmLink();
       linkedDefectId = candidate!;
+      await captureScreenshot(page, "Seed: link a not-yet-linked defect to the step");
 
       // ─── The step's defect appears in the run-level (test run) defect list ───────
       // The "test run defect list" is the run-level LINK DEFECT popup's linked list, which
@@ -71,6 +73,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await executionPage.openRunDefectPanelFresh();
       await executionPage.verifyDefectLinked(linkedDefectId);
       await executionPage.closeDefectPanel();
+      await captureScreenshot(page, "The step's defect appears in the run-level (test run) defect list");
 
       // ─── Reopen the run → the defect still appears (persists) ────────────────────
       await executionPage.close();
@@ -84,6 +87,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromStep(STEP_INDEX, linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Reopen the run → the defect still appears (persists)");
   });
 
 });

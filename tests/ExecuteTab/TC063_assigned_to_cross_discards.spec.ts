@@ -29,6 +29,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Assigned To Edit', () => {
 
@@ -46,17 +47,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
 
     await executeTabPage.openAssignedToEditor(0);
     await executeTabPage.verifyAssignedToEditorOpen(0); // dropdown available
+    await captureScreenshot(page, "Step 1 (follows TC-061): reach the grid; capture the original value");
 
     // ─── Step 2: select a user different from the current value ──────────────────
     const newUser = await executeTabPage.selectDifferentAssigneeInEditor(0, originalValue);
     expect(newUser).not.toBe(originalValue); // new value shown before saving
     await executeTabPage.verifySaveAndCancelIconsVisible(0);
+    await captureScreenshot(page, "Step 2: select a user different from the current value");
 
     // ─── Step 3: click the ✖ (Cross) icon → the change is discarded ──────────────
     await executeTabPage.cancelAssignedToEdit(0);
 
     // The original value remains unchanged (the new selection was not persisted).
     await executeTabPage.verifyAssignedToDisplay(originalValue, 0);
+    await captureScreenshot(page, "Step 3: click the ✖ (Cross) icon → the change is discarded");
   });
 
 });

@@ -34,6 +34,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite Filter', () => {
 
@@ -43,15 +44,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite Filter', () 
     // ─── Step 1 (follows TC-005): login, switch project, load releases ───────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Step 1 (follows TC-005): login, switch project, load releases");
 
     // ─── Steps 2-5: Release → first-layer cycle → second-layer cycle → Test Suite ─
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
+    await captureScreenshot(page, "Steps 2-5: Release → first-layer cycle → second-layer cycle → Test Suite");
 
     // ─── Step 6: Validate displayed records ──────────────────────────────────────
     // Expected: Only test runs belonging to the selected Test Suite are displayed
     await executeTabPage.verifyTestRunTableVisible();
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 6: Validate displayed records");
   });
 
 });

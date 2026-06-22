@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -35,11 +36,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // guaranteed to return matches (data-independent).
     const severity = await defectTabPage.getFirstNonEmptyColumnValue('Severity');
     expect(severity, 'A loaded defect should expose a Severity value').toBeTruthy();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid Severity value ────────────────────────────────
     // Expected: Selected Severity value should be displayed in the field
     await defectTabPage.selectDropdownValue('Severity', severity!);
     await expect(defectTabPage.severityDropdown).toHaveValue(severity!);
+    await captureScreenshot(page, "Step 3: Select a valid Severity value");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
@@ -47,6 +50,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
     await defectTabPage.verifyAllRowsMatchColumn('Severity', severity!);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

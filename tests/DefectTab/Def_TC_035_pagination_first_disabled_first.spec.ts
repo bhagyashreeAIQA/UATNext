@@ -23,6 +23,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
 
@@ -33,6 +34,7 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.verifyPaginationVisible();
     expect(await defectTabPage.getCurrentPageNumber()).toBe(1);
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded (page 1 by default)");
 
     // ─── Steps 3-4: First Page button is disabled; clicking it does not navigate ─
     expect(await defectTabPage.isPaginationControlDisabled('First Page')).toBe(true);
@@ -40,6 +42,7 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
     await defectTabPage.firstPageButton.click();
     await page.waitForTimeout(1500);
     expect(await defectTabPage.getCurrentPageNumber()).toBe(1);
+    await captureScreenshot(page, "Steps 3-4: First Page button is disabled; clicking it does not navigate");
   });
 
 });

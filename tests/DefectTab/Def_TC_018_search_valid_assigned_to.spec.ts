@@ -23,6 +23,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -37,11 +38,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // an arbitrary user would usually have no defects).
     const assignee = await defectTabPage.getFirstNonEmptyColumnValue('Assigned To');
     expect(assignee, 'A loaded defect should expose an Assigned To value').toBeTruthy();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid value in the Assigned To dropdown ──────────────
     // Expected: Selected Assigned To value should be displayed in the field
     await defectTabPage.selectDropdownValue('Assigned To', assignee!);
     await expect(defectTabPage.assignedToDropdown).toHaveValue(assignee!);
+    await captureScreenshot(page, "Step 3: Select a valid value in the Assigned To dropdown");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
@@ -49,6 +52,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
     await defectTabPage.verifyAllRowsMatchColumn('Assigned To', assignee!);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

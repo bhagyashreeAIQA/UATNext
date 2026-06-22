@@ -37,6 +37,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -56,14 +57,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: update an editable field (run-level Status) ─────────────────────
     const current = await executionPage.getStatusValue();
     const newStatus = await executionPage.selectDifferentStatus(current, EXPECTED.executionStatusOptions);
+    await captureScreenshot(page, "Step 3: update an editable field (run-level Status)");
 
     // ─── Steps 4-5: Save and validate the confirmation message ───────────────────
     await executionPage.clickSave();
     await executionPage.verifySaveSuccessMessage(EXPECTED.saveSuccessMessage);
+    await captureScreenshot(page, "Steps 4-5: Save and validate the confirmation message");
 
     // ─── Steps 6-7: reopen the run and confirm the change persisted ──────────────
     await executionPage.close();
@@ -71,6 +75,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     await executionPage.verifyTestRunId(rowRunId);
     await executionPage.verifyStatusValuePersisted(newStatus);
+    await captureScreenshot(page, "Steps 6-7: reopen the run and confirm the change persisted");
   });
 
 });

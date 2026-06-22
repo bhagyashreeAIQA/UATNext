@@ -36,6 +36,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details', () => {
 
@@ -52,16 +53,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Step 3: Navigate to / locate the Test Logs (test-steps) section ─────────
     await executionPage.verifyStepsGridVisible();
+    await captureScreenshot(page, "Step 3: Navigate to / locate the Test Logs (test-steps) section");
 
     // ─── Step 4: Validate column headers ─────────────────────────────────────────
     await executionPage.verifyStepColumns(EXPECTED.executionStepColumns);
+    await captureScreenshot(page, "Step 4: Validate column headers");
 
     // ─── Step 5: Validate test step data ─────────────────────────────────────────
     await executionPage.verifyStepsLoaded();
     await executionPage.verifyEachStepHasData();
+    await captureScreenshot(page, "Step 5: Validate test step data");
   });
 
 });

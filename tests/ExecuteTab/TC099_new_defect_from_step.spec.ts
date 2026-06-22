@@ -33,6 +33,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -51,19 +52,23 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: Navigate to Test Logs ───────────────────────────────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, "Step 3: Navigate to Test Logs");
 
     // ─── Steps 4-5: open the step Bug-icon defect panel and validate NEW ─────────
     await executionPage.openStepDefectPanel(0);
     await executionPage.verifyDefectPanelOpen();
     await executionPage.verifyNewDefectButtonVisible();
+    await captureScreenshot(page, "Steps 4-5: open the step Bug-icon defect panel and validate NEW");
 
     // ─── Step 6: Click New → the Create Defect form opens ────────────────────────
     await executionPage.clickNewDefect();
     await executionPage.verifyCreateDefectFormOpen();
+    await captureScreenshot(page, "Step 6: Click New → the Create Defect form opens");
   });
 
 });

@@ -23,6 +23,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
 
@@ -37,6 +38,7 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
     // Pre-condition: be on the last page
     await defectTabPage.goToLastPage();
     const lastPage = await defectTabPage.getCurrentPageNumber();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Steps 3-4: Last Page button is disabled; clicking it does not navigate ─
     expect(await defectTabPage.isPaginationControlDisabled('Last Page')).toBe(true);
@@ -44,6 +46,7 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
     await defectTabPage.lastPageButton.click();
     await page.waitForTimeout(1500);
     expect(await defectTabPage.getCurrentPageNumber()).toBe(lastPage);
+    await captureScreenshot(page, "Steps 3-4: Last Page button is disabled; clicking it does not navigate");
   });
 
 });

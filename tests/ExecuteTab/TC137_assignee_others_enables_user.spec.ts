@@ -33,6 +33,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -47,10 +48,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     // ─── Steps 2-3 / Expected 1-2: select Others → Select User becomes enabled ───
     await executeTabPage.selectAssignedToBusinessUser();
     await executeTabPage.verifySelectUserEnabled();
+    await captureScreenshot(page, "Steps 2-3 / Expected 1-2: select Others → Select User becomes enabled");
 
     // ─── Step 4 / Expected 3-4: the typeahead search field opens ─────────────────
     await executeTabPage.openSelectUserDropdown();
     expect(await executeTabPage.isSelectUserEnabled(), 'Select User search field should be usable').toBe(true);
+    await captureScreenshot(page, "Step 4 / Expected 3-4: the typeahead search field opens");
   });
 
 });

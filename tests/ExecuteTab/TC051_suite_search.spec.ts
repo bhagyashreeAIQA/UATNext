@@ -30,6 +30,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Search', () => {
 
@@ -41,16 +42,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Search',
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated grid under View All");
 
     // ─── Step 2: Search for an existing Test Case ID and click Search ────────────
     const searchTerm = await executeTabPage.getFirstRowTestCaseId();
     await executeTabPage.searchTestRun(searchTerm);
     await executeTabPage.verifySearchResultsMatch(searchTerm);
+    await captureScreenshot(page, "Step 2: Search for an existing Test Case ID and click Search");
 
     // ─── Step 3: Validate grid columns ───────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 3: Validate grid columns");
   });
 
 });

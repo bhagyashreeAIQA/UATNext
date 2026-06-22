@@ -23,6 +23,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -32,16 +33,19 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter an invalid Defect ID ───────────────────────────────────
     // Expected: Invalid Defect ID should be accepted in the search field
     await defectTabPage.fillSummaryOrId(EXPECTED.defect.invalidDefectId);
     await expect(defectTabPage.summaryDefectIdInput).toHaveValue(EXPECTED.defect.invalidDefectId);
+    await captureScreenshot(page, "Step 3: Enter an invalid Defect ID");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Right panel shows "No defects found. Use the filters to search for defects."
     await defectTabPage.clickSearch();
     await defectTabPage.verifyNoDefectsMessage();
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

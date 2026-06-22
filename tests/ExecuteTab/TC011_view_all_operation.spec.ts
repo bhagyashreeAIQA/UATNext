@@ -34,6 +34,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: View All Filter', () => {
 
@@ -81,17 +82,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: View All Filter', () =>
 
     await executeTabPage.clickFirstTestCycle();
     await executeTabPage.waitForGridContainerReady();
+    await captureScreenshot(page, "Step 1 (follows TC-006): reach the cycle grid (default Assignee intact)");
 
     // ─── Step 2: "Assigned to me" is selected by default ─────────────────────────
     // Expected: Test run list refreshes showing only the user's runs
 
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeCount = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Step 2: \"Assigned to me\" is selected by default");
 
     // ─── Step 3: Select the "View All" radio button ──────────────────────────────
     // Expected: Grid refreshes and displays all test runs, including other users'
 
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
+    await captureScreenshot(page, "Step 3: Select the \"View All\" radio button");
 
     // ─── Step 4: Test runs not assigned to the logged-in user are displayed ───────
     // Expected: Grid includes every test run from the selected filters
@@ -100,6 +104,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: View All Filter', () =>
     expect(viewAllCount).toBeGreaterThan(assignedToMeCount);
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 4: Test runs not assigned to the logged-in user are displayed");
 
     // ─── Step 5: Validate grid columns ───────────────────────────────────────────
     // Expected: All columns should display correct data for the filtered test runs
@@ -107,6 +112,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: View All Filter', () =>
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 5: Validate grid columns");
   });
 
 });

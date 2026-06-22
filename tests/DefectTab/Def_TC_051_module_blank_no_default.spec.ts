@@ -30,6 +30,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module', () => {
 
@@ -41,9 +42,11 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module',
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the New Defect form (project without default module)");
 
     // ─── Step 4 / Expected: Module dropdown is blank, no default value shown ───
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.module)).toBe('');
+    await captureScreenshot(page, "Step 4 / Expected: Module dropdown is blank, no default value shown");
   });
 
 });

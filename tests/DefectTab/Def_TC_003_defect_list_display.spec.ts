@@ -20,6 +20,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect List', () => {
 
@@ -28,6 +29,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect List', () => {
     // Expected: Defect page should be displayed
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
+    await captureScreenshot(page, "Step 1: Click on the Defect tab");
 
     // ─── Step 2: Select a project that contains defects ───────────────────────
     // Expected: All defects related to the selected project should be displayed
@@ -71,6 +73,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect List', () => {
         .poll(() => defectTabPage.getDefectIdsOnPage(), { timeout: 15000 })
         .toEqual(firstPageIds);
     }
+    await captureScreenshot(page, "Step 2: Select a project that contains defects");
   });
 
 });

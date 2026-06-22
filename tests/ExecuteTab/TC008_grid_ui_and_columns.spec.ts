@@ -31,6 +31,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Grid UI', () => {
 
@@ -82,17 +83,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Grid UI', () =
     await executeTabPage.waitForTestRunsToRefresh();
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-006): Login, navigate, switch project, select a release");
 
     // ─── Step 2: Validate the presence of the filter section ─────────────────────
     // Expected: All filters should be visible and properly aligned
     //           (Project selector, Assigned To Me / View All radios, Status dropdown)
 
     await executeTabPage.verifyFilterSectionVisible();
+    await captureScreenshot(page, "Step 2: Validate the presence of the filter section");
 
     // ─── Step 3: Validate the presence of the test run grid ──────────────────────
     // Expected: Test run grid should be displayed below the filters
 
     await executeTabPage.verifyGridPresent();
+    await captureScreenshot(page, "Step 3: Validate the presence of the test run grid");
 
     // ─── Step 4: Validate the grid headers ───────────────────────────────────────
     // Expected: Grid should display the expected columns (Test Run ID, Test Case ID,
@@ -100,11 +104,13 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Grid UI', () =
     //           Planned End Date, Action)
 
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 4: Validate the grid headers");
 
     // ─── Step 5: Validate data under each column ─────────────────────────────────
     // Expected: Each row should display correct, readable data without UI overlap
 
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 5: Validate data under each column");
   });
 
 });

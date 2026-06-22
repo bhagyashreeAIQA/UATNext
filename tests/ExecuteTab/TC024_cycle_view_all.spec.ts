@@ -31,6 +31,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – View All', () => {
 
@@ -41,25 +42,30 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – V
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 1 (follows TC-021): reach the cycle grid (default Assignee intact)");
 
     // ─── Step 2: "Assigned to me" is selected by default ─────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeCount = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Step 2: \"Assigned to me\" is selected by default");
 
     // ─── Step 3: Select the View All radio button ────────────────────────────────
     // Expected: Grid refreshes and displays all test runs
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
+    await captureScreenshot(page, "Step 3: Select the View All radio button");
 
     // ─── Step 4: Test runs assigned to other users are displayed ─────────────────
     const viewAllCount = await executeTabPage.getTotalEntries();
     expect(viewAllCount).toBeGreaterThan(assignedToMeCount);
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 4: Test runs assigned to other users are displayed");
 
     // ─── Step 5: Validate grid columns ───────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 5: Validate grid columns");
   });
 
 });

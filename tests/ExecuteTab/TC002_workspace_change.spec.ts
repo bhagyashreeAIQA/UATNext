@@ -21,6 +21,7 @@ import { LoginPage } from '../../pages/LoginPage';
 import { HomePage } from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
 
@@ -38,12 +39,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
     await homePage.waitForPageLoad();
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await captureScreenshot(page, "Pre-condition: TC-001 steps (login + navigate + auto-fill verified)");
 
     // ─── Step 1: Workspace field is auto-filled with qTest synced value ───────
     // Expected: Workspace field should be auto-filled with qTest synced value
 
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     const initialWorkspace = await executeTabPage.getWorkspaceValue();
+    await captureScreenshot(page, "Step 1: Workspace field is auto-filled with qTest synced value");
 
     // ─── Step 2: Click on the dropdown ───────────────────────────────────────
     // Expected: Available workspace names are displayed in the dropdown options
@@ -54,6 +57,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
 
     const availableOptions = await executeTabPage.getWorkspaceOptions();
     expect(availableOptions.length).toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 2: Click on the dropdown");
 
     // ─── Step 3: Select a workspace ──────────────────────────────────────────
     // Expected: Page should refresh and workspace input updates to selected value
@@ -74,6 +78,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
 
     // Sidebar must complete its Blazor refresh cycle
     await executeTabPage.verifySidebarRefreshed();
+    await captureScreenshot(page, "Step 3: Select a workspace");
   });
 
 });

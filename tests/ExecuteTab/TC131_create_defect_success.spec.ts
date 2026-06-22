@@ -38,6 +38,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -61,10 +62,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     // ─── Step 2: populate the mandatory fields lacking a default (Summary, Team) ──
     await executionPage.typeSummary(summary);
     await executionPage.selectFirstAvailableDefectDropdownValue(EXPECTED.createDefect.dropdownPlaceholders.team);
+    await captureScreenshot(page, "Step 2: populate the mandatory fields lacking a default (Summary, Team)");
 
     // ─── Step 3 / Expected 2-3: Save → "Defect Created Successfully" ─────────────
     await executionPage.clickCreateDefectSave();
     await executionPage.verifyDefectCreatedMessage(EXPECTED.createDefect.defectCreatedMessage);
+    await captureScreenshot(page, "Step 3 / Expected 2-3: Save → \"Defect Created Successfully\"");
   });
 
 });

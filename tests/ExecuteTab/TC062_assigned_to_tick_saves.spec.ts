@@ -29,6 +29,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Assigned To Edit', () => {
 
@@ -44,16 +45,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
     await executeTabPage.verifyAssignedToColumnVisible();
     await executeTabPage.openAssignedToEditor(0);
     await executeTabPage.verifyAssignedToEditorOpen(0); // dropdown available
+    await captureScreenshot(page, "Step 1 (follows TC-061): reach the grid and open the Assigned To editor");
 
     // ─── Step 2: select a user from the dropdown ─────────────────────────────────
     const selectedUser = await executeTabPage.selectAssigneeInEditor(0);
     await executeTabPage.verifySaveAndCancelIconsVisible(0);
+    await captureScreenshot(page, "Step 2: select a user from the dropdown");
 
     // ─── Step 3: click the ✔ (Tick) icon → the value is saved ────────────────────
     await executeTabPage.saveAssignedToEdit(0);
 
     // Selected user is displayed and the update is persisted (read-only state restored).
     await executeTabPage.verifyAssignedToDisplay(selectedUser, 0);
+    await captureScreenshot(page, "Step 3: click the ✔ (Tick) icon → the value is saved");
   });
 
 });

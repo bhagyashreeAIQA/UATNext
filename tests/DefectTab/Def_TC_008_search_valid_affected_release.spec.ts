@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -37,17 +38,20 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const options = await defectTabPage.getDropdownOptions('Affected Release');
     const validRelease = options.find(o => o && !/please select/i.test(o));
     expect(validRelease, 'Affected Release dropdown should expose at least one release').toBeTruthy();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid value in the Affected Release dropdown ─────────
     // Expected: Selected release value should be displayed in the field
     await defectTabPage.selectDropdownValue('Affected Release', validRelease!);
     await expect(defectTabPage.affectedReleaseDropdown).toHaveValue(validRelease!);
+    await captureScreenshot(page, "Step 3: Select a valid value in the Affected Release dropdown");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
     await defectTabPage.clickSearch();
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

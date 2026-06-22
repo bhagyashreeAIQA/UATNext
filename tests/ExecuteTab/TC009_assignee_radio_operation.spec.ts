@@ -37,6 +37,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter', () => {
 
@@ -86,12 +87,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter', () =>
     // Reach the grid WITHOUT selecting "View All" so the default Assignee state is intact.
     await executeTabPage.clickFirstTestCycle();
     await executeTabPage.waitForGridContainerReady();
+    await captureScreenshot(page, "Step 1 (follows TC-006): Login, navigate, switch project, select a release");
 
     // ─── Step 2: "Assigned to me" is selected by default ─────────────────────────
     // Expected: Grid should display only test runs assigned to the logged-in user
 
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeTotal = await executeTabPage.getTotalEntriesText();
+    await captureScreenshot(page, "Step 2: \"Assigned to me\" is selected by default");
 
     // ─── Step 3: Click the "View All" radio button ───────────────────────────────
     // Expected: Grid should refresh and display all test runs (incl. unassigned ones)
@@ -102,12 +105,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter', () =>
     expect(viewAllTotal).not.toBe(assignedToMeTotal);
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 3: Click the \"View All\" radio button");
 
     // ─── Step 4: Re-select the "Assigned to me" radio button ─────────────────────
     // Expected: Grid should refresh and display only the user's test runs again
 
     await executeTabPage.selectAssignedToMeAndWaitForRefresh(viewAllTotal);
     const assignedToMeTotalAgain = await executeTabPage.getTotalEntriesText();
+    await captureScreenshot(page, "Step 4: Re-select the \"Assigned to me\" radio button");
 
     // ─── Step 5: Selection updates the grid dynamically (no page reload) ──────────
     // Expected: Grid refreshes immediately after each radio selection; the
@@ -115,12 +120,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter', () =>
 
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     expect(assignedToMeTotalAgain).toBe(assignedToMeTotal);
+    await captureScreenshot(page, "Step 5: Selection updates the grid dynamically (no page reload)");
 
     // ─── Step 6: Validate grid columns ───────────────────────────────────────────
     // Expected: All columns should display correctly for the filtered test runs
 
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 6: Validate grid columns");
   });
 
 });

@@ -29,6 +29,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Business User Edit', () => {
 
@@ -46,17 +47,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline B
 
     await executeTabPage.openBusinessUserEditor(0);
     await executeTabPage.verifyBusinessUserEditorOpen(0); // dropdown available
+    await captureScreenshot(page, "Step 1 (follows TC-064): reach the grid; capture the original value");
 
     // ─── Step 2: change the Business User to a different value ───────────────────
     const newUser = await executeTabPage.selectDifferentBusinessUserInEditor(0, originalValue);
     expect(newUser).not.toBe(originalValue); // new value shown before saving
     await executeTabPage.verifyBusinessUserSaveAndCancelIconsVisible(0);
+    await captureScreenshot(page, "Step 2: change the Business User to a different value");
 
     // ─── Step 3: click the ✖ (Cross) icon → the change is discarded ──────────────
     await executeTabPage.cancelBusinessUserEdit(0);
 
     // The original Business User remains unchanged (the new selection was not persisted).
     await executeTabPage.verifyBusinessUserDisplay(originalValue, 0);
+    await captureScreenshot(page, "Step 3: click the ✖ (Cross) icon → the change is discarded");
   });
 
 });

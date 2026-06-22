@@ -35,6 +35,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Assigned To Edit', () => {
 
@@ -46,13 +47,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Step 2: Locate the Assigned To column ───────────────────────────────────
     await executeTabPage.verifyAssignedToColumnVisible();
+    await captureScreenshot(page, "Step 2: Locate the Assigned To column");
 
     // ─── Step 3: Click the pencil icon → the dropdown opens and becomes editable ─
     await executeTabPage.openAssignedToEditor(0);
     await executeTabPage.verifyAssignedToEditorOpen(0);
+    await captureScreenshot(page, "Step 3: Click the pencil icon → the dropdown opens and becomes editable");
 
     // ─── Step 4: Validate action icons (✔ Save and ✖ Cancel) ─────────────────────
     // The Save (tick) appears once an assignee is selected; choose one to reveal it.
@@ -61,6 +65,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
 
     // Cancel so the change is not persisted (read-only state restored).
     await executeTabPage.cancelAssignedToEdit(0);
+    await captureScreenshot(page, "Step 4: Validate action icons (✔ Save and ✖ Cancel)");
   });
 
 });

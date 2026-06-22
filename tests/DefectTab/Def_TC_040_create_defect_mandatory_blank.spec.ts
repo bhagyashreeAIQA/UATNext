@@ -33,6 +33,7 @@
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
@@ -44,14 +45,17 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the Create Defect form");
 
     // ─── Step 4: leave mandatory fields blank (enter only a Summary) ──────────
     await createDefect.fillSummary(`Def_TC_040 mandatory-blank ${Date.now()}`);
+    await captureScreenshot(page, "Step 4: leave mandatory fields blank (enter only a Summary)");
 
     // ─── Step 5: Save → blocked with a validation message; form stays open ────
     await createDefect.clickCreateSave();
     await createDefect.verifyValidationToast();           // Expected 2
     await createDefect.verifyStillOnCreateForm();         // Expected 1 (not saved)
+    await captureScreenshot(page, "Step 5: Save → blocked with a validation message; form stays open");
   });
 
 });

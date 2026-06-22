@@ -24,6 +24,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -41,6 +42,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid value in the Created By dropdown ───────────────
     // Expected: Selected Created By value should be displayed in the field. There is no
@@ -48,12 +50,14 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     //           defects is used (see testData).
     await defectTabPage.selectDropdownValue('Created By', EXPECTED.defect.validCreatedBy);
     await expect(defectTabPage.createdByDropdown).toHaveValue(EXPECTED.defect.validCreatedBy);
+    await captureScreenshot(page, "Step 3: Select a valid value in the Created By dropdown");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
     await defectTabPage.clickSearch();
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

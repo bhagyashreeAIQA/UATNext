@@ -39,6 +39,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
@@ -59,9 +60,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     try {
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
+
       // ─── Step 3: select a ≤10 MB file → it appears in the attachment panel ─────
       await executionPage.attachFile(SMALL_FILE);
       await executionPage.verifyAttachmentListed('sample_small');
+      await captureScreenshot(page, "Step 3: select a ≤10 MB file → it appears in the attachment panel");
 
       // ─── Steps 4-5: Save → success + the attachment remains listed ─────────────
       await executionPage.clickSave();
@@ -72,6 +76,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await executionPage.deleteAllAttachments().catch(() => undefined);
       await executionPage.clickSave().catch(() => undefined);
     }
+      await captureScreenshot(page, "Steps 4-5: Save → success + the attachment remains listed");
   });
 
 });

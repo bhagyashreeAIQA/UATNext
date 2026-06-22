@@ -222,7 +222,15 @@
       "Bash(git --version)",
       "Bash(git config *)",
       "Bash(grep -iA4 -B1 \"team\\\\|searchable-dropdown\\\\|No results\\\\|Please Select\")",
-      "Bash(grep -iA3 -B1 \"Created By\\\\|pagination-text\\\\|Total\\\\|No defects\\\\|Please Select\")"
+      "Bash(grep -iA3 -B1 \"Created By\\\\|pagination-text\\\\|Total\\\\|No defects\\\\|Please Select\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);fs.writeFileSync\\('.tmp_probe/big.pdf',Buffer.alloc\\(11*1024*1024,1\\)\\);console.log\\('made', fs.statSync\\('.tmp_probe/big.pdf'\\).size\\)\")",
+      "Bash(echo \"version: $\\(npx --no-install playwright-cli --raw eval \"\\(document.querySelectorAll\\('input.content-2'\\)[1]||{}\\).value\" 2>&1)",
+      "Bash(echo \"frame: $\\(npx --no-install playwright-cli --raw eval \"!!document.querySelector\\('.test-logs-frame'\\)\" 2>&1)",
+      "Bash(echo \"version=$\\(npx --no-install playwright-cli --raw eval \"\\(document.querySelectorAll\\('input.content-2'\\)[1]||{}\\).value\" 2>&1)",
+      "Bash(echo \"frame=$\\(npx --no-install playwright-cli --raw eval \"!!document.querySelector\\('.test-logs-frame'\\)\" 2>&1)",
+      "Bash(netstat -ano)",
+      "Bash(git add *)",
+      "Bash(git reset *)"
     ]
   }
 }

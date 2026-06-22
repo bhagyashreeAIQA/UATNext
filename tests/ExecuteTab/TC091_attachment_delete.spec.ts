@@ -30,6 +30,7 @@ import {
 } from './executeNavHelpers';
 import { uniqueFixture, cleanupFixture } from './attachmentFixtures';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 // Runs on its own grid row (the first-layer cycle grid has many runs) so its delete-all/empty
 // assertion is not disturbed by the other attachment specs mutating a shared run in parallel.
@@ -67,6 +68,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await executionPage.clickSave().catch(() => undefined);
       cleanupFixture(file.filePath);
     }
+    await captureScreenshot(page, "Final state — TC-091 | Validate Deleting an Uploaded Attachment");
   });
 
 });

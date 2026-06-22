@@ -43,6 +43,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Combined Status + Assignee Filter', () => {
 
@@ -55,14 +56,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Combined
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyViewAllIsDefaultSelected();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Steps 3 & 4: Open Status dropdown and validate the available statuses ────
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open Status dropdown and validate the available statuses");
 
     // ─── Step 5: Select a specific status (first non-empty) ──────────────────────
     const first = await executeTabPage.selectFirstNonEmptyStatus(EXPECTED.statusOptions);
     await executeTabPage.verifyAllRowsHaveStatus(first.status);
+    await captureScreenshot(page, "Step 5: Select a specific status (first non-empty)");
 
     // ─── Step 6: Change to another (distinct non-empty) status ───────────────────
     const remaining = EXPECTED.statusOptions.filter(s => s !== first.status);
@@ -70,26 +74,31 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Combined
     expect(second.status).not.toBe(first.status);
     await executeTabPage.verifyAllRowsHaveStatus(second.status);
     const viewAllStatusTotal = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Step 6: Change to another (distinct non-empty) status");
 
     // ─── Step 7: Switch to "Assigned to me" (status persists) ────────────────────
     await executeTabPage.selectAssignedToMeAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     expect(await executeTabPage.getCurrentStatusValue()).toBe(second.status);
     const assignedStatusTotal = await executeTabPage.getTotalEntries();
     expect(assignedStatusTotal).toBeLessThanOrEqual(viewAllStatusTotal);
+    await captureScreenshot(page, "Step 7: Switch to \"Assigned to me\" (status persists)");
 
     // ─── Step 8: Switch back to View All (status still applied) ───────────────────
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     expect(await executeTabPage.getCurrentStatusValue()).toBe(second.status);
     expect(await executeTabPage.getTotalEntries()).toBe(viewAllStatusTotal);
+    await captureScreenshot(page, "Step 8: Switch back to View All (status still applied)");
 
     // ─── Step 9: Test runs not assigned to the user are displayed ─────────────────
     expect(viewAllStatusTotal).toBeGreaterThan(assignedStatusTotal);
     await executeTabPage.verifyAllRowsHaveStatus(second.status);
+    await captureScreenshot(page, "Step 9: Test runs not assigned to the user are displayed");
 
     // ─── Step 10: Validate grid columns ──────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 10: Validate grid columns");
   });
 
 });

@@ -36,6 +36,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -54,6 +55,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.openCreateDefectForm();          // Expected 1: form opens
+    await captureScreenshot(page, "Step 1 (follows TC-098): open the Create Defect form");
 
     // ─── Step 2: every mandatory field shows the asterisk marker ─────────────────
     for (const field of EXPECTED.createDefect.mandatoryFields) {
@@ -61,6 +63,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     }
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Step 2: every mandatory field shows the asterisk marker");
   });
 
 });

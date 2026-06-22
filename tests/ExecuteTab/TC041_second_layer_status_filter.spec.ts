@@ -42,6 +42,7 @@ import {
   switchProjectAndLoadReleases,
   reachSecondLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – Status Dropdown Filter', () => {
 
@@ -54,17 +55,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyViewAllIsDefaultSelected();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-034): reach a populated second-layer grid (View All)");
 
     // ─── Steps 3 & 4: Open the Status dropdown and validate the statuses ─────────────
     // Expected: Dropdown displays all execution statuses (Passed, Failed, Retest, Blocked,
     //           InProgress, Incomplete, Unexecuted).
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open the Status dropdown and validate the statuses");
 
     // ─── Step 5: Select a specific status ────────────────────────────────────────────
     // Expected: Grid refreshes and shows only test runs with the selected status.
     const first = await executeTabPage.selectFirstNonEmptyStatus(EXPECTED.statusOptions);
     await executeTabPage.verifyAllRowsHaveStatus(first.status);
+    await captureScreenshot(page, "Step 5: Select a specific status");
 
     // ─── Step 6: Change to another status and validate the refreshed grid ────────────
     // Expected: Grid refreshes and shows only runs matching the newly selected status.
@@ -73,6 +77,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     expect(second.status).not.toBe(first.status);
     await executeTabPage.verifyAllRowsHaveStatus(second.status);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 6: Change to another status and validate the refreshed grid");
   });
 
 });

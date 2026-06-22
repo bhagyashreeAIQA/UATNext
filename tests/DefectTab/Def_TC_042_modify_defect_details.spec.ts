@@ -40,6 +40,7 @@ import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Modify Defect', () => {
 
@@ -58,27 +59,32 @@ test.describe('Feature: Defect | Sub-Feature: Modify Defect', () => {
     await detailsPage.fillRequiredForSave({ summary });
     await detailsPage.clickCreateSave();
     await expect(detailsPage.toast(EXPECTED.createDefectPage.createdSuccessMessage)).toBeVisible({ timeout: 20000 });
+    await captureScreenshot(page, "Setup: seed a fully-valid defect to modify (Step 3 precondition)");
 
     // ─── Steps 1-3: locate and open the seeded defect ─────────────────────────
     await defectTabPage.waitForResults();
     const defectId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.openDefectById(defectId);
     await detailsPage.waitForEditFormOpen();
+    await captureScreenshot(page, "Steps 1-3: locate and open the seeded defect");
 
     // ─── Step 4: modify a field value (Priority → first different option) ──────
     const before = await detailsPage.getDropdownValue(PRIORITY);
     const newValue = await detailsPage.selectFirstAvailable(PRIORITY);
     expect(newValue, 'a different Priority was selected').not.toBe('');
     expect(newValue).not.toBe(before);
+    await captureScreenshot(page, "Step 4: modify a field value (Priority → first different option)");
 
     // ─── Step 5: Save → "Defect updated successfully." ────────────────────────
     await detailsPage.clickUpdateSave();
     await expect(detailsPage.toast(EXPECTED.createDefectPage.updatedSuccessMessage)).toBeVisible({ timeout: 20000 });
+    await captureScreenshot(page, "Step 5: Save → \"Defect updated successfully.\"");
 
     // ─── Step 6: Close → return to the Defect grid ────────────────────────────
     await detailsPage.closeDiscardingIfPrompted();         // Expected 2
     await expect(defectTabPage.createDefectButton).toBeVisible();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Step 6: Close → return to the Defect grid");
 
     // ─── Step 7: reopen the same defect → modified value persists ─────────────
     // The summary filter persists in the left panel while the edit form is open, so closing it
@@ -87,6 +93,7 @@ test.describe('Feature: Defect | Sub-Feature: Modify Defect', () => {
     await defectTabPage.openDefectById(defectId);
     await detailsPage.waitForEditFormOpen();
     expect(await detailsPage.getDropdownValue(PRIORITY)).toBe(newValue);   // Expected 3
+    await captureScreenshot(page, "Step 7: reopen the same defect → modified value persists");
   });
 
 });

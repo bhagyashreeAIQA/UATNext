@@ -37,6 +37,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0; // first suite run (reliably has multiple steps)
 
@@ -55,20 +56,24 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: Navigate to the Test Logs section ───────────────────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, "Step 3: Navigate to the Test Logs section");
 
     // ─── Steps 4-6: set Passed / Failed / Blocked on three different steps ────────
     await executionPage.selectStepStatus(0, 'Passed');
     await executionPage.selectStepStatus(1, 'Failed');
     await executionPage.selectStepStatus(2, 'Blocked');
+    await captureScreenshot(page, "Steps 4-6: set Passed / Failed / Blocked on three different steps");
 
     // ─── Step 7: Validate the Step Status column reflects each update ────────────
     await executionPage.verifyStepStatusValue(0, 'Passed');
     await executionPage.verifyStepStatusValue(1, 'Failed');
     await executionPage.verifyStepStatusValue(2, 'Blocked');
+    await captureScreenshot(page, "Step 7: Validate the Step Status column reflects each update");
   });
 
 });

@@ -27,6 +27,7 @@
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
@@ -36,6 +37,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyProjectSelected();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Defect tab open, project defects loaded");
 
     // ─── Step 3: Click Create Defect ──────────────────────────────────────────
     // Expected: New Defect form opens with all documented fields.
@@ -44,6 +46,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
     await createDefect.verifyAllFieldsPresent();
+    await captureScreenshot(page, "Step 3: Click Create Defect");
   });
 
 });

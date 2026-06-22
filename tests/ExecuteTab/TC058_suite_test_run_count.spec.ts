@@ -32,6 +32,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Test Run Count', () => {
 
@@ -42,9 +43,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Test Run
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Step 2: Validate pagination controls at the bottom ──────────────────────
     await executeTabPage.verifyPaginationControlsVisible();
+    await captureScreenshot(page, "Step 2: Validate pagination controls at the bottom");
 
     // ─── Step 3: Displayed count matches the rows shown ──────────────────────────
     await executeTabPage.verifyDisplayedCountMatchesRows();
@@ -56,6 +59,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Test Run
       expect(await executeTabPage.getTestRunCount()).toBe(count);
     }
     await executeTabPage.verifyDisplayedCountMatchesRows();
+    await captureScreenshot(page, "Step 3: Displayed count matches the rows shown");
   });
 
 });

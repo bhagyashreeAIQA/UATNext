@@ -23,6 +23,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
 
@@ -37,11 +38,13 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
     // Pre-condition: move off the first page (to the last page)
     await defectTabPage.goToLastPage();
     expect(await defectTabPage.getCurrentPageNumber()).toBeGreaterThan(1);
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Steps 3-4: Click the First Page button ───────────────────────────────
     // Expected: User is navigated to the first page; page number displays 1
     await defectTabPage.goToFirstPage();
     expect(await defectTabPage.getCurrentPageNumber()).toBe(1);
+    await captureScreenshot(page, "Steps 3-4: Click the First Page button");
   });
 
 });

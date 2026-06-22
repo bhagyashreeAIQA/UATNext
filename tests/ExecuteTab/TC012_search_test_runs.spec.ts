@@ -31,6 +31,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Search Test Runs', () => {
 
@@ -83,6 +84,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Search Test Runs', () =
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-006): reach a populated grid (View All)");
 
     // ─── Step 2: Search for an existing Test Case ID and click Search ────────────
     // Expected: Test run list refreshes and shows only rows matching the search criteria
@@ -90,6 +92,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Search Test Runs', () =
     const searchTerm = await executeTabPage.getFirstRowTestCaseId();
     await executeTabPage.searchTestRun(searchTerm);
     await executeTabPage.verifySearchResultsMatch(searchTerm);
+    await captureScreenshot(page, "Step 2: Search for an existing Test Case ID and click Search");
 
     // ─── Step 3: Validate grid columns ───────────────────────────────────────────
     // Expected: All columns should display correct data for the searched test runs
@@ -97,6 +100,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Search Test Runs', () =
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 3: Validate grid columns");
   });
 
 });

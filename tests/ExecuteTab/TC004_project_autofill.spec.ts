@@ -20,6 +20,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Project', () => {
 
@@ -41,22 +42,26 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project', () => {
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
+    await captureScreenshot(page, "Step 1 (follows TC-001): Login and verify Workspace is auto-filled");
 
     // ─── Step 2: Navigate to Execute Test Cases tab ───────────────────────────
     // Expected: Execute Test Cases page should open
 
     await executeTabPage.verifyExecuteTabIsActive();
+    await captureScreenshot(page, "Step 2: Navigate to Execute Test Cases tab");
 
     // ─── Step 3: Validate visibility of Project Text ──────────────────────────
     // Expected: Project Text is displayed
 
     await executeTabPage.verifyProjectTextVisible();
+    await captureScreenshot(page, "Step 3: Validate visibility of Project Text");
 
     // ─── Step 4: Validate Project field ──────────────────────────────────────
     // Expected: Project field should be auto-filled with workspace synced value
 
     await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);
     await executeTabPage.verifyProjectNotEmpty();
+    await captureScreenshot(page, "Step 4: Validate Project field");
   });
 
 });

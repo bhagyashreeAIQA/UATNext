@@ -35,6 +35,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const PLACEHOLDER = EXPECTED.createDefect.dropdownPlaceholders.team;
@@ -57,12 +58,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     // ─── Step 2 / Expected 2: the Team dropdown lists values ─────────────────────
     expect(await executionPage.getDefectDropdownOptionCount(PLACEHOLDER),
       'Team dropdown should list values').toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 2 / Expected 2: the Team dropdown lists values");
 
     // ─── Step 3 / Expected 3: select a value → it is displayed and retained ───────
     const selected = await executionPage.selectFirstAvailableDefectDropdownValue(PLACEHOLDER);
     expect(await executionPage.getDefectDropdownValue(PLACEHOLDER)).toBe(selected);
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Step 3 / Expected 3: select a value → it is displayed and retained");
   });
 
 });

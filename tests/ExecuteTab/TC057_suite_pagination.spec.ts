@@ -34,6 +34,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Pagination', () => {
 
@@ -45,27 +46,33 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Paginati
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     expect(await executeTabPage.getTotalEntries()).toBeGreaterThan(10); // spans 2+ pages
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a multi-page suite grid (View All)");
 
     // ─── Step 2: Validate pagination controls at the bottom ──────────────────────
     await executeTabPage.verifyPaginationControlsVisible();
     expect(await executeTabPage.getCurrentPageNumber()).toBe(1);
+    await captureScreenshot(page, "Step 2: Validate pagination controls at the bottom");
 
     // ─── Step 3: Click Next Page ─────────────────────────────────────────────────
     await executeTabPage.goToNextPage();
     expect(await executeTabPage.getCurrentPageNumber()).toBe(2);
+    await captureScreenshot(page, "Step 3: Click Next Page");
 
     // ─── Step 4: Click Last Page ─────────────────────────────────────────────────
     await executeTabPage.goToLastPage();
     const lastPage = await executeTabPage.getCurrentPageNumber();
     expect(lastPage).toBeGreaterThanOrEqual(2);
+    await captureScreenshot(page, "Step 4: Click Last Page");
 
     // ─── Step 5: Click Previous Page ─────────────────────────────────────────────
     await executeTabPage.goToPreviousPage();
     expect(await executeTabPage.getCurrentPageNumber()).toBe(lastPage - 1);
+    await captureScreenshot(page, "Step 5: Click Previous Page");
 
     // ─── Step 6: Click First Page ────────────────────────────────────────────────
     await executeTabPage.goToFirstPage();
     expect(await executeTabPage.getCurrentPageNumber()).toBe(1);
+    await captureScreenshot(page, "Step 6: Click First Page");
   });
 
 });

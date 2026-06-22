@@ -25,6 +25,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Release Filter', () => {
 
@@ -71,6 +72,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Release Filter', () => 
     await executeTabPage.waitForReleasesLoad();
     await executeTabPage.verifyReleasesVisible();
     await executeTabPage.verifyAtLeastOneRelease();
+    await captureScreenshot(page, "Step 1 (follows TC-005): Login, navigate, verify workspace + project");
 
     // ─── Step 2: Click on the Release expand ─────────────────────────────────
     // Expected: Release list should open (test cycles become visible)
@@ -81,6 +83,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Release Filter', () => 
     await executeTabPage.expandFirstReleaseWithTestCycles();
     await executeTabPage.verifyReleaseExpanded();
     await executeTabPage.verifyTestCyclesVisible();
+    await captureScreenshot(page, "Step 2: Click on the Release expand");
 
     // ─── Step 3: Select a release from list ───────────────────────────────────
     // Expected: Test run list should refresh
@@ -92,12 +95,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Release Filter', () => 
     await executeTabPage.clickFirstTestCycle();
     await executeTabPage.waitForTestRunsToRefresh();
     await executeTabPage.verifyTestRunTableVisible();
+    await captureScreenshot(page, "Step 3: Select a release from list");
 
     // ─── Step 4: Validate displayed test runs ─────────────────────────────────
     // Expected: Only test runs of selected release should appear
 
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 4: Validate displayed test runs");
   });
 
 });

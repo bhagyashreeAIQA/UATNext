@@ -37,6 +37,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -54,14 +55,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();         // Expected 1
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: Navigate to Test Logs ───────────────────────────────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, "Step 3: Navigate to Test Logs");
 
     // ─── Steps 4-5 / Expected 2-3: normal steps carry no called-test-case indicator ─
     await executionPage.verifyNoStepsMarkedAsCalled();
     expect(await executionPage.getCalledStepIndices()).toEqual([]);
+    await captureScreenshot(page, "Steps 4-5 / Expected 2-3: normal steps carry no called-test-case indicator");
   });
 
 });

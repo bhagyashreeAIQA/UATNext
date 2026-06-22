@@ -34,6 +34,7 @@ import {
   switchProjectAndLoadReleases,
   reachSecondLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle Filter', () => {
 
@@ -43,15 +44,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle Filt
     // ─── Step 1 (follows TC-005): login, switch project, load releases ───────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Step 1 (follows TC-005): login, switch project, load releases");
 
     // ─── Steps 2-5: Expand release → first-layer cycle → select second-layer cycle ─
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: true });
+    await captureScreenshot(page, "Steps 2-5: Expand release → first-layer cycle → select second-layer cycle");
 
     // ─── Step 6: Validate displayed records ──────────────────────────────────────
     // Expected: Only test runs belonging to the selected Second Layer Cycle are displayed
     await executeTabPage.verifyTestRunTableVisible();
     await executeTabPage.verifyTestRunsLoaded();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 6: Validate displayed records");
   });
 
 });

@@ -23,6 +23,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -37,11 +38,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // an arbitrary user would usually have no defects).
     const businessUser = await defectTabPage.getFirstNonEmptyColumnValue('Business User');
     expect(businessUser, 'A loaded defect should expose a Business User value').toBeTruthy();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid Business User value ───────────────────────────
     // Expected: Selected Business User value should be displayed in the field
     await defectTabPage.selectDropdownValue('Business User', businessUser!);
     await expect(defectTabPage.businessUserDropdown).toHaveValue(businessUser!);
+    await captureScreenshot(page, "Step 3: Select a valid Business User value");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
@@ -49,6 +52,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
     await defectTabPage.verifyAllRowsMatchColumn('Business User', businessUser!);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

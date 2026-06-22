@@ -35,6 +35,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Reset / Clear Filters', () => {
 
@@ -79,6 +80,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Reset / Clear Filters',
     await executeTabPage.expandFirstReleaseWithTestCycles();
     await executeTabPage.verifyReleaseExpanded();
     await executeTabPage.verifyTestCyclesVisible();
+    await captureScreenshot(page, "Step 1 (follows TC-006): reach a populated grid (View All)");
 
     // ─── Step 2: Select the View All radio button ────────────────────────────────
     // Expected: Grid refreshes and displays all test runs for the selected filters
@@ -90,6 +92,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Reset / Clear Filters',
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     await executeTabPage.verifyViewAllIsDefaultSelected(); // View All is checked
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 2: Select the View All radio button");
 
     // ─── Step 3: Enter a keyword in Search and click Search ──────────────────────
     // Expected: Grid refreshes and displays only test runs matching the search criteria
@@ -97,16 +100,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Reset / Clear Filters',
     const searchTerm = await executeTabPage.getFirstRowTestCaseId();
     await executeTabPage.searchTestRun(searchTerm);
     await executeTabPage.verifySearchResultsMatch(searchTerm);
+    await captureScreenshot(page, "Step 3: Enter a keyword in Search and click Search");
 
     // ─── Step 4: Click the Reset/Clear Filters option ────────────────────────────
     // Expected: All filters and search values should be cleared
 
     await executeTabPage.clearFilters();
+    await captureScreenshot(page, "Step 4: Click the Reset/Clear Filters option");
 
     // ─── Step 5: Validate the filter section and grid (default restored) ──────────
     // Expected: Assigned To Me selected, filters cleared, grid refreshed
 
     await executeTabPage.verifyDefaultStateRestored();
+    await captureScreenshot(page, "Step 5: Validate the filter section and grid (default restored)");
 
     // ─── Step 6: Validate the test run grid (default view) ───────────────────────
     // Expected: Grid should display test runs based on the default view
@@ -120,6 +126,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Reset / Clear Filters',
       await executeTabPage.verifyEachRowHasReadableData();
     }
     expect(await executeTabPage.getSearchValue()).toBe('');
+    await captureScreenshot(page, "Step 6: Validate the test run grid (default view)");
   });
 
 });

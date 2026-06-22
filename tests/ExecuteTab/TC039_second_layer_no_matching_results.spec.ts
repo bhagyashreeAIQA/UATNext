@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachSecondLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – Empty State', () => {
 
@@ -47,17 +48,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     // ─── Steps 1 & 2 (follows TC-001): login + Execute tab + workspace auto-fill ─
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-001): login + Execute tab + workspace auto-fill");
 
     // ─── Step 3: Select a Release + cycle + second-layer cycle with no runs ───────
     // Reached on the module's default "Assigned to me" filter (no runs for this user).
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 3: Select a Release + cycle + second-layer cycle with no runs");
 
     // ─── Step 4: Validate the test run grid ──────────────────────────────────────
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 4: Validate the test run grid");
 
     // ─── Step 5: Enter a non-matching search keyword ─────────────────────────────
     await executeTabPage.searchTestRun(EXPECTED.nonMatchingSearchId);
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 5: Enter a non-matching search keyword");
   });
 
 });

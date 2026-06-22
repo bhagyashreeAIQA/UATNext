@@ -42,6 +42,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -60,6 +61,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();        // Expected 2: details page opens
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: Navigate to the Test Logs (test-steps) section ──────────────────
     await executionPage.verifyStepsGridVisible();        // Expected 3: steps grid displayed
@@ -67,9 +69,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     let linkedDefectId = '';
     try {
+    await captureScreenshot(page, "Step 3: Navigate to the Test Logs (test-steps) section");
+
       // ─── Steps 4-5: open the step Bug-icon defect panel and validate it ────────
       await executionPage.openStepDefectPanel(STEP_INDEX);
       await executionPage.verifyStepDefectPanelOpen();   // Expected 4 & 5: panel + search field
+      await captureScreenshot(page, "Steps 4-5: open the step Bug-icon defect panel and validate it");
 
       // ─── Step 6: search a valid (not-yet-linked) Defect ID ─────────────────────
       const linkedBefore = await executionPage.getLinkedDefectIds();
@@ -78,16 +83,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
       await executionPage.searchDefect(candidate!);
       await executionPage.verifyDefectInSearchResults(candidate!); // Expected 6: match displayed
+      await captureScreenshot(page, "Step 6: search a valid (not-yet-linked) Defect ID");
 
       // ─── Step 7: select the match and click Link ───────────────────────────────
       const linkEnabled = await executionPage.selectSearchedDefect(candidate!);
       expect(linkEnabled, 'LINK should enable for a not-yet-linked defect').toBe(true);
       await executionPage.confirmLink();                 // Expected 7: defect linked
       linkedDefectId = candidate!;
+      await captureScreenshot(page, "Step 7: select the match and click Link");
 
       // ─── Step 8: linking returns the user to the Test Execution Details page ───
       await expect(executionPage.defectPopup).toBeHidden(); // Expected 8
       await executionPage.verifyDetailsPageOpen();
+      await captureScreenshot(page, "Step 8: linking returns the user to the Test Execution Details page");
 
       // ─── Step 9: reopen the step panel — the new defect is in the linked list ──
       await executionPage.openStepDefectPanelFresh(STEP_INDEX);
@@ -97,6 +105,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromStep(STEP_INDEX, linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Step 9: reopen the step panel — the new defect is in the linked list");
   });
 
 });

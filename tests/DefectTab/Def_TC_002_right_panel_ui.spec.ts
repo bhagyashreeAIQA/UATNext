@@ -22,6 +22,7 @@
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
 
@@ -30,11 +31,13 @@ test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
     // Expected: Defect page should be displayed
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
+    await captureScreenshot(page, "Step 1: Click on the Defect tab");
 
     // ─── Step 2: Select a Project ─────────────────────────────────────────────
     // Expected: Project-related data should be visible
     await defectTabPage.verifyProjectSelected();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Step 2: Select a Project");
 
     // ─── Step 3: Verify the Right Panel ───────────────────────────────────────
     // Expected: CREATE DEFECT button present; grid shows the 9 columns in order;
@@ -42,6 +45,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
     await defectTabPage.verifyCreateDefectButtonVisible();
     await defectTabPage.verifyGridColumns(EXPECTED.defect.gridColumns);
     await defectTabPage.verifyPaginationVisible();
+    await captureScreenshot(page, "Step 3: Verify the Right Panel");
   });
 
 });

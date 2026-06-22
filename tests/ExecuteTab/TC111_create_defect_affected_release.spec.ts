@@ -34,6 +34,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -57,6 +58,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     expect(affectedRelease.trim().length, 'Affected Release/Build should be pre-populated').toBeGreaterThan(0);
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Expected 2: Affected Release/Build pre-populated with the mapped release");
   });
 
 });

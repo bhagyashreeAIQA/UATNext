@@ -37,6 +37,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -55,16 +56,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.openCreateDefectForm();          // Expected 1: form opens
+    await captureScreenshot(page, "Step 1 (follows TC-098): open the Create Defect form");
 
     // ─── Steps 2-3: leave Summary blank and Save ─────────────────────────────────
     await executionPage.typeSummary('');
     await executionPage.clickCreateDefectSave();
+    await captureScreenshot(page, "Steps 2-3: leave Summary blank and Save");
 
     // ─── Expected 2-3: validation shown, defect not created (form still open) ────
     await executionPage.verifyCreateDefectValidation(EXPECTED.createDefect.summaryBlankError);
     await executionPage.verifyStillOnCreateDefectForm();
 
     await executionPage.closeCreateDefectForm();
+    await captureScreenshot(page, "Expected 2-3: validation shown, defect not created (form still open)");
   });
 
 });

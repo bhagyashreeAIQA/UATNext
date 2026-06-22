@@ -36,6 +36,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Status Dropdown Filter', () => {
 
@@ -47,22 +48,26 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – S
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-021): reach a populated grid under View All");
 
     // ─── Steps 3 & 4: Open the Status dropdown and validate the statuses ─────────
     // Expected: Dropdown displays all execution statuses
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open the Status dropdown and validate the statuses");
 
     // ─── Step 5: Select a specific status (Passed) ───────────────────────────────
     // Expected: Grid shows only test runs with the selected status
     await executeTabPage.selectStatus('Passed');
     await executeTabPage.verifyAllRowsHaveStatus('Passed');
+    await captureScreenshot(page, "Step 5: Select a specific status (Passed)");
 
     // ─── Steps 6 & 7: Change the status (Failed) and validate displayed runs ──────
     // Expected: Grid shows only runs matching the new status (this cycle + Failed)
     await executeTabPage.selectStatus('Failed');
     await executeTabPage.verifyAllRowsHaveStatus('Failed');
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Steps 6 & 7: Change the status (Failed) and validate displayed runs");
   });
 
 });

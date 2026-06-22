@@ -30,6 +30,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -42,6 +43,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
 
     // ─── Steps 2-3 / Expected 1-2: all three Assignee options are displayed ──────
     await executeTabPage.verifyAssigneeOptionsVisible();
+    await captureScreenshot(page, "Steps 2-3 / Expected 1-2: all three Assignee options are displayed");
   });
 
 });

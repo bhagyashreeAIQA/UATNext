@@ -31,6 +31,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Test Run Count', () => {
 
@@ -41,9 +42,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – T
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
+    await captureScreenshot(page, "Step 1 (follows TC-021): reach a populated grid under View All");
 
     // ─── Step 2: Validate pagination controls at the bottom ──────────────────────
     await executeTabPage.verifyPaginationControlsVisible();
+    await captureScreenshot(page, "Step 2: Validate pagination controls at the bottom");
 
     // ─── Step 3: Displayed count matches the rows shown ──────────────────────────
     await executeTabPage.verifyDisplayedCountMatchesRows();
@@ -55,6 +58,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – T
       expect(await executeTabPage.getTestRunCount()).toBe(count);
     }
     await executeTabPage.verifyDisplayedCountMatchesRows();
+    await captureScreenshot(page, "Step 3: Displayed count matches the rows shown");
   });
 
 });

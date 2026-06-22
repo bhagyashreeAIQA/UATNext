@@ -34,6 +34,7 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
 
@@ -49,11 +50,13 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the Create Defect form");
 
     // ─── Step 4: enter data + attach a file (so there are unsaved changes) ─────
     await createDefect.fillSummary(summary);
     await createDefect.attachFile(SMALL_FILE);
     await createDefect.verifyAttachmentListed(path.basename(SMALL_FILE));
+    await captureScreenshot(page, "Step 4: enter data + attach a file (so there are unsaved changes)");
 
     // ─── Step 5-6: Close → No → stays on form with data retained ──────────────
     await createDefect.clickClose();
@@ -62,6 +65,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     await createDefect.verifyStillOnCreateForm();
     expect(await createDefect.getSummaryValue()).toBe(summary);
     await createDefect.verifyAttachmentListed(path.basename(SMALL_FILE));
+    await captureScreenshot(page, "Step 5-6: Close → No → stays on form with data retained");
 
     // ─── Step 7-8: Close → Yes → discards and returns to the Defect grid ──────
     await createDefect.clickClose();
@@ -69,6 +73,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     await createDefect.confirmYes();                       // Expected 3
     await expect(defectTabPage.createDefectButton).toBeVisible();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Step 7-8: Close → Yes → discards and returns to the Defect grid");
   });
 
 });

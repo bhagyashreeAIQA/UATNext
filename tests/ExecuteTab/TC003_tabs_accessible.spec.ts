@@ -22,6 +22,7 @@ import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { AuthorTabPage }  from '../../pages/AuthorTab/AuthorTabPage';
 import { DefectTabPage }  from '../../pages/DefectTab/DefectTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => {
 
@@ -45,12 +46,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
+    await captureScreenshot(page, "Step 1 (follows TC-001): Login and verify Workspace is auto-filled");
 
     // ─── Verify all three tabs are visible in the navigation bar ─────────────
 
     await expect(homePage.authorTestCasesTab).toBeVisible();
     await expect(homePage.executeTestCasesTab).toBeVisible();
     await expect(homePage.defectTab).toBeVisible();
+    await captureScreenshot(page, "Verify all three tabs are visible in the navigation bar");
 
     // ─── Step 2 & 3: Navigate to Author Test Cases tab and validate ───────────
     // Expected: Author Test Cases page should open with requirements table
@@ -58,6 +61,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
     await homePage.navigateToAuthorTab();
     await authorTabPage.waitForPageLoad();
     await authorTabPage.verifyAuthorPageFullyLoaded();
+    await captureScreenshot(page, "Step 2 & 3: Navigate to Author Test Cases tab and validate");
 
     // ─── Step 3 (continued): Navigate to Execute Test Cases tab and validate ──
     // Expected: Execute Test Cases page should open with Workspace dropdown
@@ -68,6 +72,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
     await executeTabPage.verifyWorkspaceLabelVisible();
     await executeTabPage.verifyWorkspaceDropdownVisible();
     await executeTabPage.verifyWorkspaceNotEmpty();
+    await captureScreenshot(page, "Step 3 (continued): Navigate to Execute Test Cases tab and validate");
 
     // ─── Step 5 & 6: Navigate to Defect tab and validate ─────────────────────
     // Expected: Defect page should open with defect table and filters
@@ -75,6 +80,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
     await homePage.navigateToDefectTab();
     await defectTabPage.waitForPageLoad();
     await defectTabPage.verifyDefectPageFullyLoaded();
+    await captureScreenshot(page, "Step 5 & 6: Navigate to Defect tab and validate");
   });
 
 });

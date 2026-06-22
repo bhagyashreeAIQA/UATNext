@@ -36,6 +36,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Test Step Filter', () => {
 
@@ -53,12 +54,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.verifyStepsGridVisible();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Step 3: Validate the test step filter option ────────────────────────────
     await executionPage.verifyStepFilterOptionsVisible();
     // Documented expected #2 is "Show Only Business" by default; the live default is actually
     // "Show All Steps" — asserted here to reflect real behaviour.
     await executionPage.verifyShowAllStepsSelectedByDefault();
+    await captureScreenshot(page, "Step 3: Validate the test step filter option");
 
     // ─── Steps 4-5: select "Show Only Business" and validate UAT categories ──────
     await executionPage.selectShowBusinessSteps();
@@ -67,6 +70,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.verifyAllStepsAreBusiness();
     const businessCats = await executionPage.getStepUatCategories();
     expect(businessCats.every(c => c === 'Business')).toBe(true);
+    await captureScreenshot(page, "Steps 4-5: select \"Show Only Business\" and validate UAT categories");
   });
 
 });

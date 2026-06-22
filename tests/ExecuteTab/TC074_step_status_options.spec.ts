@@ -38,6 +38,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 // Validate the default state on a run the mutating tests leave untouched (TC-075 uses row 1).
 const RUN_ROW_INDEX = 2;
@@ -57,10 +58,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-068): reach the grid and open a run");
 
     // ─── Step 3: Navigate to / locate the Test Logs (steps) grid ─────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, "Step 3: Navigate to / locate the Test Logs (steps) grid");
 
     // ─── Steps 4-5: validate the Status options for multiple steps ───────────────
     const stepCount = await executionPage.getStepRowCount();
@@ -68,9 +71,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     for (let i = 0; i < sample; i++) {
       await executionPage.verifyStepStatusOptions(i, EXPECTED.executionStatusOptions);
     }
+    await captureScreenshot(page, "Steps 4-5: validate the Status options for multiple steps");
 
     // ─── Step 6: validate the default state — all steps Unexecuted ───────────────
     await executionPage.verifyAllStepsUnexecuted();
+    await captureScreenshot(page, "Step 6: validate the default state — all steps Unexecuted");
   });
 
 });

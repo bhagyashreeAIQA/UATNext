@@ -16,13 +16,17 @@ export default defineConfig({
   // headed mode, and too many concurrent browsers starve it (sidebar stalls on "Loading
   // projects..."). Four keeps the run parallel but stable.
   workers: process.env.CI ? 1 : 4,
-  reporter: [['html', { open: 'never' }], ['list']],
+  //reporter: [['html', { open: 'never' }], ['list']],
+  reporter: [
+    ['html', { outputFolder: `playwright-report/run-${Date.now()}` }],
+    ['json', { outputFile: `test-logs/report-${Date.now()}.json` }]
+  ],
 
   use: {
     baseURL: 'https://webapp-v1-blazor-uatnext-dev.azurewebsites.net',
     storageState: AUTH_STATE_PATH,
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',    
     video: 'retain-on-failure',
     headless: false,
     // Bound individual actions/navigations so a non-actionable element fails fast with a

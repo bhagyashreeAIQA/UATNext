@@ -21,6 +21,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Project Dropdown', () => {
 
@@ -44,18 +45,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project Dropdown', () =
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyProjectTextVisible();
     await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);
+    await captureScreenshot(page, "Step 1 (follows TC-004): Login, navigate, verify workspace + project");
 
     // ─── Step 2: Click on the Project dropdown ────────────────────────────────
     // Expected: Project list should open
 
     await executeTabPage.openProjectDropdown();
     await executeTabPage.verifyProjectDropdownOpen();
+    await captureScreenshot(page, "Step 2: Click on the Project dropdown");
 
     // ─── Step 3: Validate the values ─────────────────────────────────────────
     // Expected: All mapped projects with the workspace should be displayed
 
     await executeTabPage.verifyProjectDropdownHasAtLeastOneOption();
     await executeTabPage.verifyProjectDropdownContains([EXPECTED.activeProject]);
+    await captureScreenshot(page, "Step 3: Validate the values");
 
     // ─── Step 4: Select a project ─────────────────────────────────────────────
     // Expected: Selected project should appear in the field
@@ -65,6 +69,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project Dropdown', () =
 
     await executeTabPage.verifyProjectDropdownClosed();
     await executeTabPage.verifyProjectUpdatedTo(selectedProject);
+    await captureScreenshot(page, "Step 4: Select a project");
 
     // ─── Step 4 (continued): Validate the releases list ──────────────────────
     // Expected: Releases should be visible based on the selected project
@@ -72,6 +77,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project Dropdown', () =
     await executeTabPage.waitForReleasesLoad();
     await executeTabPage.verifyReleasesVisible();
     await executeTabPage.verifyAtLeastOneRelease();
+    await captureScreenshot(page, "Step 4 (continued): Validate the releases list");
   });
 
 });

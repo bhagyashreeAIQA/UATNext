@@ -34,6 +34,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Clear Status Filter', () => {
 
@@ -46,14 +47,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – C
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
     const unfilteredTotal = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-021): reach a populated grid under View All");
 
     // ─── Step 3: Apply a Status filter ───────────────────────────────────────────
     const { status } = await executeTabPage.selectFirstNonEmptyStatus(EXPECTED.statusOptions);
     await executeTabPage.verifyAllRowsHaveStatus(status);
+    await captureScreenshot(page, "Step 3: Apply a Status filter");
 
     // ─── Step 4: Clear the Status filter ─────────────────────────────────────────
     await executeTabPage.clearStatusFilter();
     expect(await executeTabPage.getCurrentStatusValue()).toBe('All');
+    await captureScreenshot(page, "Step 4: Clear the Status filter");
 
     // ─── Step 5: Validate the test run grid (restored to remaining filters) ──────
     await expect.poll(() => executeTabPage.getTotalEntries(), { timeout: 30000 })
@@ -61,6 +65,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – C
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 5: Validate the test run grid (restored to remaining filters)");
   });
 
 });

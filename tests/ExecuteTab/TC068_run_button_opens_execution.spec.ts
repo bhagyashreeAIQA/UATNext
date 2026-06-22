@@ -33,6 +33,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details', () => {
 
@@ -44,13 +45,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Step 2: Locate a test run row + capture its Test Run ID ─────────────────
     await executeTabPage.verifyRunButtonVisible(0);
     const rowRunId = await executeTabPage.getRowTestRunId(0);
+    await captureScreenshot(page, "Step 2: Locate a test run row + capture its Test Run ID");
 
     // ─── Step 3: Click the Run button → execution details opens ──────────────────
     await executeTabPage.clickRunButton(0);
+    await captureScreenshot(page, "Step 3: Click the Run button → execution details opens");
 
     // ─── Step 4: Validate the Test Run Details section ───────────────────────────
     const executionPage = new TestRunExecutionPage(page);
@@ -59,6 +63,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     // Correct test run information should be displayed (breadcrumb TR id matches the row).
     await executionPage.verifyTestRunId(rowRunId);
     await executionPage.verifyTestCaseNameNotEmpty();
+    await captureScreenshot(page, "Step 4: Validate the Test Run Details section");
   });
 
 });

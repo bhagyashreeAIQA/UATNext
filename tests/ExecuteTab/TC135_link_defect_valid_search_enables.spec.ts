@@ -42,6 +42,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -64,6 +65,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.verifyDefectPanelOpen();
     expect(await executionPage.isDefectLinkButtonPresent(),
       'LINK should not be available before a search (list mode)').toBe(false);
+    await captureScreenshot(page, "Steps 4-5 / Expected 1-2: panel opens; no LINK control in list mode");
 
     // ─── Steps 6-7 / Expected 3: valid search shows the matching defect ──────────
     const linkedBefore = await executionPage.getLinkedDefectIds();
@@ -71,12 +73,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     expect(candidate, 'an unlinked candidate defect must be available').toBeTruthy();
     await executionPage.searchDefect(candidate!);
     await executionPage.verifyDefectInSearchResults(candidate!);
+    await captureScreenshot(page, "Steps 6-7 / Expected 3: valid search shows the matching defect");
 
     // ─── Step 8 / Expected 4: selecting the valid result enables LINK ────────────
     expect(await executionPage.selectSearchedDefect(candidate!),
       'LINK should become enabled for a valid not-yet-linked defect').toBe(true);
 
     await executionPage.closeDefectPanelAnyMode();                // no defect linked
+    await captureScreenshot(page, "Step 8 / Expected 4: selecting the valid result enables LINK");
   });
 
 });

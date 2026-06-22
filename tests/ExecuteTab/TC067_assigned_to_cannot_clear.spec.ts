@@ -31,6 +31,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Assigned To Edit', () => {
 
@@ -42,19 +43,23 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Step 2: Locate the Assigned To column ───────────────────────────────────
     await executeTabPage.verifyAssignedToColumnVisible();
+    await captureScreenshot(page, "Step 2: Locate the Assigned To column");
 
     // ─── Step 3: Click the pencil icon → the dropdown opens ──────────────────────
     await executeTabPage.openAssignedToEditor(0);
     await executeTabPage.verifyAssignedToEditorOpen(0);
+    await captureScreenshot(page, "Step 3: Click the pencil icon → the dropdown opens");
 
     // ─── Step 4: Attempt to remove the value → no clear/remove option exists ─────
     await executeTabPage.verifyNoClearOptionInAssignedToEditor(0);
 
     // Cancel so no change is persisted (read-only state restored).
     await executeTabPage.cancelAssignedToEdit(0);
+    await captureScreenshot(page, "Step 4: Attempt to remove the value → no clear/remove option exists");
   });
 
 });

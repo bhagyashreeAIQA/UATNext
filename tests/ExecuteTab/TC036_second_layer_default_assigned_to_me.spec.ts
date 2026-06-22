@@ -36,6 +36,7 @@ import {
   switchProjectAndLoadReleases,
   reachSecondLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – Default Assignee', () => {
 
@@ -46,10 +47,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 1 (follows TC-034): reach the module grid on its Assigned-to-me default");
 
     // ─── Steps 2 & 3: Default filter is "Assigned to me" ─────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeCount = await executeTabPage.getTotalEntries();
+    await captureScreenshot(page, "Steps 2 & 3: Default filter is \"Assigned to me\"");
 
     // ─── Step 4: No test runs assigned to other users are displayed ──────────────
     await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
@@ -61,6 +64,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     if (assignedToMeCount === 0) {
       await executeTabPage.verifyNoResultsMessageVisible();
     }
+    await captureScreenshot(page, "Step 4: No test runs assigned to other users are displayed");
 
     // ─── Step 5: Refresh the page; default must remain "Assigned to me" ──────────
     await executeTabPage.reloadPage();
@@ -68,10 +72,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Second-Layer Cycle – 
     await reachSecondLayerCycleGrid(executeTabPage, { viewAll: false });
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     expect(await executeTabPage.getTotalEntries()).toBe(assignedToMeCount);
+    await captureScreenshot(page, "Step 5: Refresh the page; default must remain \"Assigned to me\"");
 
     // ─── Step 6: Validate grid columns ───────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 6: Validate grid columns");
   });
 
 });

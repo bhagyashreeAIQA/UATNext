@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Status Dropdown Filter', () => {
 
@@ -50,14 +51,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Status D
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyViewAllIsDefaultSelected();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Steps 3 & 4: Open the Status dropdown and validate the statuses ─────────
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);
+    await captureScreenshot(page, "Steps 3 & 4: Open the Status dropdown and validate the statuses");
 
     // ─── Step 5: Select a specific status (first non-empty) ──────────────────────
     const first = await executeTabPage.selectFirstNonEmptyStatus(EXPECTED.statusOptions);
     await executeTabPage.verifyAllRowsHaveStatus(first.status);
+    await captureScreenshot(page, "Step 5: Select a specific status (first non-empty)");
 
     // ─── Step 6: Change to another status and validate the refreshed grid ────────
     const remaining = EXPECTED.statusOptions.filter(s => s !== first.status);
@@ -65,6 +69,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Status D
     expect(second.status).not.toBe(first.status);
     await executeTabPage.verifyAllRowsHaveStatus(second.status);
     await executeTabPage.verifyEachRowHasReadableData();
+    await captureScreenshot(page, "Step 6: Change to another status and validate the refreshed grid");
   });
 
 });

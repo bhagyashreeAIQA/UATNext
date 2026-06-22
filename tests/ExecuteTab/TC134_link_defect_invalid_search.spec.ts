@@ -44,6 +44,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -66,6 +67,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.verifyDefectPanelOpen();
     expect(await executionPage.isDefectLinkButtonPresent(),
       'LINK should not be available before a search (list mode)').toBe(false);
+    await captureScreenshot(page, "Steps 4-5 / Expected 1-2: panel opens; no LINK control in list mode");
 
     // ─── Steps 6-9 / Expected 4-6: invalid ID → no match + LINK disabled ─────────
     await executionPage.searchDefect(EXPECTED.invalidDefectId);   // Expected 3: field accepts input
@@ -73,6 +75,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.verifyDefectLinkButtonDisabled();         // Expected 6
 
     await executionPage.closeDefectPanelAnyMode();                // no defect linked
+    await captureScreenshot(page, "Steps 6-9 / Expected 4-6: invalid ID → no match + LINK disabled");
   });
 
 });

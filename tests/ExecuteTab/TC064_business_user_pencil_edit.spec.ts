@@ -33,6 +33,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Business User Edit', () => {
 
@@ -44,13 +45,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline B
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach a populated suite grid (View All)");
 
     // ─── Step 2: Locate the Business User column ─────────────────────────────────
     await executeTabPage.verifyBusinessUserColumnVisible();
+    await captureScreenshot(page, "Step 2: Locate the Business User column");
 
     // ─── Step 3: Click the pencil icon → the dropdown opens and becomes editable ─
     await executeTabPage.openBusinessUserEditor(0);
     await executeTabPage.verifyBusinessUserEditorOpen(0);
+    await captureScreenshot(page, "Step 3: Click the pencil icon → the dropdown opens and becomes editable");
 
     // ─── Step 4: Validate action icons (✔ Save and ✖ Cancel) ─────────────────────
     // The Save (tick) appears once a user is selected; choose one to reveal it.
@@ -59,6 +63,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline B
 
     // Cancel so the change is not persisted (read-only state restored).
     await executeTabPage.cancelBusinessUserEdit(0);
+    await captureScreenshot(page, "Step 4: Validate action icons (✔ Save and ✖ Cancel)");
   });
 
 });

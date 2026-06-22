@@ -33,6 +33,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search – Date validation', () => {
 
@@ -42,15 +43,18 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search – Date validation'
     // ─── Steps 1-2: Defect tab open, defects loaded ───────────────────────────
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Defect tab open, defects loaded");
 
     // ─── Step 3: enter Submitted After = 2027-04-20 ───────────────────────────
     await defectTabPage.setSubmittedAfter(after);
     await expect(defectTabPage.submittedAfterInput).toHaveValue(after);
+    await captureScreenshot(page, "Step 3: enter Submitted After = 2027-04-20");
 
     // ─── Step 4 / Expected: Submitted Before now disables earlier dates ────────
     // The coupling exposes itself as a `min` attribute equal to the Submitted After date, so every
     // date prior to 20-04-2027 is unselectable in the Submitted Before picker.
     await expect(defectTabPage.submittedBeforeInput).toHaveAttribute('min', after);
+    await captureScreenshot(page, "Step 4 / Expected: Submitted Before now disables earlier dates");
   });
 
 });

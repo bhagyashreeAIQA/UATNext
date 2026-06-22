@@ -17,3 +17,6 @@ node_modules/
 
 # Local run logs
 *.log
+
+# Generated test-log report artifacts
+/test-logs/

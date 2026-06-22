@@ -22,6 +22,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
 
@@ -34,11 +35,13 @@ test.describe('Feature: Defect | Sub-Feature: Pagination', () => {
 
     const lastPage = await defectTabPage.getLastPageNumber();
     expect(lastPage).toBeGreaterThan(1);
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Steps 3-4: Click the Last Page button ────────────────────────────────
     // Expected: User is navigated to the last available page
     await defectTabPage.goToLastPage();
     expect(await defectTabPage.getCurrentPageNumber()).toBe(lastPage);
+    await captureScreenshot(page, "Steps 3-4: Click the Last Page button");
   });
 
 });

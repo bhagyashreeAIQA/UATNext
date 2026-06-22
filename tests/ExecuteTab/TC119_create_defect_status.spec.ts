@@ -38,6 +38,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const PLACEHOLDER = EXPECTED.createDefect.dropdownPlaceholders.status;
@@ -63,12 +64,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     for (const value of EXPECTED.createDefect.statusOptions) {
       expect(options, `Status options should include "${value}"`).toContain(value);
     }
+    await captureScreenshot(page, "Step 2 / Expected 2: the Status dropdown lists the documented values");
 
     // ─── Step 3 / Expected 3: select a value → it is displayed and retained ───────
     await executionPage.selectDefectDropdownValue(PLACEHOLDER, SELECT_VALUE);
     expect(await executionPage.getDefectDropdownValue(PLACEHOLDER)).toBe(SELECT_VALUE);
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Step 3 / Expected 3: select a value → it is displayed and retained");
   });
 
 });

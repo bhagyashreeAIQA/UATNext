@@ -36,6 +36,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Assignee Filter', () => {
 
@@ -46,10 +47,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – A
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 1 (follows TC-021): reach the cycle grid (default Assignee intact)");
 
     // ─── Step 2: "Assigned to me" is selected by default ─────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeTotal = await executeTabPage.getTotalEntriesText();
+    await captureScreenshot(page, "Step 2: \"Assigned to me\" is selected by default");
 
     // ─── Step 3: Click the View All radio button ─────────────────────────────────
     // Expected: Grid displays all test runs, including those assigned to other users
@@ -57,18 +60,22 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – A
     const viewAllTotal = await executeTabPage.getTotalEntriesText();
     expect(viewAllTotal).not.toBe(assignedToMeTotal);
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 3: Click the View All radio button");
 
     // ─── Step 4: Re-select the "Assigned to me" radio button ─────────────────────
     // Expected: Grid again displays only the user's test runs
     await executeTabPage.selectAssignedToMeAndWaitForRefresh(viewAllTotal);
+    await captureScreenshot(page, "Step 4: Re-select the \"Assigned to me\" radio button");
 
     // ─── Step 5: Dynamic refresh without page reload ─────────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     expect(await executeTabPage.getTotalEntriesText()).toBe(assignedToMeTotal);
+    await captureScreenshot(page, "Step 5: Dynamic refresh without page reload");
 
     // ─── Step 6: Validate grid columns ───────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 6: Validate grid columns");
   });
 
 });

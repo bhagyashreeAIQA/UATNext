@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – Reset / Clear Filters', () => {
 
@@ -50,20 +51,24 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – R
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyViewAllIsDefaultSelected();
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-021): reach a populated grid under View All");
 
     // ─── Step 3: Enter a keyword in Search and click Search ──────────────────────
     // Expected: Grid shows only test runs matching the search criteria
     const searchTerm = await executeTabPage.getFirstRowTestCaseId();
     await executeTabPage.searchTestRun(searchTerm);
     await executeTabPage.verifySearchResultsMatch(searchTerm);
+    await captureScreenshot(page, "Step 3: Enter a keyword in Search and click Search");
 
     // ─── Step 4: Click the Reset/Clear Filters option ────────────────────────────
     // Expected: All filters and search values should be cleared
     await executeTabPage.clearFilters();
+    await captureScreenshot(page, "Step 4: Click the Reset/Clear Filters option");
 
     // ─── Step 5: Validate the filter section (default restored) ──────────────────
     // Expected: Assigned To Me selected, filters cleared, grid refreshed
     await executeTabPage.verifyDefaultStateRestored();
+    await captureScreenshot(page, "Step 5: Validate the filter section (default restored)");
 
     // ─── Step 6: Validate the test run grid (default view) ───────────────────────
     await executeTabPage.verifyGridPresent();
@@ -74,6 +79,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: First-Layer Cycle – R
       await executeTabPage.verifyEachRowHasReadableData();
     }
     expect(await executeTabPage.getSearchValue()).toBe('');
+    await captureScreenshot(page, "Step 6: Validate the test run grid (default view)");
   });
 
 });

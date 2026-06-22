@@ -36,6 +36,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Assignee Filter', () => {
 
@@ -46,27 +47,33 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Assignee
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 1 (follows TC-047): reach the suite grid on its Assigned-to-me default");
 
     // ─── Step 2: "Assigned to me" is selected by default ─────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     const assignedToMeTotal = await executeTabPage.getTotalEntriesText();
+    await captureScreenshot(page, "Step 2: \"Assigned to me\" is selected by default");
 
     // ─── Step 3: Click the View All radio button ─────────────────────────────────
     await executeTabPage.selectViewAllAndWaitForRefresh(assignedToMeTotal);
     const viewAllTotal = await executeTabPage.getTotalEntriesText();
     expect(viewAllTotal).not.toBe(assignedToMeTotal);
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, "Step 3: Click the View All radio button");
 
     // ─── Step 4: Re-select the "Assigned to me" radio button ─────────────────────
     await executeTabPage.selectAssignedToMeAndWaitForRefresh(viewAllTotal);
+    await captureScreenshot(page, "Step 4: Re-select the \"Assigned to me\" radio button");
 
     // ─── Step 5: Dynamic refresh without page reload ─────────────────────────────
     await executeTabPage.verifyAssignedToMeSelectedByDefault();
     expect(await executeTabPage.getTotalEntriesText()).toBe(assignedToMeTotal);
+    await captureScreenshot(page, "Step 5: Dynamic refresh without page reload");
 
     // ─── Step 6: Validate grid columns ───────────────────────────────────────────
     await executeTabPage.verifyGridPresent();
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Step 6: Validate grid columns");
   });
 
 });

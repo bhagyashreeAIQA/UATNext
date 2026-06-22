@@ -37,6 +37,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
@@ -61,6 +62,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.verifyDefectAttachmentListed('sample_small');
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Steps 2-4 / Expected 2-3: upload a ≤10 MB file → it is listed");
   });
 
 });

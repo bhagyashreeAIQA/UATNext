@@ -47,6 +47,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -73,6 +74,8 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     let linkedDefectId = '';
     let baselineCount = 0;
     try {
+    await captureScreenshot(page, "Steps 1-3 (follows TC-047): open a run and reach the Test Logs");
+
       // ─── Step 4: note the existing defect count for the step (badge + panel) ────
       const baselineBadge = await executionPage.getStepBugBadgeCount(STEP_INDEX); // Expected 3
       await executionPage.openStepDefectPanel(STEP_INDEX);
@@ -80,6 +83,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       baselineCount = await executionPage.getLinkedDefectCount();
       expect(baselineCount).toBe(baselineBadge); // badge matches the panel's linked count
       const linkedBefore = await executionPage.getLinkedDefectIds();
+      await captureScreenshot(page, "Step 4: note the existing defect count for the step (badge + panel)");
 
       // ─── Steps 5-6: open the Bug panel (done) and link a not-yet-linked defect ─
       const candidate = EXPECTED.linkDefectCandidates.find(id => !linkedBefore.includes(id));
@@ -91,6 +95,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       expect(linkEnabled, 'LINK should enable for a not-yet-linked defect').toBe(true);
       await executionPage.confirmLink();                 // Expected 4: defect linked
       linkedDefectId = candidate!;
+      await captureScreenshot(page, "Steps 5-6: open the Bug panel (done) and link a not-yet-linked defect");
 
       // ─── Steps 7-8: the displayed count (badge) increased; panel corroborates ──
       // Linking auto-closes the panel (Step 7), returning to the steps grid where the badge shows.
@@ -101,6 +106,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await executionPage.verifyDefectLinked(linkedDefectId);
       expect(await executionPage.getLinkedDefectCount()).toBe(baselineCount + 1);
       await executionPage.closeDefectPanel();
+      await captureScreenshot(page, "Steps 7-8: the displayed count (badge) increased; panel corroborates");
 
       // ─── Steps 9-10: reopen the run and validate the count persists ────────────
       await executionPage.close();
@@ -116,6 +122,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromStep(STEP_INDEX, linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Steps 9-10: reopen the run and validate the count persists");
   });
 
 });

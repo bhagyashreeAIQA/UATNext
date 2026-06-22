@@ -21,6 +21,7 @@
 
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
 
@@ -29,17 +30,20 @@ test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
     // Expected: Defect page should be displayed
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
+    await captureScreenshot(page, "Step 1: Click on the Defect tab");
 
     // ─── Step 2: Select a Project ─────────────────────────────────────────────
     // Expected: Project-related data should be visible
     await defectTabPage.verifyProjectSelected();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Step 2: Select a Project");
 
     // ─── Step 3: Verify the Left Panel components ─────────────────────────────
     // Expected: Search, Clear, Projects, Summary/Defect ID, Affected Release, Status,
     //           Team, Severity, Priority, Assigned To, Business User, Created By,
     //           Submitted After and Submitted Before controls should all be present.
     await defectTabPage.verifyLeftPanelControls();
+    await captureScreenshot(page, "Step 3: Verify the Left Panel components");
   });
 
 });

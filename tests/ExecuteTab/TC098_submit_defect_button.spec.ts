@@ -34,6 +34,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -52,18 +53,22 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Step 3: validate the defect-creation entry point is present + enabled ───
     await executionPage.verifyDefectSectionVisible();
+    await captureScreenshot(page, "Step 3: validate the defect-creation entry point is present + enabled");
 
     // ─── Step 4: open the defect panel and trigger the Create Defect form ────────
     await executionPage.openLinkDefectPanel();
     await executionPage.verifyDefectPanelOpen();
     await executionPage.verifyNewDefectButtonVisible();
     await executionPage.clickNewDefect();
+    await captureScreenshot(page, "Step 4: open the defect panel and trigger the Create Defect form");
 
     // ─── Step 5: the Create Defect form should be displayed ──────────────────────
     await executionPage.verifyCreateDefectFormOpen();
+    await captureScreenshot(page, "Step 5: the Create Defect form should be displayed");
   });
 
 });

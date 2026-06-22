@@ -37,6 +37,7 @@ import { LoginPage }      from '../../pages/LoginPage';
 import { HomePage }       from '../../pages/HomePage';
 import { ExecuteTabPage } from '../../pages/ExecuteTab/ExecuteTabPage';
 import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Empty State', () => {
 
@@ -55,6 +56,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Empty State', () => {
     }
     await homePage.waitForPageLoad();
     await homePage.verifyHomePageLoaded();
+    await captureScreenshot(page, "Step 1 (follows TC-001): Login and verify Workspace auto-fill");
 
     // ─── Step 2: Navigate to the Execute Test Cases tab ──────────────────────────
     // Expected: Execute Test Cases page should open
@@ -74,6 +76,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Empty State', () => {
     await executeTabPage.verifyProjectUpdatedTo(selectedProject);
     await executeTabPage.waitForProjectSwitchComplete(workspaceBeforeSwitch);
     await executeTabPage.waitForReleasesLoad();
+    await captureScreenshot(page, "Step 2: Navigate to the Execute Test Cases tab");
 
     // ─── Step 3: Select a Release with no test runs ──────────────────────────────
     // Expected: Grid should refresh automatically
@@ -85,17 +88,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Empty State', () => {
     await executeTabPage.verifyReleaseExpanded();
     await executeTabPage.clickFirstTestCycle();
     await executeTabPage.waitForGridContainerReady();
+    await captureScreenshot(page, "Step 3: Select a Release with no test runs");
 
     // ─── Step 4: Validate the test run grid ──────────────────────────────────────
     // Expected: Grid should display the message "No matching results found"
 
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 4: Validate the test run grid");
 
     // ─── Step 5: Enter a search keyword that does not match any test run ──────────
     // Expected: Grid should continue to display "No matching results found"
 
     await executeTabPage.searchTestRun(EXPECTED.nonMatchingSearchId);
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 5: Enter a search keyword that does not match any test run");
   });
 
 });

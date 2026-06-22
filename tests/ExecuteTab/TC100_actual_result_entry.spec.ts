@@ -49,6 +49,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -70,15 +71,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
 
     // ─── Steps 3-6: enter Actual Result text for step 0 and blur ─────────────────
     await executionPage.verifyStepsGridVisible();
     await executionPage.enterActualResult(0, marker);
     await executionPage.verifyActualResultContains(0, marker); // visible before save
+    await captureScreenshot(page, "Steps 3-6: enter Actual Result text for step 0 and blur");
 
     // ─── Steps 7-8: Save and validate the confirmation message ───────────────────
     await executionPage.clickSave();
     await executionPage.verifySaveSuccessMessage(EXPECTED.saveSuccessMessage);
+    await captureScreenshot(page, "Steps 7-8: Save and validate the confirmation message");
 
     // ─── Steps 9-10: reopen the run and confirm the Actual Result persisted ──────
     await executionPage.close();
@@ -86,6 +90,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     await executionPage.verifyTestRunId(rowRunId);
     await executionPage.verifyActualResultContains(0, marker);
+    await captureScreenshot(page, "Steps 9-10: reopen the run and confirm the Actual Result persisted");
   });
 
 });

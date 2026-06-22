@@ -31,6 +31,7 @@ import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
@@ -45,10 +46,12 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the New Defect form");
 
     // ─── Step 4: enter valid values in all fields EXCEPT Team ──────────────────
     await createDefect.fillRequiredForSave({ summary, skip: ['team'] });
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.team)).toBe('');
+    await captureScreenshot(page, "Step 4: enter valid values in all fields EXCEPT Team");
 
     // ─── Step 5: Save → success even without a Team (Team optional) ────────────
     await createDefect.clickCreateSave();
@@ -57,6 +60,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     await defectTabPage.waitForResults();
     const newId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.verifyDefectVisible(newId);
+    await captureScreenshot(page, "Step 5: Save → success even without a Team (Team optional)");
   });
 
 });

@@ -26,6 +26,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -66,6 +67,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await expect(async () => {
         expect(await executionPage.getStepBugBadgeCount(STEP_INDEX)).toBe(baselineCount + 1);
       }).toPass({ timeout: 20000, intervals: [1000, 2000, 3000] });
+      await captureScreenshot(page, "Seed: link a not-yet-linked defect to the step (proven TC-084/085 path)");
 
       // ─── Validate: the "Defects Linked to Step" section lists the linked defect ──
       await executionPage.openStepDefectPanelFresh(STEP_INDEX);
@@ -77,6 +79,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromStep(STEP_INDEX, linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Validate: the \"Defects Linked to Step\" section lists the linked defect");
   });
 
 });

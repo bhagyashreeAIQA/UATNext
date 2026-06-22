@@ -33,6 +33,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -55,6 +56,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     expect(await executionPage.getDefectFieldValue('Priority')).toBe(EXPECTED.createDefect.defaultPriority);
 
     await executionPage.closeCreateDefectForm();         // discard — no defect created
+    await captureScreenshot(page, "Step 2 / Expected 2: Priority defaults to \"3 - Medium\"");
   });
 
 });

@@ -31,6 +31,7 @@ import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
@@ -42,12 +43,14 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the New Defect form on the (Team-optional) default BU");
 
     // ─── Step 4: observe the Team field ───────────────────────────────────────
     // Expected: Team has no "*"; the truly-mandatory field is still marked (sanity check that the
     // asterisk detection works, so a passing assertion is not a false negative).
     expect(await createDefect.isFieldMandatory('Team')).toBe(false);
     expect(await createDefect.isFieldMandatory(EXPECTED.createDefectPage.markedMandatoryField)).toBe(true);
+    await captureScreenshot(page, "Step 4: observe the Team field");
   });
 
 });

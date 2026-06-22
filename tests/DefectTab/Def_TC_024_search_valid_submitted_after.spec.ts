@@ -24,6 +24,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -32,17 +33,20 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter a valid Submitted After date ───────────────────────────
     // Expected: Selected date should be displayed in the field
     await defectTabPage.setSubmittedAfter(EXPECTED.defect.submittedAfterDate);
     await expect(defectTabPage.submittedAfterInput).toHaveValue(EXPECTED.defect.submittedAfterDate);
+    await captureScreenshot(page, "Step 3: Enter a valid Submitted After date");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────
     // Expected: Matching defects should be displayed in the right panel
     await defectTabPage.clickSearch();
     await defectTabPage.verifyDefectsLoaded();
     expect(await defectTabPage.getTotalEntries()).toBeGreaterThan(0);
+    await captureScreenshot(page, "Step 4: Click the Search button");
   });
 
 });

@@ -35,6 +35,7 @@ import path from 'path';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
 
@@ -51,6 +52,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, "Steps 1-3: open the Create Defect form");
 
     // ─── Step 4: enter valid data in the fields ───────────────────────────────
     // Expected: entered values are visible/retained in their fields.
@@ -58,11 +60,13 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     expect(await createDefect.getSummaryValue()).toBe(summary);
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.affectedRelease)).not.toBe('');
     expect(selected.reason, 'Reason value selected').toBeTruthy();
+    await captureScreenshot(page, "Step 4: enter valid data in the fields");
 
     // ─── Step 5: upload an attachment < 10 MB ─────────────────────────────────
     // Expected: attachment uploads successfully (file name listed in the drop zone).
     await createDefect.attachFile(SMALL_FILE);
     await createDefect.verifyAttachmentListed(path.basename(SMALL_FILE));
+    await captureScreenshot(page, "Step 5: upload an attachment < 10 MB");
 
     // ─── Step 6: Save ─────────────────────────────────────────────────────────
     // Expected: "Defect created successfully." then the new defect appears in the list.
@@ -72,6 +76,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     await defectTabPage.waitForResults();
     const newId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.verifyDefectVisible(newId);
+    await captureScreenshot(page, "Step 6: Save");
   });
 
 });

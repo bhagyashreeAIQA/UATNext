@@ -40,6 +40,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const STEP_INDEX = 0;
@@ -66,15 +67,18 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.enterActualResult(STEP_INDEX, marker);
     await executionPage.clickSave();
     await executionPage.verifySaveSuccessMessage(EXPECTED.saveSuccessMessage);
+    await captureScreenshot(page, "Step 1 (follows TC-100): enter + save an Actual Result");
 
     // ─── Steps 2-3: reopen the Test Run and go to Test Logs ──────────────────────
     await executionPage.close();
     await reopenTestRun(executeTabPage, executionPage, RUN_ROW_INDEX);
     await executionPage.verifyTestRunId(rowRunId);        // Expected 1
     await executionPage.verifyStepsGridVisible();
+    await captureScreenshot(page, "Steps 2-3: reopen the Test Run and go to Test Logs");
 
     // ─── Step 4 / Expected 2-3: the saved Actual Result persisted ────────────────
     await executionPage.verifyActualResultContains(STEP_INDEX, marker);
+    await captureScreenshot(page, "Step 4 / Expected 2-3: the saved Actual Result persisted");
   });
 
 });

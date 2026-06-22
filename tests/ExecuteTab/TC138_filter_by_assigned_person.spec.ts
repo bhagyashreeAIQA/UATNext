@@ -37,6 +37,7 @@ import {
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -57,10 +58,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     const options = await executeTabPage.getSelectUserOptions(assignee.split(/\s+/)[0]); // Expected 1
     expect(options.some(o => o.includes(assignee)), `options should include "${assignee}"`).toBe(true);
     const chosen = await executeTabPage.selectUserAndWaitForRefresh(assignee.split(/\s+/)[0], assignee); // Expected 2
+    await captureScreenshot(page, "Steps 1-4: select Others → search + pick that user");
 
     // ─── Steps 5-6 / Expected 3-4: grid shows only that user's runs; columns ok ──
     await executeTabPage.verifyAllRowsMatchUser(chosen);
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Steps 5-6 / Expected 3-4: grid shows only that user's runs; columns ok");
   });
 
 });

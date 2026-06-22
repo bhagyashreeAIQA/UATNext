@@ -42,6 +42,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -65,9 +66,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
     let linkedDefectId = '';
     try {
+    await captureScreenshot(page, "Steps 1-2 (follows TC-047): reach the grid and open a run");
+
       // ─── Step 3: open the run-level Link Defect panel ──────────────────────────
       await executionPage.openLinkDefectPanel();
       await executionPage.verifyDefectPanelOpen();        // Expected 3: search panel opens
+      await captureScreenshot(page, "Step 3: open the run-level Link Defect panel");
 
       // ─── Step 4: search a valid (not-yet-linked) Defect ID ─────────────────────
       const linkedBefore = await executionPage.getLinkedDefectIds();
@@ -76,17 +80,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
       await executionPage.searchDefect(candidate!);
       await executionPage.verifyDefectInSearchResults(candidate!); // Expected 4: match displayed
+      await captureScreenshot(page, "Step 4: search a valid (not-yet-linked) Defect ID");
 
       // ─── Step 5: select the match and click Link ───────────────────────────────
       const linkEnabled = await executionPage.selectSearchedDefect(candidate!);
       expect(linkEnabled, 'LINK should enable for a not-yet-linked defect').toBe(true);
       await executionPage.confirmLink();                  // Expected 5: defect linked
       linkedDefectId = candidate!;
+      await captureScreenshot(page, "Step 5: select the match and click Link");
 
       // ─── Step 6: the linked defect appears above the Link Defect button ────────
       await executionPage.openRunDefectPanelFresh();
       await executionPage.verifyDefectLinked(linkedDefectId); // Expected 6
       await executionPage.closeDefectPanel();
+      await captureScreenshot(page, "Step 6: the linked defect appears above the Link Defect button");
 
       // ─── Steps 7-8: reopen the run and confirm the link persisted ──────────────
       await executionPage.close();
@@ -101,6 +108,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromRun(linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Steps 7-8: reopen the run and confirm the link persisted");
   });
 
 });

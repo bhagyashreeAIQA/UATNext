@@ -33,6 +33,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 const SMALL_FILE = path.resolve(__dirname, '../fixtures/sample_small.pdf');
@@ -65,6 +66,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
       await executionPage.deleteAllAttachments().catch(() => undefined);
       await executionPage.clickSave().catch(() => undefined);
     }
+    await captureScreenshot(page, "Final state — TC-093 | Validate Success Message After Attaching a File to Test Run");
   });
 
 });

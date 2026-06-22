@@ -26,6 +26,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -61,6 +62,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
 
       await executionPage.openRunDefectPanelFresh();
       await executionPage.verifyDefectLinked(linkedDefectId);
+      await captureScreenshot(page, "Seed: link a not-yet-linked defect at the run level");
 
       // ─── Unlink → NO → the defect stays linked (cancellation) ────────────────────
       await executionPage.cancelUnlinkDefect(linkedDefectId);
@@ -71,6 +73,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
         await executionPage.cleanupUnlinkFromRun(linkedDefectId);
       }
     }
+      await captureScreenshot(page, "Unlink → NO → the defect stays linked (cancellation)");
   });
 
 });

@@ -29,6 +29,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
@@ -37,6 +38,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Enter an invalid Team value in the Team dropdown ──────────────
     // Expected: Entered value visible; dropdown shows "Please Select" + "No results found"
@@ -47,9 +49,11 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
       .poll(() => defectTabPage.getDropdownListText('Team'), { timeout: 10000 })
       .toContain(EXPECTED.defect.dropdownNoResultsText);
     expect(await defectTabPage.getDropdownListText('Team')).toContain('Please Select');
+    await captureScreenshot(page, "Step 3: Enter an invalid Team value in the Team dropdown");
 
     // ─── Step 4: No valid team is committed → no team filter is applied ────────
     expect(await defectTabPage.teamDropdown.inputValue()).toBe(EXPECTED.defect.invalidDropdownValue);
+    await captureScreenshot(page, "Step 4: No valid team is committed → no team filter is applied");
   });
 
 });

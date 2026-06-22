@@ -28,6 +28,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: View Defect', () => {
 
@@ -35,6 +36,7 @@ test.describe('Feature: Defect | Sub-Feature: View Defect', () => {
     // ─── Steps 1-2: Defect tab open, defects loaded ───────────────────────────
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
+    await captureScreenshot(page, "Steps 1-2: Defect tab open, defects loaded");
 
     // ─── Step 3: open the first defect's details ──────────────────────────────
     const defectId = await defectTabPage.getFirstDefectId();
@@ -53,6 +55,7 @@ test.describe('Feature: Defect | Sub-Feature: View Defect', () => {
     // Expected 3: existing defect data is shown (Summary + the mandatory Affected Release/Build).
     expect(await detailsPage.getSummaryValue()).not.toBe('');
     expect(await detailsPage.getDropdownValue(CreateDefectPage.PLACEHOLDER.affectedRelease)).not.toBe('');
+    await captureScreenshot(page, "Step 3: open the first defect's details");
   });
 
 });

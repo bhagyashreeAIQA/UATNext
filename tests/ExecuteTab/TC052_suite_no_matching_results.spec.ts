@@ -38,6 +38,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Empty State', () => {
 
@@ -47,17 +48,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Empty St
     // ─── Steps 1 & 2 (follows TC-001): login + Execute tab + workspace auto-fill ─
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await captureScreenshot(page, "Steps 1 & 2 (follows TC-001): login + Execute tab + workspace auto-fill");
 
     // ─── Step 3: Select a Release + cycle + nested cycle + Test Suite with no runs ─
     // Reached on the suite's default "Assigned to me" filter (no runs for this user).
     await reachTestSuiteGrid(executeTabPage, { viewAll: false });
+    await captureScreenshot(page, "Step 3: Select a Release + cycle + nested cycle + Test Suite with no runs");
 
     // ─── Step 4: Validate the test run grid ──────────────────────────────────────
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 4: Validate the test run grid");
 
     // ─── Step 5: Enter a non-matching search keyword ─────────────────────────────
     await executeTabPage.searchTestRun(EXPECTED.nonMatchingSearchId);
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, "Step 5: Enter a non-matching search keyword");
   });
 
 });

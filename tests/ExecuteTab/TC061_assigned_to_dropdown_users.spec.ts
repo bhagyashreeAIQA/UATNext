@@ -32,6 +32,7 @@ import {
   switchProjectAndLoadReleases,
   reachTestSuiteGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline Assigned To Edit', () => {
 
@@ -47,6 +48,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
     await executeTabPage.verifyAssignedToColumnVisible();
     await executeTabPage.openAssignedToEditor(0);
     await executeTabPage.verifyAssignedToEditorOpen(0); // field is editable
+    await captureScreenshot(page, "Step 1 (follows TC-060): reach a populated suite grid and open the editor");
 
     // ─── Steps 2-3: open the dropdown and validate the displayed users ───────────
     const options = await executeTabPage.getAssignedToOptions(0);
@@ -69,6 +71,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
 
     // Cancel so the change is not persisted (read-only state restored).
     await executeTabPage.cancelAssignedToEdit(0);
+    await captureScreenshot(page, "Steps 2-3: open the dropdown and validate the displayed users");
   });
 
 });

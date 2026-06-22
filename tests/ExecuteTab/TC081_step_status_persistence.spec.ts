@@ -33,6 +33,7 @@ import {
   reopenTestRun,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -57,19 +58,23 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.selectStepStatus(0, 'Passed');
     await executionPage.selectStepStatus(1, 'Failed');
     await executionPage.selectStepStatus(2, 'Blocked');
+    await captureScreenshot(page, "Step 1 (follows TC-080): open the run and update three step statuses");
 
     // ─── Step 2: Save ─────────────────────────────────────────────────────────────
     await executionPage.save();
+    await captureScreenshot(page, "Step 2: Save");
 
     // ─── Step 3: reopen the same test run ────────────────────────────────────────
     await executionPage.close();
     await reopenTestRun(executeTabPage, executionPage, RUN_ROW_INDEX);
     await executionPage.verifyTestRunId(rowRunId);
+    await captureScreenshot(page, "Step 3: reopen the same test run");
 
     // ─── Step 4: validate the previously updated step statuses persisted ─────────
     await executionPage.verifyStepStatusPersisted(0, 'Passed');
     await executionPage.verifyStepStatusPersisted(1, 'Failed');
     await executionPage.verifyStepStatusPersisted(2, 'Blocked');
+    await captureScreenshot(page, "Step 4: validate the previously updated step statuses persisted");
   });
 
 });

@@ -36,6 +36,7 @@ import {
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -52,16 +53,19 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     await executeTabPage.selectAssignedToBusinessUser();
     const chosen = await executeTabPage.selectUserAndWaitForRefresh(assignee.split(/\s+/)[0], assignee);
     await executeTabPage.verifyAllRowsMatchUser(chosen);
+    await captureScreenshot(page, "Step 1 (TC-138): filter by a real user who has runs");
 
     // ─── Steps 2-3 / Expected 1-2: status dropdown lists statuses; pick one ──────
     await executeTabPage.openStatusDropdown();
     await executeTabPage.verifyStatusOptions(EXPECTED.statusOptions);  // Expected 1
     const { status } = await executeTabPage.selectFirstNonEmptyStatus(EXPECTED.statusOptions); // Expected 2
+    await captureScreenshot(page, "Steps 2-3 / Expected 1-2: status dropdown lists statuses; pick one");
 
     // ─── Steps 4-6 / Expected 3-4: rows match BOTH user and status; columns ok ───
     await executeTabPage.verifyAllRowsMatchUser(chosen);
     await executeTabPage.verifyAllRowsHaveStatus(status);
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, "Steps 4-6 / Expected 3-4: rows match BOTH user and status; columns ok");
   });
 
 });
