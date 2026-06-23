@@ -285,21 +285,41 @@ export const EXPECTED = {
     saveSuccessMessage: /test log created successfully/i,
   },
 
-  // ── Coordinator → Bulk Execution (BE_TC_001) ─────────────────────────────────
+  // ── Coordinator → Bulk Execution (BE_TC_001 onward) ──────────────────────────
   // Bulk Execution renders its Release tree + Test Run grid on the UATNext Dev workspace (under the
-  // default qConnect BU the panel does not render). Values verified live 2026-06-19.
+  // default qConnect BU the panel does not render). Values verified live 2026-06-19 / 2026-06-22.
   bulkExecution: {
     // Workspace that exposes Bulk Execution releases with test runs.
     workspace: 'UATNext Dev',
     // Project pre-selected in the left-panel Projects dropdown for that workspace.
     expectedProject: 'Testdata_Module',
-    // A Release node that loads a populated Test Run grid when clicked.
+    // A Release node that loads a populated Test Run grid when clicked (also has version-mismatch rows).
     releaseWithRuns: 'Testdata_Release_P03',
-    // Test Run grid columns (left-to-right) shown after selecting a Release.
+    // A Release that expands to a Cycle tree (P02/P03 expand to empty — only P01 carries cycles).
+    releaseWithCycles: 'Testdata_Release_P01',
+    // A first-level Cycle (under releaseWithCycles) whose grid carries runs, version mismatches, all
+    // status values and at least one log-eligible row.
+    cycleWithRuns: 'Testdata_Cycle_1',
+    // A second-level Cycle (under cycleWithRuns) that expands to a Test Suite leaf node.
+    subCycleWithSuite: 'Sales Ops',
+    // A Test Suite leaf (under subCycleWithSuite) that loads a suite-scoped grid when clicked. Carries
+    // both matched and mismatched version rows (for suite-level colour-coding checks).
+    suiteWithRuns: 'Sales Ops',
+    // A SECOND sub-cycle + its Test Suite (sibling of subCycleWithSuite) with a different run set —
+    // used to verify switching between suites refreshes the grid (no stale data).
+    secondSubCycle: 'Dealer Services',
+    secondSuite: 'Dealer Services',
+    // Test Run grid columns (left-to-right) shown after selecting a Release/Cycle/Suite.
     gridColumns: [
       'Test Run ID', 'Test Case PID', 'Test Case Version', 'Name', 'Status',
       'Execution Date', 'Assign To', 'Business User',
     ],
+    // The build's valid Status values (the spec's "In Progress" renders as "InProgress" here).
+    statusValues: ['Unexecuted', 'Failed', 'Blocked', 'InProgress', 'Passed'],
+    // Version-cell text colours: mismatch is RED; a matching version uses the normal text token (a
+    // dark slate, the build's stand-in for "black") — not pure black. Used to assert colour coding.
+    versionMismatchColor: 'rgb(255, 65, 54)',
+    versionMatchColor: 'rgb(71, 84, 103)',
   },
 
   // ── DEFECT-tab Create / View-Modify Defect form (Def_TC_036 to Def_TC_051) ──

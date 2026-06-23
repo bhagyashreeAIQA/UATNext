@@ -234,7 +234,28 @@
       "Bash(git commit -q -m ' *)",
       "Bash(git push *)",
       "Bash(git ls-remote *)",
-      "Bash(git branch *)"
+      "Bash(git branch *)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 30; if \\($?\\) { \"TSC OK\" })",
+      "PowerShell(npx playwright test tests/Coordinator/BE_TC_004_subtab_switching.spec.ts --reporter=line 2>&1 | Select-Object -Last 40)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_005\" \"tests/Coordinator/BE_TC_006\" \"tests/Coordinator/BE_TC_007\" \"tests/Coordinator/BE_TC_008\" \"tests/Coordinator/BE_TC_011\" \"tests/Coordinator/BE_TC_012\" \"tests/Coordinator/BE_TC_013\" \"tests/Coordinator/BE_TC_016\" \"tests/Coordinator/BE_TC_019\" \"tests/Coordinator/BE_TC_020\" \"tests/Coordinator/BE_TC_021\" --reporter=line 2>&1 | Select-Object -Last 60)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_005\" \"tests/Coordinator/BE_TC_007\" \"tests/Coordinator/BE_TC_016\" \"tests/Coordinator/BE_TC_019\" --reporter=line 2>&1 | Select-Object -Last 45)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_005\" \"tests/Coordinator/BE_TC_006\" \"tests/Coordinator/BE_TC_007\" \"tests/Coordinator/BE_TC_008\" \"tests/Coordinator/BE_TC_011\" \"tests/Coordinator/BE_TC_012\" \"tests/Coordinator/BE_TC_013\" \"tests/Coordinator/BE_TC_016\" \"tests/Coordinator/BE_TC_019\" \"tests/Coordinator/BE_TC_020\" \"tests/Coordinator/BE_TC_021\" --reporter=line 2>&1 | Select-Object -Last 25)",
+      "Bash(node scripts/build-traceability-matrix.mjs)",
+      "Bash(awk -F'\",\"' '{print $1, $5}')",
+      "Bash(node -e \"const r=require\\('./test-logs/report-1782127809025.json'\\); console.log\\('keys:',Object.keys\\(r\\)\\); console.log\\('suites len:',r.suites.length\\); console.log\\('suite0 keys:',Object.keys\\(r.suites[0]\\)\\); console.log\\('suite0.file:',r.suites[0].file\\); console.log\\('suite0.specs len:',\\(r.suites[0].specs||[]\\).length\\); console.log\\('suite0.suites len:',\\(r.suites[0].suites||[]\\).length\\);\")",
+      "Bash(node -e ' *)",
+      "Bash(awk -F'\",\"' '{print $1, \"|\", $4}')",
+      "Bash(awk -F'\",\"' '{print $1}')",
+      "PowerShell(npx playwright test tests/Coordinator --reporter=line 2>&1 | Select-Object -Last 20)",
+      "Bash(rm -f .tmp-explore.js)",
+      "Bash(npx --no-install playwright-cli close)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_023\" \"tests/Coordinator/BE_TC_024\" \"tests/Coordinator/BE_TC_025\" --reporter=line 2>&1 | Select-Object -Last 25)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_025\" --reporter=line 2>&1 | Select-Object -Last 12)",
+      "PowerShell(Remove-Item *)",
+      "Bash(awk -F'\",\"' '{print $1\" | \"$5}')",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_026\" \"tests/Coordinator/BE_TC_027\" \"tests/Coordinator/BE_TC_028\" \"tests/Coordinator/BE_TC_029\" \"tests/Coordinator/BE_TC_030\" \"tests/Coordinator/BE_TC_032\" \"tests/Coordinator/BE_TC_033\" \"tests/Coordinator/BE_TC_034\" \"tests/Coordinator/BE_TC_035\" --reporter=line 2>&1 | Select-Object -Last 40)",
+      "PowerShell(npx playwright test \"tests/Coordinator/BE_TC_027\" \"tests/Coordinator/BE_TC_028\" \"tests/Coordinator/BE_TC_029\" \"tests/Coordinator/BE_TC_034\" \"tests/Coordinator/BE_TC_035\" --reporter=line 2>&1 | Select-Object -Last 30)",
+      "Bash(awk -F'\",\"' '{print $1\" | \"$5\" | skip=\"$6}')"
     ]
   }
 }
