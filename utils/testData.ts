@@ -283,6 +283,30 @@ export const EXPECTED = {
     generateEnabledColor: 'rgb(255, 183, 0)',
     // Toast shown after a successful New Log SAVE.
     saveSuccessMessage: /test log created successfully/i,
+    // A Test Case with a NEVER-executed Test Run (GTL_TC_010): generating its log shows a BLANK Last
+    // Log (0 step rows) while the New Log is fully populated with all steps defaulting to Unexecuted.
+    // TC-26300 lives in the UATNext Dev workspace (NOT the default qConnect BU), version 2.0; its run
+    // TR-1680 has no previous execution (verified live 2026-06-24). TR-1555/1683 by contrast carry a
+    // Last Log.
+    neverExecuted: {
+      workspace: 'UATNext Dev',
+      pid: 'TC-26300',
+      version: '2.0',
+      run: 'TR-1680',
+    },
+    // GTL_TC_013 — Business-Unit-scoped search. The SAME Test Case PID resolves to a DIFFERENT,
+    // BU-local test case depending on the active Business Unit, proving search is scoped to the
+    // current BU (another BU's version and runs are unreachable). Verified live 2026-06-25:
+    //  - qConnect - Sample Project: TC-3019 → version 3.0, runs TR-2237/2253/2269/2285.
+    //  - UATNext Dev:               TC-3019 → version 1.0, NO runs (GENERATE stays disabled).
+    crossBu: {
+      pid: 'TC-3019',
+      homeWorkspace: 'qConnect - Sample Project',
+      homeVersion: '3.0',
+      homeRun: 'TR-2237',
+      otherWorkspace: 'UATNext Dev',
+      otherVersion: '1.0',
+    },
   },
 
   // ── Coordinator → Bulk Execution (BE_TC_001 onward) ──────────────────────────

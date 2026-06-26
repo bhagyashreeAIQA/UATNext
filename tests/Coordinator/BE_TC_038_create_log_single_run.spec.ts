@@ -21,11 +21,16 @@
  *   its checkbox becomes disabled (no longer selectable).
  *
  * BUILD NOTE — fixme: in this environment CREATE LOG does NOT successfully generate a log. With a valid
- *   eligible + no-mismatch run selected, clicking CREATE LOG raises the toast
- *   "Error: Log creation failed for all selected test runs." (and the row stays blank/eligible — no
- *   log is created). The successful-creation outcome this case asserts therefore cannot be verified
- *   here, so it is marked test.fixme. The body encodes the intended flow for when the backend supports
- *   bulk log creation. Verified live 2026-06-23 (error toast class `.notification`).
+ *   eligible + no-mismatch run selected (TR-1396 on Testdata_Module → P01 → Cycle_1), clicking CREATE
+ *   LOG raises the toast "Error: Log creation failed for all selected test runs." and the row stays
+ *   blank/eligible/checked — no log is created. The successful-creation outcome this case asserts
+ *   therefore cannot be verified here, so it is marked test.fixme. The body encodes the intended flow
+ *   for when the backend supports bulk log creation. Re-verified live 2026-06-24 (error toast class
+ *   `.notification`; row unchanged afterwards).
+ *
+ * ENV NOTE: the UATNext Dev workspace now defaults its Bulk Execution Projects dropdown to
+ *   "SET Dealer CRM" (which carries no cycle tree); the runs live under the "Testdata_Module" project,
+ *   so the body selects that project before opening the cycle grid.
  *
  * Post-condition: this case (when enabled) MUTATES data — it creates a test log for the selected run.
  */
@@ -37,12 +42,15 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
-  test('BE_TC_038 | Verify CREATE LOG Generates a Log for a Single Eligible Run with No Version Mismatch', async ({ page }) => {
+  test.fixme('BE_TC_038 | Verify CREATE LOG Generates a Log for a Single Eligible Run with No Version Mismatch', async ({ page }) => {
     test.slow();
     const data = EXPECTED.bulkExecution;
     const { bulkExecutionPage: be } = await loginAndOpenBulkExecution(page, data.workspace);
 
     await be.openBulkExecution();
+    // UATNext Dev now defaults to the "SET Dealer CRM" project (no cycles); the test runs live under
+    // Testdata_Module, so select it before opening the cycle grid.
+    await be.selectProject(data.expectedProject);
     await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns);
 
     // ─── Step 1: find a run with a BLANK Execution Date (+ no version mismatch) and
@@ -51,7 +59,7 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     const colors = await be.getVersionCellColors();
     // A blank Execution Date is exactly what makes a row eligible (enabled checkbox).
     const idx = rows.findIndex((r, i) => r.date === '' && r.eligible && colors[i] === data.versionMatchColor);
-    //test.skip(idx === -1, 'No blank-Execution-Date + no-mismatch run on this grid page.');
+    expect(idx, 'expected an eligible (blank-date) no-mismatch run on this grid page').toBeGreaterThanOrEqual(0);
     const target = rows[idx].runId;
     await be.selectRowByRunId(target);
     await expect(be.rowByRunId(target).locator('.gtl-checkbox-cell input')).toBeChecked();

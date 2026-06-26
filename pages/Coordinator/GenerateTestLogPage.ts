@@ -81,6 +81,24 @@ export class GenerateTestLogPage {
     await expect(this.generateButton).toBeVisible();
   }
 
+  /**
+   * Ensures the Generate Test Log sub-tab (not Bulk Execution) is active and its Test Case search
+   * panel is rendered. Under some Business Units the COORDINATOR screen lands on the Bulk Execution
+   * sub-tab — which has no Test Case search field — so click back to Generate Test Log if the search
+   * field is absent. Polled because the screen can briefly show one sub-tab before settling on the
+   * remembered one.
+   */
+  async ensureGenerateTestLogSubTab(): Promise<void> {
+    await this.page.waitForURL(/\/generate-test-log/);
+    await expect(async () => {
+      if (!(await this.testCaseInput.isVisible().catch(() => false))) {
+        await this.generateTestLogSubTab.click({ timeout: 5000 }).catch(() => undefined);
+      }
+      await expect(this.testCaseInput).toBeVisible({ timeout: 5000 });
+      await expect(this.generateButton).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 30000, intervals: [1000, 2000, 3000] });
+  }
+
   // ─── Left-panel state getters ─────────────────────────────────────────────────
 
   async getTestCaseValue(): Promise<string> { return (await this.testCaseInput.inputValue()).trim(); }
@@ -170,6 +188,21 @@ export class GenerateTestLogPage {
     return (await this.testRunsList().allInnerTexts()).map(t => t.trim()).filter(Boolean);
   }
 
+  /**
+   * Test Run options, or `[]` when the dropdown has no items. Unlike `getTestRunOptions`, this does
+   * not throw when the current Business Unit's copy of the test case carries no runs (used by
+   * GTL_TC_013 to assert another BU's runs are unreachable).
+   */
+  async getTestRunOptionsSafe(): Promise<string[]> {
+    try {
+      await this.testRunsInput.click();
+      await expect(this.testRunsList().first()).toBeVisible({ timeout: 8000 });
+      return (await this.testRunsList().allInnerTexts()).map(t => t.trim()).filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+
   async selectTestRun(run: string): Promise<void> {
     await this.openTestRunsDropdown();
     await this.testRunsList().filter({ hasText: run }).first().click();
@@ -190,7 +223,10 @@ export class GenerateTestLogPage {
 
   async clickGenerate(): Promise<void> {
     await this.generateButton.click();
-    await expect(this.logsFrame).toBeVisible({ timeout: 30000 });
+    // Wait for the New Log grid rather than the `.test-logs-frame` wrapper: when the selected run has
+    // never been executed the Last Log's frame renders empty/hidden and `.first()` resolves to it, but
+    // the New Log is always populated after a generate.
+    await expect(this.newLogTable.first()).toBeVisible({ timeout: 30000 });
   }
 
   async clickClear(): Promise<void> {

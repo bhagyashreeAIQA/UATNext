@@ -26,6 +26,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -35,13 +36,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test.fixme('TC-097 | Validate Opening Attachments in Defect Details', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the test suite grid ───────────────────────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
-    await executeTabPage.clickRunButton(RUN_ROW_INDEX);
+    await captureScreenshot(page, 'Step 1: Test suite grid reached');
 
+    // ─── Step 2: open a run / its execution details ──────────────────────────────────
+    await executeTabPage.clickRunButton(RUN_ROW_INDEX);
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, 'Step 2: Test run execution details open');
 
     // TODO (needs a linked defect with an attachment): open the Defect Details, go to the
     // Attachment section, click an attachment, and assert it opens successfully.

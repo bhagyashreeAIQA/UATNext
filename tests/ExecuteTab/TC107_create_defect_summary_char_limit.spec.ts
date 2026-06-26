@@ -38,6 +38,7 @@ import {
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -47,22 +48,27 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test.fixme('TC-107 | Validate Summary Character Limit in Create Defect Screen', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the suite grid and open a Test Run ────────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
     await executeTabPage.clickRunButton(RUN_ROW_INDEX);
 
+    // ─── Step 1 / Expected 1: open the Create Defect form ────────────────────────────
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.openCreateDefectForm();          // Expected 1: form opens
+    await captureScreenshot(page, 'Step 1: Create Defect form open');
 
     // ─── Step 2: attempt to enter more than 255 characters ───────────────────────
     const max = EXPECTED.createDefect.summaryMaxLength;
     await executionPage.typeSummary('A'.repeat(max + 45));
+    await captureScreenshot(page, 'Step 2: Entered more than 255 characters in Summary');
 
     // ─── Expected 2-3: input restricted to the 255-character maximum ─────────────
     expect((await executionPage.getSummaryValue()).length).toBe(max);
+    await captureScreenshot(page, 'Expected: Summary capped at 255 characters');
 
     await executionPage.closeCreateDefectForm();
   });

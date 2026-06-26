@@ -33,6 +33,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -42,14 +43,21 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test.fixme('TC-094 | Validate Navigation to Defect Details by Clicking a Linked Defect', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the test suite grid ───────────────────────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
-    await executeTabPage.clickRunButton(RUN_ROW_INDEX);
+    await captureScreenshot(page, 'Step 1: Test suite grid reached');
 
+    // ─── Step 2: open a run with a linked defect ─────────────────────────────────────
+    await executeTabPage.clickRunButton(RUN_ROW_INDEX);
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
+    await captureScreenshot(page, 'Step 2: Test run execution details open');
+
+    // ─── Step 3: the linked-defect section is visible ────────────────────────────────
     await executionPage.verifyDefectSectionVisible();
+    await captureScreenshot(page, 'Step 3: Linked-defect section visible');
 
     // Seed a linked defect (works), then click it — but the build navigates home instead of
     // opening a Defect Details page, so there is nothing to validate. See header note.

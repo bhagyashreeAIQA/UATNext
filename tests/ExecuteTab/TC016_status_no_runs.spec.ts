@@ -44,6 +44,14 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Status Filter – Empty
     // ─── Step 1 & 2 (follows TC-006): reach a populated grid under View All ──────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+
+    // Select the "Testdata_Module" project from the sidebar Projects dropdown. Switching the
+    // header to "UATNext Dev" (done above) exposes two sidebar projects — "SET Dealer CRM"
+    // (the default) and "Testdata_Module"; pick the latter and wait for its release tree.
+    await executeTabPage.openWorkspaceDropdown();
+    await executeTabPage.selectWorkspaceOption('Testdata_Module');
+    await executeTabPage.waitForReleasesLoad();
+
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
     await captureScreenshot(page, "Step 1 & 2 (follows TC-006): reach a populated grid under View All");

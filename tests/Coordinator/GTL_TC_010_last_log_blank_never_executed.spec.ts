@@ -14,33 +14,52 @@
  *   3. Select that run; click GENERATE TEST LOG.
  *   4-6. Validate the Last Log is blank and the New Log shows all steps as Unexecuted.
  *
- * BLOCKED (test.fixme): this needs a Test Run that has never been executed. The available seeded
- *   runs all carry a previous execution (a non-empty Last Log), and creating a guaranteed-virgin run
- *   under this account is not reliably possible. Enable once a never-executed run is provisioned and
- *   set it in testData (e.g. generateTestLog.neverExecutedRun); the body then asserts the Last Log
- *   step rows / statuses are empty while the New Log is fully populated with Unexecuted steps.
+ * DATA NOTE: the never-executed run is TC-26300 → TR-1680, which lives in the "UATNext Dev" workspace
+ *   (NOT the default qConnect BU), version 2.0 — verified live 2026-06-24: generating its log shows a
+ *   blank Last Log (0 step rows) while the New Log carries all steps defaulting to Unexecuted.
+ *   `EXPECTED.generateTestLog.neverExecuted` holds the workspace / pid / version / run.
+ *
+ * Post-condition: no data is mutated (the log is generated for inspection only, not saved).
  */
 
 import { test, expect } from '@playwright/test';
-import { loginAndOpenGenerateTestLog, searchSelectAndGenerate } from './coordinatorNavHelpers';
+import { loginAndOpenGenerateTestLog } from './coordinatorNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Coordinator | Sub-Feature: Generate Test Log', () => {
 
-  test.fixme('GTL_TC_010 | Verify Last Log Section is Blank When No Previous Execution Exists', async ({ page }) => {
-    const { generateTestLogPage: gtl } = await loginAndOpenGenerateTestLog(page);
+  test('GTL_TC_010 | Verify Last Log Section is Blank When No Previous Execution Exists', async ({ page }) => {
+    test.slow(); // workspace switch + permission nav + slow search exceed the 30s default
     const data = EXPECTED.generateTestLog;
+    const nx = data.neverExecuted;
+    // ─── Step 1: open the Generate Test Log screen (on the UATNext Dev workspace) ─────
+    const { generateTestLogPage: gtl } = await loginAndOpenGenerateTestLog(page, nx.workspace);
+    await captureScreenshot(page, 'Step 1: Generate Test Log screen open (UATNext Dev)');
 
-    // TODO: replace with a Test Case + never-executed run once such data exists.
-    await searchSelectAndGenerate(gtl, data.validTestCasePid, data.validTestRun);
+    // ─── Step 2: search the test case and confirm its version populates ───────────────
+    await gtl.searchValidTestCase(nx.pid);
+    expect(await gtl.getVersionValue()).toBe(nx.version);
+    await captureScreenshot(page, 'Step 2: Test case searched, version populated');
 
-    // Last Log present but with no execution data.
+    // ─── Step 3: select the never-executed run and generate the log ───────────────────
+    await gtl.selectTestRun(nx.run);
+    await gtl.clickGenerate();
+    // The New Log steps stream in after the grid mounts — wait for them before asserting, so the
+    // generate is fully rendered when we check the (blank) Last Log.
+    await expect.poll(() => gtl.getStepStatusValues('new').then(v => v.length), { timeout: 20000 })
+      .toBeGreaterThan(0);
+    await captureScreenshot(page, 'Step 3: Never-executed run selected and log generated');
+
+    // ─── Step 4: Last Log blank — no previous execution, so no step rows ──────────────
     expect(await gtl.getStepCount('last')).toBe(0);
+    await captureScreenshot(page, 'Step 4: Last Log blank (no previous execution)');
 
-    // New Log fully populated, all Unexecuted.
+    // ─── Steps 5-6: New Log fully populated, every step defaulting to Unexecuted ──────
     const newStatuses = await gtl.getStepStatusValues('new');
     expect(newStatuses.length).toBeGreaterThan(0);
     expect(newStatuses.every(s => s === data.defaultStatus)).toBe(true);
+    await captureScreenshot(page, 'Step 5-6: New Log fully populated, all steps Unexecuted');
   });
 
 });

@@ -42,6 +42,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -51,22 +52,27 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test.fixme('TC-102 | Validate Called Test Case Steps Are Indicated Correctly', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Steps 1-2: reach the suite grid and open a Test Run ─────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, 'Step 1-2: Test suite grid reached');
     await executeTabPage.clickRunButton(RUN_ROW_INDEX);
 
+    // ─── Step 3 / Expected 1: Test Execution Details page opens with steps ────────────
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();         // Expected 1
     await executionPage.verifyStepsGridVisible();
     await executionPage.verifyStepsLoaded();
+    await captureScreenshot(page, 'Step 3: Execution details open with steps loaded');
 
     // ─── Steps 4-5 / Expected 2-3: at least one step shows the called indicator and
     //     normal steps do not (clear differentiation) ──────────────────────────────
     const calledSteps = await executionPage.getCalledStepIndices();
     expect(calledSteps.length).toBeGreaterThan(0);       // Expected 2
     expect(calledSteps.length).toBeLessThan(await executionPage.getStepRowCount()); // Expected 3
+    await captureScreenshot(page, 'Step 4-5: Called-step indicator differentiates called from normal steps');
   });
 
 });

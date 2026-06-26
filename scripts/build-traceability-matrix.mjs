@@ -1,11 +1,13 @@
-// Builds a traceability matrix CSV: every spec (manual TC ID → automation spec) joined with the most
-// recent recorded run status from the JSON reports in test-logs/. Tests with no recorded run are
-// "Not Run". A separate Skipped flag marks tests whose last run was skipped (e.g. runtime test.skip).
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+// Updates the traceability matrix CSV: every spec (manual TC ID → automation spec) joined with its
+// most recent recorded Execution Status from the JSON reports in test-logs/. Tests with no recorded
+// run are "Not Run". Manual review columns (Review Status, Reviewer Name) are PRESERVED across runs by
+// Manual Test Case ID, so regenerating never wipes hand-entered review data.
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { globSync } from 'node:fs';
 
 const repo = process.cwd();
+const OUTPUT = 'docs/UATNext_traceability-matrix.csv';
 
 // ── 1. Inventory: all spec files with their docblock manual ID + name ──────────
 const specFiles = globSync('tests/**/*.spec.ts', { cwd: repo })
@@ -28,7 +30,7 @@ const inventory = specFiles.map(file => {
   };
 });
 
-// ── 2. Parse reports → latest status per spec file (by report timestamp) ───────
+// ── 2. Parse reports → latest Execution Status per spec file (by report mtime) ──
 const outcomeToStatus = { expected: 'Passed', unexpected: 'Failed', flaky: 'Flaky', skipped: 'Skipped' };
 
 function collectSpecs(suite, file, acc) {
@@ -36,16 +38,17 @@ function collectSpecs(suite, file, acc) {
   for (const sp of suite.specs || []) {
     const t = (sp.tests && sp.tests[0]) || {};
     const status = outcomeToStatus[t.status] || (sp.ok ? 'Passed' : 'Failed');
-    acc.push({ file: (sp.file || f).replace(/\\/g, '/'), title: sp.title, status });
+    acc.push({ file: (sp.file || f).replace(/\\/g, '/'), status });
   }
   for (const child of suite.suites || []) collectSpecs(child, f, acc);
 }
 
-// Recency is keyed by the report file's MODIFICATION TIME, not the filename. The project's reporter
-// names files `report-${Date.now()}.json`, but Date.now() collides in this environment so the numeric
-// suffix is unreliable; the file mtime reflects which run actually wrote last.
+// Recency is keyed by report file MODIFICATION TIME, not the filename: the project's reporter names
+// files `report-${Date.now()}.json`, but Date.now() collides in this environment so the numeric suffix
+// is unreliable; the mtime reflects which run actually wrote last.
 const latest = new Map(); // basename -> { status, ts }
-const reports = readdirSync(join(repo, 'test-logs')).filter(f => f.endsWith('.json'));
+const reports = existsSync(join(repo, 'test-logs'))
+  ? readdirSync(join(repo, 'test-logs')).filter(f => f.endsWith('.json')) : [];
 for (const r of reports) {
   const full = join(repo, 'test-logs', r);
   let json;
@@ -60,21 +63,45 @@ for (const r of reports) {
   }
 }
 
-const fmtDate = ms => Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 19).replace('T', ' ') : '';
+// ── 3. Preserve existing manual review columns (Review Status, Reviewer Name) ───
+const parseCsvLine = (line) => {
+  const out = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else cur += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ',') { out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out;
+};
 
-// ── 3. Join + emit CSV ─────────────────────────────────────────────────────────
-const csvCell = s => `"${String(s).replace(/"/g, '""')}"`;
-const rows = [['Manual Test Case ID', 'Automation Spec File', 'Module', 'Test Name', 'Last Run Status', 'Skipped', 'Last Run (UTC)']];
+const review = new Map(); // manualId -> { reviewStatus, reviewerName }
+if (existsSync(join(repo, OUTPUT))) {
+  const lines = readFileSync(join(repo, OUTPUT), 'utf8').split(/\r?\n/).filter(Boolean);
+  for (const line of lines.slice(1)) {
+    const c = parseCsvLine(line);
+    if (c[0] && (c[5] || c[6])) review.set(c[0].trim(), { reviewStatus: c[5] ?? '', reviewerName: c[6] ?? '' });
+  }
+}
+
+// ── 4. Emit CSV ────────────────────────────────────────────────────────────────
+const csvCell = s => `"${String(s ?? '').replace(/"/g, '""')}"`;
+const header = ['Manual Test Case ID', 'Automation Spec File', 'Module', 'Test Name', 'Execution Status', 'Review Status', 'Reviewer Name'];
+const rows = [header.map(csvCell).join(',')];
 const counts = {};
 for (const it of inventory) {
   const run = latest.get(basename(it.file));
   const status = run ? run.status : 'Not Run';
-  const skipped = status === 'Skipped' ? 'YES' : '';
+  const rv = review.get(it.manualId) ?? { reviewStatus: '', reviewerName: '' };
   counts[status] = (counts[status] || 0) + 1;
-  rows.push([it.manualId, it.file, it.module, it.name, status, skipped, run ? fmtDate(run.ts) : '']
-    .map(csvCell).join(','));
+  rows.push([it.manualId, it.file, it.module, it.name, status, rv.reviewStatus, rv.reviewerName].map(csvCell).join(','));
 }
 
-writeFileSync(join(repo, 'docs/traceability-matrix.csv'), rows.map(r => Array.isArray(r) ? r.map(csvCell).join(',') : r).join('\n') + '\n');
-console.log(`Wrote docs/traceability-matrix.csv (${inventory.length} tests)`);
-console.log('Status breakdown:', counts);
+writeFileSync(join(repo, OUTPUT), rows.join('\n') + '\n');
+console.log(`Wrote ${OUTPUT} (${inventory.length} tests)`);
+console.log('Execution Status breakdown:', counts);

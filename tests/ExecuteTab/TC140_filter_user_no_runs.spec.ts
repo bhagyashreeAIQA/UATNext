@@ -37,6 +37,7 @@ import {
   switchProjectAndLoadReleases,
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const NO_RUN_USER = 'Bhagyashree';   // replace with a seeded user who has no runs in the cycle
 
@@ -46,10 +47,12 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
   test.fixme('TC-140 | Verify "No Matching Results Found" for User Without Test Runs', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the first-layer cycle grid (View All) ─────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, 'Step 1: First-layer cycle grid (View All)');
 
     // ─── Steps 1-2 / Expected 1: select Others → pick a user with no runs ────────
     await executeTabPage.selectAssignedToBusinessUser();
@@ -57,9 +60,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     const chosen = options.find(o => o.includes(NO_RUN_USER)) ?? options[0];
     expect(chosen, `Select User should list a "${NO_RUN_USER}" user with no runs`).toBeTruthy();
     await executeTabPage.selectUserAndWaitForRefresh(NO_RUN_USER, chosen);
+    await captureScreenshot(page, 'Step 2: User with no runs selected');
 
     // ─── Step 3 / Expected 2: the grid shows "No Matching Results Found" ─────────
     await executeTabPage.verifyNoResultsMessageVisible();
+    await captureScreenshot(page, 'Step 3: "No Matching Results Found" shown');
   });
 
 });

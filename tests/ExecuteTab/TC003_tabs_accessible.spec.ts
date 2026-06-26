@@ -79,7 +79,9 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
 
     await homePage.navigateToDefectTab();
     await defectTabPage.waitForPageLoad();
-    await defectTabPage.verifyDefectPageFullyLoaded();
+    await defectTabPage.verifyDefectPageDisplayed();
+    await defectTabPage.verifyDefectsLoaded();
+    await defectTabPage.verifyLeftPanelControls();
     await captureScreenshot(page, "Step 5 & 6: Navigate to Defect tab and validate");
   });
 

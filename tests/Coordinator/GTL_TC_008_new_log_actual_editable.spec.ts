@@ -29,6 +29,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenGenerateTestLog, searchSelectAndGenerate } from './coordinatorNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Coordinator | Sub-Feature: Generate Test Log', () => {
 
@@ -37,19 +38,24 @@ test.describe('Feature: Coordinator | Sub-Feature: Generate Test Log', () => {
     const { generateTestLogPage: gtl } = await loginAndOpenGenerateTestLog(page);
     const data = EXPECTED.generateTestLog;
 
+    // ─── Step 1: generate the log (Last Log + New Log shown) ─────────────────────────
     await searchSelectAndGenerate(gtl, data.validTestCasePid, data.validTestRun);
+    await captureScreenshot(page, 'Step 1: Log generated (Last Log + New Log shown)');
 
-    // Expected 1: cell becomes editable (TinyMCE mounts) and the placeholder clears.
+    // ─── Step 2 / Expected 1: the Actual Result cell becomes editable, placeholder clears ─
     const cell = gtl.actualResultCells('new').first();
     await cell.locator('.testcase-prototype').click();
     await expect(cell.frameLocator('iframe.tox-edit-area__iframe').locator('body')).toBeVisible({ timeout: 10000 });
+    await captureScreenshot(page, 'Step 2: Actual Result cell editable (placeholder cleared)');
 
     // Entering + persisting text — flaky TinyMCE↔Blazor sync (see header); enable once automatable.
     await gtl.enterNewLogActualResult(0, `Actual result ${Date.now()}`);
+    await captureScreenshot(page, 'Step 2: Actual result text entered');
 
-    // Expected 2: read-only columns are not editable inputs.
+    // ─── Step 3 / Expected 2: read-only columns are not editable inputs ───────────────
     const firstRowExpected = gtl.newLogTable.locator('.table-row-cell.expected-result').first();
     expect(await firstRowExpected.locator('input, textarea, [contenteditable="true"]').count()).toBe(0);
+    await captureScreenshot(page, 'Step 3: Read-only columns remain non-editable');
   });
 
 });

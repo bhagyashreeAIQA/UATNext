@@ -32,29 +32,36 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module', () => {
 
   test.fixme('Def_TC_049 | Verify User Can Change Auto-Selected Module', async ({ page }) => {
     const MODULE = CreateDefectPage.PLACEHOLDER.module;
 
+    // ─── Steps 1-2: (project with default module) → Defect tab loaded ────────────────
     // TODO: select a project configured with a default module before opening the Defect tab.
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
-    await defectTabPage.openCreateDefectForm();
+    await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
+    // ─── Step 3: open the New Defect form ────────────────────────────────────────────
+    await defectTabPage.openCreateDefectForm();
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, 'Step 3: New Defect form open');
 
-    // Expected 1: a default module is shown.
+    // ─── Step 4 / Expected 1: a default module is shown ───────────────────────────────
     const initial = await createDefect.getDropdownValue(MODULE);
     expect(initial).not.toBe('');
+    await captureScreenshot(page, 'Step 4: Default module shown');
 
-    // Expected 2-3: change it to a different option, which is then displayed.
+    // ─── Step 5 / Expected 2-3: change it to a different option, which is displayed ────
     const changed = await createDefect.selectFirstAvailable(MODULE);
     expect(changed).not.toBe('');
     expect(changed).not.toBe(initial);
     expect(await createDefect.getDropdownValue(MODULE)).toBe(changed);
+    await captureScreenshot(page, 'Step 5: Module changed to a different option');
   });
 
 });

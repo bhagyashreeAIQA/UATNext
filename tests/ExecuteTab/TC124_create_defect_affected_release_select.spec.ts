@@ -29,6 +29,7 @@ import {
   reachTestSuiteGrid,
 } from './executeNavHelpers';
 import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 const RUN_ROW_INDEX = 0;
 
@@ -38,14 +39,17 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test.fixme('TC-124 | Verify Affected Release/Build Field Value Selection', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the suite grid and open a Test Run ────────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.clickRunButton(RUN_ROW_INDEX);
 
+    // ─── Step 1: open the Create Defect form ─────────────────────────────────────────
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
     await executionPage.openCreateDefectForm();
+    await captureScreenshot(page, 'Step 1: Create Defect form open');
 
     // Affected Release/Build has no dropdown to open/select — display-only (see header note).
   });

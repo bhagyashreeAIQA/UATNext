@@ -31,25 +31,32 @@
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
   test.fixme('Def_TC_044 | Verify Validation When Team is Mandatory but Not Selected', async ({ page }) => {
+    // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
     // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
-    await defectTabPage.openCreateDefectForm();
+    await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
+    // ─── Step 3: open the New Defect form ────────────────────────────────────────────
+    await defectTabPage.openCreateDefectForm();
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, 'Step 3: New Defect form open');
 
-    // Fill all mandatory fields except Team, then attempt to save.
+    // ─── Step 4: fill all mandatory fields EXCEPT Team ───────────────────────────────
     await createDefect.fillRequiredForSave({ summary: `Def_TC_044 ${Date.now()}`, skip: ['team'] });
-    await createDefect.clickCreateSave();
+    await captureScreenshot(page, 'Step 4: Required fields filled, Team left blank');
 
-    // Expected: not saved + validation toast.
+    // ─── Step 5 / Expected: save blocked with a validation toast, still on the form ───
+    await createDefect.clickCreateSave();
     await createDefect.verifyValidationToast();
     await createDefect.verifyStillOnCreateForm();
+    await captureScreenshot(page, 'Step 5: Save blocked — validation toast shown');
   });
 
 });

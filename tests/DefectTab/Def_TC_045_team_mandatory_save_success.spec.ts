@@ -31,6 +31,7 @@ import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
@@ -38,24 +39,32 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     test.setTimeout(480000);
     const summary = `Automated defect Def_TC_045 ${Date.now()}`;
 
+    // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
     // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
-    await defectTabPage.openCreateDefectForm();
+    await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
+    // ─── Step 3: open the New Defect form ────────────────────────────────────────────
+    await defectTabPage.openCreateDefectForm();
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, 'Step 3: New Defect form open');
 
-    // Enter valid values in ALL required fields including Team.
+    // ─── Step 4: enter valid values in ALL required fields including Team ─────────────
     await createDefect.fillRequiredForSave({ summary });
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.team)).not.toBe('');
+    await captureScreenshot(page, 'Step 4: Required fields filled, Team selected');
 
+    // ─── Step 5 / Expected: defect saved successfully and appears in the list ─────────
     await createDefect.clickCreateSave();
     await expect(createDefect.toast(EXPECTED.createDefectPage.createdSuccessMessage)).toBeVisible({ timeout: 20000 });
+    await captureScreenshot(page, 'Step 5: Defect saved — success toast');
 
     await defectTabPage.waitForResults();
     const newId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.verifyDefectVisible(newId);
+    await captureScreenshot(page, 'Step 5: New defect visible in the list');
   });
 
 });

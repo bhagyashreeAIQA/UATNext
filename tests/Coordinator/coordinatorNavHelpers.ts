@@ -24,7 +24,12 @@ export interface CoordinatorContext {
   generateTestLogPage: GenerateTestLogPage;
 }
 
-export async function loginAndOpenGenerateTestLog(page: Page): Promise<CoordinatorContext> {
+/**
+ * @param workspace When given, switches the header workspace before opening the COORDINATOR tab.
+ *   Most GTL data lives on the default qConnect BU (omit it), but some test cases (e.g. TC-26300 used
+ *   by GTL_TC_010) only exist under "UATNext Dev".
+ */
+export async function loginAndOpenGenerateTestLog(page: Page, workspace?: string): Promise<CoordinatorContext> {
   const loginPage = new LoginPage(page);
   const homePage  = new HomePage(page);
   const generateTestLogPage = new GenerateTestLogPage(page);
@@ -36,6 +41,7 @@ export async function loginAndOpenGenerateTestLog(page: Page): Promise<Coordinat
   await homePage.waitForPageLoad();
   await homePage.verifyHomePageLoaded();
 
+  if (workspace) await homePage.switchWorkspace(workspace);
   await homePage.navigateToCoordinatorTab();
   await generateTestLogPage.waitForScreenLoad();
 

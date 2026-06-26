@@ -43,6 +43,7 @@ import {
   reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
 import { EXPECTED } from '../../utils/testData';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
@@ -50,14 +51,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
   test.fixme('TC-139 | Verify Filtering Test Runs by Business User Email', async ({ page }) => {
     test.setTimeout(300000);
 
+    // ─── Step 1: reach the first-layer cycle grid (View All) ─────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
+    await captureScreenshot(page, 'Step 1: First-layer cycle grid (View All)');
 
-    // Derive a Business User email that the typeahead can actually resolve. Which email lands on
-    // each row varies per session, and not every Business User is in the project's Select User
-    // list, so scan the first several rows for one whose email is searchable.
+    // ─── Steps 2-3: open Select User and derive a searchable Business User email ──────
+    // Which email lands on each row varies per session, and not every Business User is in the
+    // project's Select User list, so scan the first several rows for one whose email is searchable.
     await executeTabPage.selectAssignedToBusinessUser();
     let email = '';
     for (let i = 0; i < 6; i++) {
@@ -67,13 +70,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
       if (opts.some(o => o.includes(candidate))) { email = candidate; break; }   // Expected 1
     }
     expect(email, 'a searchable Business User email should be found in the grid').toBeTruthy();
+    await captureScreenshot(page, 'Step 2-3: Searchable Business User email derived');
 
-    // ─── Steps 1-4: search the email + pick the matching user ────────────────────
+    // ─── Step 4: search the email + pick the matching user ───────────────────────────
     const chosen = await executeTabPage.selectUserAndWaitForRefresh(email, email);      // Expected 2
+    await captureScreenshot(page, 'Step 4: Business User selected, grid filtered');
 
     // ─── Steps 5-6 / Expected 3-4: grid shows only matching runs; columns ok ─────
     await executeTabPage.verifyAllRowsMatchUser(chosen);
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
+    await captureScreenshot(page, 'Step 5-6: Grid shows only matching runs; columns valid');
   });
 
 });

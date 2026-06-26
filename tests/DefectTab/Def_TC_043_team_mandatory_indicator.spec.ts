@@ -32,20 +32,26 @@
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
+import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
   test.fixme('Def_TC_043 | Verify Team Field is Mandatory for Specific Business Unit', async ({ page }) => {
+    // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
     // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
     const { defectTabPage } = await loginAndOpenDefectTab(page);
     await defectTabPage.verifyDefectsLoaded();
-    await defectTabPage.openCreateDefectForm();
+    await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
+    // ─── Step 3: open the New Defect form ────────────────────────────────────────────
+    await defectTabPage.openCreateDefectForm();
     const createDefect = new CreateDefectPage(page);
     await createDefect.waitForCreateFormOpen();
+    await captureScreenshot(page, 'Step 3: New Defect form open');
 
-    // Expected: the Team label carries the mandatory "*" marker.
+    // ─── Step 4 / Expected: the Team label carries the mandatory "*" marker ───────────
     expect(await createDefect.isFieldMandatory('Team')).toBe(true);
+    await captureScreenshot(page, 'Step 4: Team field shows mandatory indicator');
   });
 
 });
