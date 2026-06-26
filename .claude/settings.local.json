@@ -264,7 +264,8 @@
       "PowerShell(npx playwright test tests/Coordinator/GTL_TC_010_last_log_blank_never_executed.spec.ts --workers=1 --retries=0 2>&1 | Select-Object -Last 20)",
       "PowerShell(npx playwright test tests/Coordinator/GTL_TC_010_last_log_blank_never_executed.spec.ts --workers=1 --retries=0 2>&1 | Select-Object -Last 12)",
       "PowerShell(npx playwright test tests/Coordinator/GTL_TC_010_last_log_blank_never_executed.spec.ts --workers=1 --retries=0 2>&1 | Select-Object -Last 8)",
-      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; if \\($LASTEXITCODE -eq 0\\) { \"TSC OK\" })"
+      "PowerShell(npx tsc --noEmit -p tsconfig.json 2>&1 | Select-Object -First 40; if \\($LASTEXITCODE -eq 0\\) { \"TSC OK\" })",
+      "PowerShell(npx playwright test tests/ExecuteTab --workers=4)"
     ]
   }
 }
