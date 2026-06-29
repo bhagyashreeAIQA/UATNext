@@ -1045,6 +1045,79 @@ export class TestRunExecutionPage {
     return [...new Set(texts.join(' ').match(/DF-\d+/g) ?? [])];
   }
 
+  // ─── Defect Details view (clicking a linked defect) — TC-094, TC-097 ──────────
+  // Clicking a linked-defect chip opens that defect's form, populated and rendered in place
+  // (the URL stays at root). Its breadcrumb `.defect-breadcrumbs` carries the TR + DF ids; in
+  // this (edit) mode SAVE is `#updateDefect` and CLOSE is `#closeButton`. The fields reuse the
+  // Create Defect markup (`.defect-form-text-field`) and the attachment list lives in `#drop-area`.
+  private get defectDetailsBreadcrumb(): Locator { return this.page.locator('.defect-breadcrumbs'); }
+  private get defectDetailsDropArea(): Locator { return this.page.locator('#drop-area'); }
+
+  /** Clicks a linked defect chip in the run-level Defect display and waits for its details form. */
+  async openLinkedDefectDetails(defectId: string): Promise<void> {
+    await this.defectDisplay.locator('button.test-run-div-wrapper')
+      .filter({ hasText: defectId }).first().click();
+    await this.defectDetailsBreadcrumb.waitFor({ state: 'visible', timeout: 20000 });
+  }
+
+  /** The Defect Details form is open and its breadcrumb header shows the defect id. */
+  async verifyDefectDetailsOpen(defectId: string): Promise<void> {
+    await expect(this.defectDetailsBreadcrumb).toBeVisible();
+    await expect(this.defectDetailsBreadcrumb).toContainText(defectId);
+    await expect(this.page.locator('#updateDefect')).toBeVisible();   // SAVE in edit mode
+  }
+
+  /**
+   * Asserts a Defect Details field/section label is visible. The form replaces the run panel,
+   * so a page-level text match is unambiguous. Labels render with a trailing colon (e.g.
+   * "Affected Release/Build:"), so the match is non-exact.
+   */
+  async verifyDefectDetailLabelVisible(label: string): Promise<void> {
+    await expect(this.page.getByText(label, { exact: false }).first(),
+      `"${label}" should be visible on Defect Details`).toBeVisible({ timeout: 10000 });
+  }
+
+  /** Asserts the Linked Test Runs section shows at least one associated TR id. */
+  async verifyDefectLinkedTestRuns(): Promise<void> {
+    await expect(this.page.getByText('Linked Test Runs', { exact: false }).first()).toBeVisible();
+    await expect(this.page.getByText(/TR-\d+/).first()).toBeVisible({ timeout: 10000 });
+  }
+
+  /** Asserts the Attachment section shows an uploaded file (a name with a file extension). */
+  async verifyDefectAttachmentShown(): Promise<void> {
+    await expect(this.defectDetailsDropArea).toBeVisible();
+    await expect(this.defectDetailsDropArea.getByText(/\.(png|jpe?g|gif|pdf|docx?|xlsx?|mp4)/i).first(),
+      'an uploaded attachment file should be displayed').toBeVisible({ timeout: 10000 });
+  }
+
+  /** The file name of the first attachment listed on the open Defect Details form. */
+  async getFirstDefectAttachmentName(): Promise<string> {
+    return (await this.defectDetailsDropArea.locator('li.file-item span[title]').first()
+      .getAttribute('title') ?? '').trim();
+  }
+
+  /**
+   * Opens (downloads) the first attachment on the Defect Details form via its Download (⬇) button
+   * and returns the downloaded file name. Each `li.file-item` exposes a `button[title="Download"]`;
+   * clicking it triggers a browser download rather than opening a new tab.
+   */
+  async openFirstDefectAttachment(): Promise<string> {
+    const item = this.defectDetailsDropArea.locator('li.file-item').first();
+    await expect(item).toBeVisible({ timeout: 10000 });
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download', { timeout: 20000 }),
+      item.locator('button[title="Download"]').click(),
+    ]);
+    return download.suggestedFilename();
+  }
+
+  /** Closes the Defect Details form (confirming the leave prompt) → returns to the Test Run panel. */
+  async closeDefectDetails(): Promise<void> {
+    await this.page.locator('#closeButton').click({ noWaitAfter: true }).catch(() => undefined);
+    await this.page.locator('button', { hasText: /^YES$/ }).first().click({ noWaitAfter: true }).catch(() => undefined);
+    await this.breadcrumb.waitFor({ state: 'visible', timeout: 20000 });
+  }
+
   /**
    * In the open popup's list mode, clicks a linked defect row's unlink icon, then clicks NO on
    * the "...unlinking of Defect?" confirm — the cancellation path. The defect stays linked and

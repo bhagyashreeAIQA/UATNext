@@ -464,6 +464,38 @@ export class ExecuteTabPage {
     await this.testCycleItems.first().click();
   }
 
+  // ─── By-name tree navigation (deterministic Release → Cycle → Module) ──────────
+  // Unlike the "first with data" probes above, these target a specific node by its label so a
+  // test can drive an exact path (e.g. Testdata_Release_P01 → Testdata_Cycle_1 → Dealer Master).
+
+  /** Selects a project from the sidebar Projects dropdown and waits for its release tree. */
+  async selectSidebarProject(projectName: string): Promise<void> {
+    await this.openWorkspaceDropdown();
+    await this.selectWorkspaceOption(projectName);
+    await this.waitForReleasesLoad();
+  }
+
+  /** Expands the release whose label contains `name` and waits for its depth-1 cycles. */
+  async expandReleaseByName(name: string): Promise<void> {
+    await this.waitForReconnectIfNeeded();
+    await this.releaseItems.filter({ hasText: name }).first().click();
+    await this.testCycleItems.first().waitFor({ state: 'visible', timeout: 20000 });
+  }
+
+  /** Expands the depth-1 cycle whose label contains `name` and waits for its depth-2 modules. */
+  async expandCycleByName(name: string): Promise<void> {
+    await this.waitForReconnectIfNeeded();
+    await this.testCycleItems.filter({ hasText: name }).first().click();
+    await this.suiteItems.first().waitFor({ state: 'visible', timeout: 20000 });
+  }
+
+  /** Clicks the depth-2 module whose label contains `name` and waits for its grid shell. */
+  async clickModuleByName(name: string): Promise<void> {
+    await this.waitForReconnectIfNeeded();
+    await this.suiteItems.filter({ hasText: name }).first().click();
+    await this.waitForGridContainerReady();
+  }
+
   // ─── Release expand assertions ────────────────────────────────────────────────
 
   async verifyReleaseExpanded(): Promise<void> {

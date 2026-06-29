@@ -14,69 +14,72 @@
  * Dependencies : Follows TC-137. A real Business User email is derived from the View All grid.
  *
  * Steps:
- *   1. Follow TC-137.
- *   2. Open the Select User dropdown.
- *   3. Enter a valid Business User email.
- *   4. Select the user.
- *   5. Validate the test run grid.
- *   6. Validate grid columns.
+ *   1. Follow TC-137 — the Select User dropdown is enabled.
+ *   2. Click the Select User dropdown — it opens with a search field.
+ *   3. Type a valid Business User email — matching user entries appear in the list.
+ *   4. Select the user — the selected email/name shows in the Select User field.
+ *   5. Validate the test run grid — only runs whose Business User matches the email are shown.
+ *   6. Validate the grid columns (Test Run, Test Case, Status, Assigned To, etc.).
  *
- * Expected:
- *   1. Matching user records are displayed.
- *   2. Selected email/user appears in the filter.
- *   3. Grid displays only matching test runs (the email as Business User, or that person assigned).
- *   4. Grid columns display correct data.
- *
- * BLOCKED (test.fixme) — test data: the "Select user" typeahead is NAME-based. Only Business Users
- *   who are also platform users are resolvable by email, and they appear sporadically in the grid
- *   (scanning the first 6 rows found none resolvable in a given session — verified 2026-06-15), so
- *   a searchable Business User email cannot be reliably derived. The filter mechanic itself is
- *   proven by TC-138 (name-based). Enable once a known searchable Business User email is seeded.
- *   The body below is complete and robust (it scans rows for a resolvable email) and passes when
- *   the data contains one.
+ * BLOCKED (test.fixme) — test data / feature limitation (re-verified 2026-06-26):
+ *   The "Select user" typeahead lists users by NAME only — typing an email never matches an
+ *   option, so step 3 ("matching user entries appear") cannot be satisfied. On the deterministic
+ *   Testdata_Module → Testdata_Release_P01 → Testdata_Cycle_1 → Dealer Master grid, the Business
+ *   User column holds external emails (e.g. Keshan.Beharry@setoyota.com, Amy.Gordon@jmfamily.com)
+ *   whose owners are NOT platform users; searching any of them with proper waiting returns zero
+ *   options. The name-based filter mechanic is proven by TC-138. Enable this (drop `.fixme`) once a
+ *   Business User who is also a searchable platform user (resolvable by email) is seeded. The body
+ *   below follows the documented steps and passes the moment such an email exists in the grid.
  */
 
 import { test, expect } from '@playwright/test';
 import {
   loginAndOpenExecuteTab,
   switchProjectAndLoadReleases,
-  reachFirstLayerCycleGrid,
 } from './executeNavHelpers';
 import { EXPECTED } from '../../utils/testData';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
-  // BLOCKED: no reliably-searchable Business User email in the typeahead (see header note).
+  // BLOCKED: the Select User typeahead is name-based, so a Business User email never matches an
+  // option (re-verified 2026-06-26 on Dealer Master). See header note.
   test.fixme('TC-139 | Verify Filtering Test Runs by Business User Email', async ({ page }) => {
     test.setTimeout(300000);
 
-    // ─── Step 1: reach the first-layer cycle grid (View All) ─────────────────────────
+    // ─── Step 1 (Follow TC-137): reach a populated grid and enable Business User filter ─
+    // Project: Testdata_Module (sidebar). Path: Testdata_Release_P01 → Testdata_Cycle_1 →
+    // Dealer Master (its grid carries Business User emails). View All for a populated grid.
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
-    await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
+    await executeTabPage.selectSidebarProject('Testdata_Module');
+    await executeTabPage.expandReleaseByName('Testdata_Release_P01');
+    await executeTabPage.expandCycleByName('Testdata_Cycle_1');
+    await executeTabPage.clickModuleByName('Dealer Master');
+    await executeTabPage.selectViewAllAndWaitForRefresh(await executeTabPage.getTotalEntriesText());
     await executeTabPage.verifyTotalEntriesPositive();
-    await captureScreenshot(page, 'Step 1: First-layer cycle grid (View All)');
+    await executeTabPage.selectAssignedToBusinessUser();   // Select User dropdown enabled
+    await captureScreenshot(page, 'Step 1: Business User filter enabled on a populated grid');
 
-    // ─── Steps 2-3: open Select User and derive a searchable Business User email ──────
-    // Which email lands on each row varies per session, and not every Business User is in the
-    // project's Select User list, so scan the first several rows for one whose email is searchable.
-    await executeTabPage.selectAssignedToBusinessUser();
+    // ─── Step 2-3: take a Business User email from the grid and search it in Select User ─
     let email = '';
-    for (let i = 0; i < 6; i++) {
-      const candidate = (await executeTabPage.getBusinessUserDisplay(i).catch(() => '')).trim();
-      if (!candidate.includes('@')) continue;
-      const opts = await executeTabPage.getSelectUserOptions(candidate);
-      if (opts.some(o => o.includes(candidate))) { email = candidate; break; }   // Expected 1
+    const rows = await executeTabPage.getTestRunCount();
+    for (let i = 0; i < rows; i++) {
+      const bu = (await executeTabPage.getBusinessUserDisplay(i).catch(() => '')).trim();
+      if (bu.includes('@')) { email = bu; break; }
     }
-    expect(email, 'a searchable Business User email should be found in the grid').toBeTruthy();
-    await captureScreenshot(page, 'Step 2-3: Searchable Business User email derived');
+    expect(email, 'a Business User email should be present in the grid').toBeTruthy();
+    // Expected 1: typing the email surfaces a matching user entry in the dropdown.
+    const options = await executeTabPage.getSelectUserOptions(email);
+    expect(options.some(o => o.includes(email)),
+      'matching user entries should appear for the typed email').toBe(true);
+    await captureScreenshot(page, 'Step 2-3: Email typed; matching user entry shown');
 
-    // ─── Step 4: search the email + pick the matching user ───────────────────────────
-    const chosen = await executeTabPage.selectUserAndWaitForRefresh(email, email);      // Expected 2
+    // ─── Step 4: select the user → it shows in the Select User field (Expected 2) ──────
+    const chosen = await executeTabPage.selectUserAndWaitForRefresh(email, email);
     await captureScreenshot(page, 'Step 4: Business User selected, grid filtered');
 
-    // ─── Steps 5-6 / Expected 3-4: grid shows only matching runs; columns ok ─────
+    // ─── Steps 5-6 / Expected 3-4: grid shows only matching runs; columns are correct ──
     await executeTabPage.verifyAllRowsMatchUser(chosen);
     await executeTabPage.verifyGridHeaders(EXPECTED.gridColumns);
     await captureScreenshot(page, 'Step 5-6: Grid shows only matching runs; columns valid');
