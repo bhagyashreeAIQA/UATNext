@@ -424,6 +424,87 @@ export class BulkExecutionPage {
     await this.rowByRunId(runId).locator('.gtl-checkbox-cell input').check();
   }
 
+  /**
+   * Walks the grid pages from page 1 until it finds a row with a blank Execution Date (an eligible,
+   * log-creatable row), leaving the grid on the page where it was found. Returns that row's Test Run
+   * ID, or '' if no blank-date row exists on any page. Assumes the grid is currently on page 1.
+   */
+  async findFirstEmptyExecutionDateRow(): Promise<string> {
+    const totalPages = await this.getTotalPages();
+    for (let p = 1; p <= totalPages; p++) {
+      const hit = (await this.getRowSelectionStates()).find(s => s.date === '' && s.eligible);
+      if (hit) return hit.runId;
+      if (p < totalPages) await this.goToNextPage();
+    }
+    return '';
+  }
+
+  /**
+   * Pages from page 1 to find the first blank-Execution-Date eligible row whose Test Case Version
+   * renders in `color` (e.g. the RED version-mismatch colour), leaving the grid on the page where it
+   * was found. Returns that row's Test Run ID, or '' if none exists. Assumes the grid is on page 1.
+   */
+  async findFirstEligibleRowWithVersionColor(color: string): Promise<string> {
+    const totalPages = await this.getTotalPages();
+    for (let p = 1; p <= totalPages; p++) {
+      const states = await this.getRowSelectionStates();
+      const colors = await this.getVersionCellColors();
+      for (let i = 0; i < states.length; i++) {
+        if (states[i].date === '' && states[i].eligible && colors[i] === color) return states[i].runId;
+      }
+      if (p < totalPages) await this.goToNextPage();
+    }
+    return '';
+  }
+
+  /**
+   * Pages from page 1 for an eligible (blank-date) run, PREFERRING one whose Test Case Version renders
+   * in `preferColor` (e.g. the RED mismatch colour) but falling back to any eligible run when none of
+   * that colour exists (e.g. the scarce mismatched data has been consumed). Leaves the grid on the page
+   * of the returned run so it can be selected. Returns the run id and whether it matched the preferred
+   * colour; runId is '' when no eligible run exists anywhere. Assumes the grid starts on page 1.
+   */
+  async findEligibleRowPreferringColor(preferColor: string): Promise<{ runId: string; matchedPreferred: boolean }> {
+    const totalPages = await this.getTotalPages();
+    let fallbackId = '', fallbackPage = 0;
+    for (let p = 1; p <= totalPages; p++) {
+      const states = await this.getRowSelectionStates();
+      const colors = await this.getVersionCellColors();
+      for (let i = 0; i < states.length; i++) {
+        if (states[i].date !== '' || !states[i].eligible) continue;
+        if (colors[i] === preferColor) return { runId: states[i].runId, matchedPreferred: true };
+        if (!fallbackId) { fallbackId = states[i].runId; fallbackPage = p; }
+      }
+      if (p < totalPages) await this.goToNextPage();
+    }
+    // No preferred-colour run found; page back to the fallback's page so it can be selected.
+    if (fallbackId) {
+      while ((await this.getCurrentPage()) > fallbackPage) await this.goToPreviousPage();
+    }
+    return { runId: fallbackId, matchedPreferred: false };
+  }
+
+  /**
+   * Pages from page 1 to find a SINGLE grid page that holds at least `count` eligible (blank-date) rows
+   * whose Test Case Version renders in `color`, leaving the grid on that page (so all can be selected
+   * without relying on cross-page selection). Returns those run ids, or null if no single page has
+   * enough. Using the matched/BLACK colour keeps a bulk action off the version-mismatch path.
+   */
+  async findPageWithEligibleRowsOfColor(color: string, count = 2): Promise<string[] | null> {
+    const totalPages = await this.getTotalPages();
+    for (let p = 1; p <= totalPages; p++) {
+      const states = await this.getRowSelectionStates();
+      const colors = await this.getVersionCellColors();
+      const hits: string[] = [];
+      for (let i = 0; i < states.length; i++) {
+        if (states[i].date === '' && states[i].eligible && colors[i] === color) hits.push(states[i].runId);
+        if (hits.length === count) return hits;
+      }
+      if (p < totalPages) await this.goToNextPage();
+    }
+    return null;
+  }
+
   // ─── CREATE LOG action ──────────────────────────────────────────────────────
 
   /** Clicks the (enabled) CREATE LOG button. Toasts are transient, so do not wait for navigation. */

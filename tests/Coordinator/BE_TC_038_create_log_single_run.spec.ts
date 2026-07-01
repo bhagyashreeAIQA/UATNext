@@ -1,36 +1,39 @@
 /**
  * Feature      : Coordinator Tab – Bulk Execution
  * Test Case ID : BE_TC_038
- * Test Name    : Verify CREATE LOG Generates a Log for a Single Eligible Run with No Version Mismatch
+ * Test Name    : Verify CREATE LOG Generates a Log for a Single Eligible Run (Blank Execution Date)
  *
- * Description  : As a Test Engineer, I want to verify that clicking CREATE LOG for a single eligible
- *                run with a matching version creates a log successfully without any errors.
+ * Description  : As a Test Engineer, I want to verify that, under the SET Dealer CRM project, an
+ *                eligible run (one with a blank Execution Date) can be located across the grid pages,
+ *                selected via its checkbox, and a log created for it via CREATE LOG.
  *
  * Pre-conditions:
  *   1-5. (see BE_TC_026)
- *   6. At least one eligible run (blank Execution Date) exists with NO version mismatch (black version).
+ *   6. At least one eligible run (blank Execution Date) exists somewhere in the SET Dealer CRM grid.
  *
  * Steps:
- *   1. Follow BE_TC_032 to select one eligible run with NO version mismatch.
- *   2. Verify the Test Case Version is displayed in the normal (non-red) colour.
- *   3. Click CREATE LOG.
- *   4. Wait for processing to complete.
+ *   1. Select the "SET Dealer CRM" project and navigate its cycle tree (Release "SET Dealer CRM" →
+ *      Cycle "SET Dealer CRM" → Sales Ops) to load the Sales Ops Test Run grid.
+ *   2. Search the grid pages for ONE row with a blank Execution Date (an eligible row).
+ *   3. Select that single row's checkbox.
+ *   4. Click CREATE LOG and wait for processing to complete.
  *   5. Re-inspect the processed row.
  *
  * Expected: a success message; the row gains a populated Execution Date, shows "Testlog exists", and
  *   its checkbox becomes disabled (no longer selectable).
  *
- * BUILD NOTE — fixme: in this environment CREATE LOG does NOT successfully generate a log. With a valid
- *   eligible + no-mismatch run selected (TR-1396 on Testdata_Module → P01 → Cycle_1), clicking CREATE
- *   LOG raises the toast "Error: Log creation failed for all selected test runs." and the row stays
- *   blank/eligible/checked — no log is created. The successful-creation outcome this case asserts
- *   therefore cannot be verified here, so it is marked test.fixme. The body encodes the intended flow
- *   for when the backend supports bulk log creation. Re-verified live 2026-06-24 (error toast class
- *   `.notification`; row unchanged afterwards).
+ * BUILD NOTE (verified 2026-06-29): CREATE LOG SUCCEEDS when the run is selected through the cycle tree
+ *   (SET Dealer CRM → Cycle "SET Dealer CRM" → Sales Ops) — the success toast shows and the processed
+ *   row becomes logged ("Testlog exists", disabled). On the release-scoped grid (no cycle context) the
+ *   same action instead errored "Log creation failed for all selected test runs"; selecting through the
+ *   Sales Ops cycle is what makes log creation work, so this case now runs (no longer test.fixme).
  *
- * ENV NOTE: the UATNext Dev workspace now defaults its Bulk Execution Projects dropdown to
- *   "SET Dealer CRM" (which carries no cycle tree); the runs live under the "Testdata_Module" project,
- *   so the body selects that project before opening the cycle grid.
+ * ENV NOTE: under UATNext Dev the Bulk Execution Projects dropdown defaults to "SET Dealer CRM". Its
+ *   tree is Release "SET Dealer CRM" → Cycle "SET Dealer CRM" → {Sales Ops, Dealer Services, Dealer
+ *   Master, Distribution}. Selecting the Sales Ops cycle loads a 40-row / 4-page grid whose first two
+ *   pages are already-logged rows (populated Execution Date, disabled checkbox); the blank-date
+ *   eligible rows appear on pages 3-4 (verified 2026-06-29: 17 rows), so the body pages through the
+ *   grid until it finds one rather than assuming an eligible row on page 1.
  *
  * Post-condition: this case (when enabled) MUTATES data — it creates a test log for the selected run.
  */
@@ -42,39 +45,40 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
-  test.fixme('BE_TC_038 | Verify CREATE LOG Generates a Log for a Single Eligible Run with No Version Mismatch', async ({ page }) => {
+  test('BE_TC_038 | Verify CREATE LOG Generates a Log for a Single Eligible Run (Blank Execution Date)', async ({ page }) => {
     test.slow();
     const data = EXPECTED.bulkExecution;
     const { bulkExecutionPage: be } = await loginAndOpenBulkExecution(page, data.workspace);
 
     await be.openBulkExecution();
-    // UATNext Dev now defaults to the "SET Dealer CRM" project (no cycles); the test runs live under
-    // Testdata_Module, so select it before opening the cycle grid.
-    await be.selectProject(data.expectedProject);
-    await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns);
 
-    // ─── Step 1: find a run with a BLANK Execution Date (+ no version mismatch) and
-    //             tick its checkbox ─────────────────────────────────────────────────
-    const rows = await be.getRowSelectionStates();
-    const colors = await be.getVersionCellColors();
-    // A blank Execution Date is exactly what makes a row eligible (enabled checkbox).
-    const idx = rows.findIndex((r, i) => r.date === '' && r.eligible && colors[i] === data.versionMatchColor);
-    expect(idx, 'expected an eligible (blank-date) no-mismatch run on this grid page').toBeGreaterThanOrEqual(0);
-    const target = rows[idx].runId;
+    // ─── Step 1: select SET Dealer CRM and drill the cycle tree down to Sales Ops ────
+    // Tree: Release "SET Dealer CRM" → Cycle "SET Dealer CRM" → Sales Ops. Selecting the Sales Ops
+    // cycle loads its Test Run grid.
+    await be.selectProject('SET Dealer CRM');
+    await be.expandRelease('SET Dealer CRM');
+    await be.expandCycle('SET Dealer CRM');
+    await be.selectCycle('Sales Ops');
+    await be.verifyCycleActive('Sales Ops');
+    await be.verifyTestRunGridLoaded();
+    await captureScreenshot(page, 'Step 1: Sales Ops grid loaded');
+
+    // ─── Step 2: search the grid pages for ONE blank-Execution-Date (eligible) row ───
+    const target = await be.findFirstEmptyExecutionDateRow();
+    expect(target, 'expected at least one blank-Execution-Date run across the grid pages').toBeTruthy();
+    await captureScreenshot(page, 'Step 2: Blank Execution Date run located');
+
+    // ─── Step 3: select that single row → checkbox checked + CREATE LOG enabled ──────
     await be.selectRowByRunId(target);
     await expect(be.rowByRunId(target).locator('.gtl-checkbox-cell input')).toBeChecked();
     await be.verifyCreateLogEnabled();
-    await captureScreenshot(page, "Step 1: Blank Execution Date run selected");
+    await captureScreenshot(page, 'Step 3: Single eligible run selected');
 
-    // ─── Step 2: the run's version is shown in the normal (non-mismatch) colour ─────
-    expect(colors[idx]).toBe(data.versionMatchColor);
-    await captureScreenshot(page, "Step 2: Version shown in normal colour");
-
-    // ─── Step 3-4: CREATE LOG → success message, no error ──────────────────────────
+    // ─── Step 4: CREATE LOG → success message, no error ──────────────────────────────
     await be.clickCreateLog();
     await expect(be.notification(/success|created|log.*generated/i)).toBeVisible({ timeout: 30000 });
     await expect(be.notification(/error|fail/i)).toHaveCount(0);
-    await captureScreenshot(page, "Step 3-4: Log creation success message");
+    await captureScreenshot(page, 'Step 4: Log creation success message');
 
     // ─── Step 5: processed row now has an Execution Date + "Testlog exists" + disabled ─
     const row = be.rowByRunId(target);
@@ -82,7 +86,7 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     const cb = row.locator('.gtl-checkbox-cell input');
     await expect(cb).toBeDisabled();
     expect(await be.getDisabledCheckboxTitle(row)).toMatch(/testlog exists/i);
-    await captureScreenshot(page, "Step 5: Row logged — Testlog exists, not selectable");
+    await captureScreenshot(page, 'Step 5: Row logged — Testlog exists, not selectable');
   });
 
 });

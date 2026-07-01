@@ -346,6 +346,63 @@ export const EXPECTED = {
     versionMatchColor: 'rgb(71, 84, 103)',
   },
 
+  // ── Author Test Cases tab (/author) — AT_TC_001 onward ──────────────────────
+  // The Author tab renders its requirement list on the UATNext Dev BU. Verified live 2026-06-29.
+  author: {
+    // Business Unit that exposes Author requirements.
+    workspace: 'UATNext Dev',
+    // Requirement table columns (left-to-right).
+    requirementColumns: ['ID', 'ADO ID', 'Requirement'],
+    // The two projects available in the left-panel Projects dropdown (both carry requirements:
+    // Testdata_Module ≈ 45, SET Dealer CRM ≈ 20 — so NO project with zero requirements exists).
+    projects: ['SET Dealer CRM', 'Testdata_Module'],
+    // A project that carries requirements (used to satisfy a "select a project" step).
+    projectWithRequirements: 'Testdata_Module',
+    // A Requirement search term that matches nothing → induces the documented empty state.
+    noMatchSearch: 'ZZZNONEXISTENTREQ999',
+    // The empty-state message shown when the requirement list is empty.
+    emptyStateMessage: 'There is no data',
+    // Epic/Feature filter data under Testdata_Module. NOTE: the requirement counts are VOLATILE (the
+    // shared qTest data changes) — epic P1 ALONE was 38, later 51, while epic P1 + feature P01 stayed
+    // 38 (so the feature genuinely subsets now). Most specs select epic+feature and use `epicACount`
+    // (the stable epic+feature count); the two pure-epic specs (AT_TC_003/005) use `epicAOnlyCount`.
+    // For the after-`selectEpic` settle, prefer `waitForTotalEntriesStable()` over a hard-coded count.
+    epicA: 'Sub_Testdata_Module_P1',          // epic alone ≈ 51 reqs; with feature P01 = 38
+    epicB: 'Sub_Testdata_Module_P2',          // ≈ 4 requirements (disjoint from epicA)
+    epicEmpty: 'Sub_Testdata_Module_P5',      // 0 requirements → "There is no data"
+    epicACount: 38,                           // epic P1 + feature P01 (stable)
+    epicAOnlyCount: 51,                       // epic P1 alone (no feature)
+    epicBCount: 4,
+    featureA: 'Sub_Testdata_Module_P01',      // the single Feature mapped to epicA
+    featureB: 'Sub_Testdata_Module_P02',      // the single Feature mapped to epicB (different Epic)
+    featureUnderEmptyEpic: 'Sub_Testdata_Module_P05', // Feature of epicEmpty → 0 requirements
+    // Team filter data under epicA (verified live 2026-06-29). Team is enabled but lists no teams
+    // until an Epic is selected; once an Epic is chosen, selecting a Team subsets the requirements.
+    teamWithRequirements: 'SPARK Mod Team A', // ≈ 19 requirements under epicA
+    teamWithRequirementsCount: 19,
+    teamB: 'SPARK Mod Team B',                 // ≈ 3 requirements under epicA (for Team_A→Team_B switch)
+    teamBCount: 3,
+    teamEmpty: 'Main Team',                    // mapped to 0 requirements under epicA → "There is no data"
+    // Requirement search data (search is GLOBAL across the project — it ignores the Epic/Feature/Team
+    // filters — and clearing it restores the full list; verified live 2026-06-29). Triggered with Enter
+    // (the magnifier icon is decorative). Search matches Requirement PID / ADO ID / Title.
+    searchReqId: 'RQ-7513',                    // a valid Requirement ID → exactly 1 match
+    searchAdoId: '383414',                     // a valid ADO ID → 2 matches (duplicated across epics)
+    searchAdoIdCount: 2,
+    searchTitleWord: 'Create',                 // a Title word → 20 matches (case-insensitive)
+    searchTitleCount: 20,
+    searchSpecialChars: '@#$%',                // special chars → empty state
+    // Requirement detail (right) panel + Linked Test Cases (verified live 2026-06-30). Selecting a
+    // requirement under epicA+featureA opens its detail; the first row (RQ-8438) carries linked test
+    // cases, while RQ-8442 has none ("no test case linked" empty state).
+    reqDetailLinkedSystem: 'Azure Boards',
+    reqWithoutTestCases: 'RQ-8442',
+    // Linked Test Cases columns shown live (the documented spec omits Description and Status).
+    linkedTcColumns: [
+      'Test Case ID', 'Name', 'Description', 'Type', 'Status', 'Assigned To', 'Business User', 'Action',
+    ],
+  },
+
   // ── DEFECT-tab Create / View-Modify Defect form (Def_TC_036 to Def_TC_051) ──
   // The DEFECT tab's CREATE DEFECT button opens a "New Defect" form that replaces the grid. It
   // shares its DOM with the execution-page Create-Defect popup, but here there is NO test-case

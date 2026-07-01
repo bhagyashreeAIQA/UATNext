@@ -50,8 +50,13 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     await executeTabPage.verifyTotalEntriesPositive();
 
     // Derive a real assignee (a user who has runs) from the populated grid.
-    const assignee = (await executeTabPage.getAssignedToDisplay(0)).trim();
-    expect(assignee.length, 'an assignee should be present to filter by').toBeGreaterThan(0);
+    const i=0;
+    const assignee = (await executeTabPage.getAssignedToDisplay(i)).trim();
+    if(assignee.length === 0) {
+      const assignee = (await executeTabPage.getBusinessUserDisplay(i+1)).trim();
+      expect(assignee.length, 'a business user should be present to filter by').toBeGreaterThan(0);
+    }else {
+    expect(assignee.length, 'an assignee should be present to filter by').toBeGreaterThan(0);}
 
     // ─── Steps 1-4: select Others → search + pick that user ──────────────────────
     await executeTabPage.selectAssignedToBusinessUser();

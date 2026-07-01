@@ -15,7 +15,7 @@ export default defineConfig({
   // Cap local workers: the suite drives a shared dev backend (Blazor/SignalR streaming) in
   // headed mode, and too many concurrent browsers starve it (sidebar stalls on "Loading
   // projects..."). Four keeps the run parallel but stable.
-  workers: process.env.CI ? 1 : 4,
+  workers: process.env.CI ? 1 : 6,
   //reporter: [['html', { open: 'never' }], ['list']],
   reporter: [
     ['html', { outputFolder: `playwright-report/run-${Date.now()}` }],
