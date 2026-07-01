@@ -36,6 +36,8 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     // ─── Step 1: Bulk Execution open, left panel visible, grid loaded ──────────────
     await be.openBulkExecution();
     await be.verifyLeftPanelDisplayed();
+    // The panel defaults to another project ("SET Dealer CRM"); select Testdata_Module explicitly.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithRuns);
     await be.selectRelease(data.releaseWithRuns);
     await be.verifyTestRunGridLoaded();
     expect(await be.isSidebarCollapsed()).toBe(false);

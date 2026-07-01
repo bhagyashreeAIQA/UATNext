@@ -918,11 +918,26 @@ export class ExecuteTabPage {
     return this.page.locator('.user-filter-searchable-dropdown-item');
   }
 
-  /** Types a term into Select User and returns the matching option texts (typeahead). */
+  /**
+   * Types `term` into the Select User typeahead and returns the offered option texts WITHOUT
+   * selecting one. The list streams in (and can lag a keystroke behind the fill under load per
+   * the SignalR timing gotcha), so the options are polled until the set stops changing before
+   * being read. Never presses Enter/ArrowDown — doing so selects an option and collapses the
+   * list, leaving nothing to read.
+   */
   async getSelectUserOptions(term: string): Promise<string[]> {
     await this.selectUserInput.click();
     await this.selectUserInput.fill(term);
-    await this.selectUserOptions.first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => undefined);
+    // Poll until the option set settles (or stays empty), so a mid-stream / lagged read is not
+    // mistaken for the final result.
+    let prev = ' ';
+    let stable = 0;
+    await expect(async () => {
+      const now = (await this.selectUserOptions.allInnerTexts()).join('|');
+      stable = now === prev ? stable + 1 : 0;
+      prev = now;
+      expect(stable).toBeGreaterThanOrEqual(2);
+    }).toPass({ timeout: 10000, intervals: [300, 400, 500] }).catch(() => undefined);
     return (await this.selectUserOptions.allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean);
   }
 
@@ -947,12 +962,36 @@ export class ExecuteTabPage {
   }
 
   /**
+   * Returns a value that can be filtered on via the "Assigned To / Business User" typeahead: the first
+   * grid row's non-empty Assigned To name (some rows have a BLANK assignee — deriving blindly from row
+   * 0 yields an empty term that then filters an arbitrary user with no runs), falling back to the first
+   * non-empty Business User. Assigned To names are preferred (the typeahead resolves them cleanly).
+   * Throws if no row carries either field.
+   */
+  async deriveFilterableAssignee(): Promise<string> {
+    const count = await this.testRunRows.count();
+    for (let i = 0; i < count; i++) {
+      const a = (await this.getAssignedToDisplay(i)).trim();
+      if (a) return a;
+    }
+    for (let i = 0; i < count; i++) {
+      const b = (await this.getBusinessUserDisplay(i)).trim();
+      if (b) return b;
+    }
+    throw new Error('No grid row has an Assigned To or Business User to filter by');
+  }
+
+  /**
    * Asserts every visible grid row matches `user` either as its Assigned To or its Business User
    * (the "Assigned To / Business User" filter matches either field). Requires ≥1 row.
    */
   async verifyAllRowsMatchUser(user: string): Promise<void> {
+    // The grid re-queries over SignalR after a filter and is transiently empty mid-refresh — poll for
+    // rows to arrive before asserting, so we don't read a still-refreshing (0-row) grid.
+    await expect
+      .poll(() => this.testRunRows.count(), { message: 'filtered grid should have at least one row', timeout: 15000 })
+      .toBeGreaterThan(0);
     const count = await this.testRunRows.count();
-    expect(count, 'filtered grid should have at least one row').toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
       const assignee = (await this.getAssignedToDisplay(i)).trim();
       const businessUser = (await this.getBusinessUserDisplay(i)).trim();

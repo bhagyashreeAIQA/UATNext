@@ -26,10 +26,15 @@ test.describe('Feature: Coordinator | Sub-Feature: Generate Test Log', () => {
 
   test('GTL_TC_007 | Verify Last Log Section Displays Most Recent Execution Data Correctly', async ({ page }) => {
     test.slow(); // coordinator nav + qTest search/generate make this flow slower than the 30s default
-    const { generateTestLogPage: gtl } = await loginAndOpenGenerateTestLog(page);
     const data = EXPECTED.generateTestLog;
+    // The qConnect sample project's test cases lost their step rows; use the multi-step TC-26300 in
+    // the UATNext Dev workspace — its run TR-1681 carries a saved Last Log to inspect.
+    const ws = data.withSteps;
+    const { generateTestLogPage: gtl } = await loginAndOpenGenerateTestLog(page, ws.workspace);
 
-    await searchSelectAndGenerate(gtl, data.validTestCasePid, data.validTestRun);
+    await searchSelectAndGenerate(gtl, ws.pid, ws.executedRun);
+    // Last Log step rows stream in a beat after the table mounts — wait before reading its data.
+    await gtl.waitForSteps('last');
 
     // Expected 1: heading + read-only overall Status
     await expect(gtl.lastLogHeading).toBeVisible();

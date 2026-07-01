@@ -42,7 +42,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Called Test Case �
     const tcIds = await authorPage.getLinkedTcIds();
     await authorPage.openTestCaseDetail(0);
     await authorPage.openCalledTcPopup();
-    await authorPage.searchCalledTc(tcIds[0]);
+    await authorPage.searchCalledTc(tcIds[1]);
 
     // ─── Step 6-7: select a result + Save → "Call <name>" step (MUTATING) ──────────────
     // TODO: pin the result-row selection + add/save controls in #addCalledTestCaseModal.

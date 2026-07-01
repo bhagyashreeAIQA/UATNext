@@ -286,13 +286,28 @@ export const EXPECTED = {
     // A Test Case with a NEVER-executed Test Run (GTL_TC_010): generating its log shows a BLANK Last
     // Log (0 step rows) while the New Log is fully populated with all steps defaulting to Unexecuted.
     // TC-26300 lives in the UATNext Dev workspace (NOT the default qConnect BU), version 2.0; its run
-    // TR-1680 has no previous execution (verified live 2026-06-24). TR-1555/1683 by contrast carry a
-    // Last Log.
+    // TR-1687 has no previous execution (re-verified live 2026-07-01 — the former TR-1680 has since
+    // been executed and now carries a Last Log). TR-1681..1686 by contrast carry a Last Log.
     neverExecuted: {
       workspace: 'UATNext Dev',
       pid: 'TC-26300',
       version: '2.0',
-      run: 'TR-1680',
+      run: 'TR-1687',
+    },
+    // Generate-with-steps scenario. The qConnect sample project's test cases have lost their step
+    // definitions (a generated New Log renders headers only, 0 step rows), so the flows that need
+    // populated Last Log / New Log STEP rows run against TC-26300 in the UATNext Dev workspace — a
+    // 4-step case, version 2.0. Verified live 2026-07-01:
+    //   - executedRun TR-1681 carries a saved Last Log (4 steps, overall status "Unexecuted").
+    //   - neverExecutedRun TR-1687 has New Log steps but a BLANK Last Log.
+    //   - UATNext Dev exposes the full 7 step-status options (qConnect's copy shows only 5).
+    withSteps: {
+      workspace: 'UATNext Dev',
+      pid: 'TC-26300',
+      version: '2.0',
+      executedRun: 'TR-1681',
+      neverExecutedRun: 'TR-1687',
+      stepStatusOptions: ['Passed', 'Failed', 'Blocked', 'InProgress', 'Retest', 'Unexecuted', 'Incomplete'],
     },
     // GTL_TC_013 — Business-Unit-scoped search. The SAME Test Case PID resolves to a DIFFERENT,
     // BU-local test case depending on the active Business Unit, proving search is scoped to the
@@ -338,8 +353,9 @@ export const EXPECTED = {
       'Test Run ID', 'Test Case PID', 'Test Case Version', 'Name', 'Status',
       'Execution Date', 'Assign To', 'Business User',
     ],
-    // The build's valid Status values (the spec's "In Progress" renders as "InProgress" here).
-    statusValues: ['Unexecuted', 'Failed', 'Blocked', 'InProgress', 'Passed'],
+    // The build's valid Status values (the spec's "In Progress" renders as "InProgress" here;
+    // "Retest" is emitted for runs re-opened after execution).
+    statusValues: ['Unexecuted', 'Failed', 'Blocked', 'InProgress', 'Passed', 'Retest'],
     // Version-cell text colours: mismatch is RED; a matching version uses the normal text token (a
     // dark slate, the build's stand-in for "black") — not pure black. Used to assert colour coding.
     versionMismatchColor: 'rgb(255, 65, 54)',

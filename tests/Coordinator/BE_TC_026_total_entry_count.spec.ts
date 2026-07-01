@@ -39,6 +39,8 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
     // ─── Step 1: open the Cycle grid (many runs) ───────────────────────────────────
     await be.openBulkExecution();
+    // Panel defaults to another project ("SET Dealer CRM"); select Testdata_Module first.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns);
     await captureScreenshot(page, "Step 1: Cycle grid loaded with many runs");
 

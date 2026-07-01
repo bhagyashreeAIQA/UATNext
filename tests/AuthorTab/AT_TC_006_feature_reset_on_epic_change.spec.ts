@@ -64,11 +64,13 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Feature/Requirement
     await authorPage.selectEpic(data.epicB);
     expect(await authorPage.getEpicValue()).toBe(data.epicB);
     await authorPage.waitForListRefreshedFrom(cBeforeEpicSwitch); // requirement list refreshed
-    // DEVIATION from the spec: the Feature is NOT reset and the dropdown is NOT disabled on Epic change.
-    expect(await authorPage.getFeatureValue(), 'Feature is NOT reset on Epic change (live deviation)')
-      .toBe(data.featureA);
+    // The build now IMPLEMENTS the spec's Feature reset (re-verified 2026-07-01): on an Epic change the
+    // Feature clears to empty (the stale Feature is not carried into the new Epic). The dropdown remains
+    // enabled so a Feature of the new Epic can be picked.
+    expect(await authorPage.getFeatureValue(), 'Feature resets to empty on Epic change')
+      .toBe('');
     await expect(authorPage.featureField).toBeEnabled();
-    await captureScreenshot(page, 'Step 7-8: EPIC_B list refreshed, Feature retained');
+    await captureScreenshot(page, 'Step 7-8: EPIC_B list refreshed, Feature reset');
 
     // ─── Step 9-10: the refreshed list shows valid EPIC_B requirements ─────────────────
     await authorPage.verifyRequirementsFiltered();

@@ -41,6 +41,9 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
     // ─── Step 1: open Bulk Execution and expand a Release with Cycles ───────────────
     await be.openBulkExecution();
+    // The panel defaults to another project ("SET Dealer CRM"); select Testdata_Module and wait for
+    // its Release tree before expanding.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     await be.expandRelease(data.releaseWithCycles);
     await expect.poll(() => be.getCycleNames(), { timeout: 20000 }).toContain(data.cycleWithRuns);
     await captureScreenshot(page, "Step 1: Release expanded, Cycles shown");

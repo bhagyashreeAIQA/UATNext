@@ -26,7 +26,10 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Management – Add Step (Save)', () => {
 
-  test('AT_TC_040 | Verify User Can Add a Test Step Using Save Button', async ({ page }) => {
+  // BLOCKED (test.fixme): adds a step via the TinyMCE `.testcase-prototype` editor, whose programmatic
+  // text-commit is unreliable (same editor as Execute TC-100/101), and it MUTATES qTest irreversibly
+  // (a real test step is created with no automated cleanup). See AT_TC_036's note.
+  test.fixme('AT_TC_040 | Verify User Can Add a Test Step Using Save Button', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);
@@ -50,7 +53,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
     await captureScreenshot(page, 'Step 4-10: New step details entered');
 
     // ─── Step 11-12: Save → success → new step appears ─────────────────────────────────
-    await authorPage.saveTcDetail();
+    await authorPage.saveTcDetail(); // clicks SAVE and waits for the "updated successfully" toast
     await expect.poll(() => authorPage.getStepRowCount(), { timeout: 15000 })
       .toBeGreaterThan(stepsBefore);
     await captureScreenshot(page, 'Step 11-12: Test step added');

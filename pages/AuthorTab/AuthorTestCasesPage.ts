@@ -1,4 +1,5 @@
 import { Page, expect, Locator } from '@playwright/test';
+import { captureScreenshot } from '../../utils/screenshot';
 
 /**
  * Page Object for the **Author Test Cases** tab (`/author`).
@@ -833,8 +834,10 @@ export class AuthorTestCasesPage {
   /** Clicks the test case detail SAVE and waits for the "Successfully updated" toast. */
   async saveTcDetail(): Promise<void> {
     await this.page.getByRole('button', { name: /^SAVE$/i }).first().click();
+    
     await expect(this.page.locator('.notification').filter({ hasText: /success|updated/i }).first())
       .toBeVisible({ timeout: 15000 });
+    await captureScreenshot(this.page, 'Saved successfully');
   }
 
   /** Closes the test case detail view, returning to the requirement's linked test case list. */
@@ -853,8 +856,10 @@ export class AuthorTestCasesPage {
   get addStepButton(): Locator { return this.page.locator('#addRowIcon'); }
   get newStepRow(): Locator { return this.page.locator('#test-steps-row').filter({ has: this.page.locator('#stepDescription') }).last(); }
   get newStepUatCategory(): Locator { return this.newStepRow.locator('input[placeholder="Select UAT Category"]'); }
-  get stepDescriptionCell(): Locator { return this.page.locator('#stepDescription .testcase-prototype').first(); }
-  get stepExpectedCell(): Locator { return this.page.locator('#stepExpected .testcase-prototype').first(); }
+  // Scope to the NEW step row (the last `#test-steps-row`): a global `.first()` would grab an EXISTING
+  // step's populated description cell instead of the new empty "Click to add…" placeholder cell.
+  get stepDescriptionCell(): Locator { return this.newStepRow.locator('#stepDescription .testcase-prototype'); }
+  get stepExpectedCell(): Locator { return this.newStepRow.locator('#stepExpected .testcase-prototype'); }
   get stepDeleteIcon(): Locator { return this.page.locator('#test-steps-row .deleteRowButton, #test-steps-row [class*="delete"], #test-steps-row img[title*="Delete"]').first(); }
   get stepDeleteIcons(): Locator { return this.page.locator('#test-steps-row .deleteRowButton, #test-steps-row [class*="delete"], #test-steps-row img[title*="Delete"]'); }
 
@@ -886,15 +891,6 @@ export class AuthorTestCasesPage {
     return this.page.locator('#test-steps-row').count();
   }
 
-  /**
-   * The numeric step numbers shown on the SAVED step rows (`#test-steps-row .step-number`), in order.
-   * Only saved steps carry a `.step-number` (the trailing "add new" row has none), so this matches the
-   * "Test Steps(N)" heading count — use it to assert sequential numbering.
-   */
-  async getStepNumbers(): Promise<number[]> {
-    return (await this.page.locator('#test-steps-row .step-number').allInnerTexts())
-      .map(t => parseInt(t.trim(), 10)).filter(n => Number.isFinite(n));
-  }
 
   /** Asserts the new step section's default state: UAT=Business, empty desc/expected, delete icon. */
   async verifyNewStepDefaults(): Promise<void> {
@@ -1033,15 +1029,99 @@ export class AuthorTestCasesPage {
       .toBeVisible({ timeout: 10000 });
   }
 
+  // ─── Called Test Case step navigation (AT_TC_046) ────────────────────────────
+  // A committed called test case renders in the step's Step Description cell as a
+  // `.call-tc-container` holding a literal `Call ` span + a readonly, pointer-cursor
+  // `input.called-tc` whose value is the referenced test case's name — that input IS the
+  // clickable "Call <name>" hyperlink. Clicking it opens the referenced test case read-only
+  // (the caller's SAVE button is replaced by a CLOSE-only header, and a new TC-id breadcrumb
+  // — distinct from the caller's — is shown).
+
+  /** The clickable "Call <name>" step hyperlinks (readonly `input.called-tc` in `#stepDescription`). */
+  get calledTcStepLink(): Locator { return this.page.locator('#stepDescription .call-tc-container input.called-tc'); }
+
+  /**
+   * Clicks the first "Call <name>" step hyperlink and waits for the referenced test case's
+   * (read-only) detail to open. Returns the referenced test case name (the link's value).
+   * @param fromTcId The caller test case id, used to assert the breadcrumb switched to a different TC.
+   */
+  async openReferencedTestCase(fromTcId: string): Promise<string> {
+    const link = this.calledTcStepLink.first();
+    await expect(link).toBeVisible({ timeout: 15000 });
+    const name = (await link.inputValue()).trim();
+    await link.click();
+    // Called test cases open read-only: the caller's SAVE button is gone, only CLOSE remains.
+    await expect(this.page.getByRole('button', { name: /^SAVE$/i })).toHaveCount(0, { timeout: 15000 });
+    await expect(this.page.getByRole('button', { name: /^CLOSE$/i }).first()).toBeVisible();
+    // A referenced TC-id (distinct from the caller) now appears in the breadcrumb.
+    await expect.poll(async () =>
+      (await this.page.getByText(/^TC-\d+$/).allInnerTexts()).map(t => t.trim()).some(id => id && id !== fromTcId),
+      { timeout: 15000, intervals: [500, 1000, 2000] }).toBe(true);
+    return name;
+  }
+
+  /** Asserts the opened referenced test case detail shows its name and the standard detail fields. */
+  async verifyReferencedTestCaseDetails(name: string): Promise<void> {
+    for (const f of ['Description', 'Precondition', 'Priority', 'Status']) {
+      await expect(this.page.getByText(f, { exact: false }).first(), `field "${f}"`).toBeVisible();
+    }
+    // The referenced name is rendered as the detail title in a readonly input, so match on text
+    // content OR any input's value.
+    await expect.poll(async () => {
+      if (await this.page.getByText(name, { exact: false }).count() > 0) return true;
+      const vals = await this.page.locator('input').evaluateAll(
+        els => els.map(e => (e as HTMLInputElement).value));
+      return vals.some(v => v && v.includes(name));
+    }, { timeout: 10000, intervals: [500, 1000, 2000] }).toBe(true);
+  }
+
   // ─── Test step reorder (AT_TC_048-050) ───────────────────────────────────────
-  // Each step row's `#order` cell has `.move-up` / `.move-down` arrows; at a boundary the arrow gets
-  // a `.disable` class + `aria-disabled`. Step numbers are `.step-number`.
+  // Each SAVED step row's `#order` cell has `.move-up` / `.move-down` arrows; at a boundary the arrow
+  // gets a `.disable` class + `aria-disabled`. The `.step-number` labels are POSITIONAL (always
+  // 1..N) — they do NOT change after a reorder, so detect a move by the step DESCRIPTIONS' order, not
+  // the numbers. A TC with N saved steps renders N+1 `#test-steps-row` (a trailing add-new row with no
+  // `.step-number` and no arrows); the N arrows align 1:1 with the N saved steps (index 0 = first step).
 
   stepMoveUp(index: number): Locator { return this.page.locator('#test-steps-row .move-up').nth(index); }
   stepMoveDown(index: number): Locator { return this.page.locator('#test-steps-row .move-down').nth(index); }
 
+  /** Positional step-number labels (always "1".."N") of the saved step rows. */
   async getStepNumbers(): Promise<string[]> {
     return (await this.page.locator('#test-steps-row .step-number').allInnerTexts()).map(t => t.trim());
+  }
+
+  /** The saved steps' descriptions in display order (a called step contributes its "Call <name>" value). */
+  async getStepDescriptions(): Promise<string[]> {
+    const rows = this.page.locator('#test-steps-row').filter({ has: this.page.locator('.step-number') });
+    const n = await rows.count();
+    const out: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const cell = rows.nth(i).locator('#stepDescription');
+      const text = (await cell.innerText().catch(() => '')).replace(/\s+/g, ' ').trim();
+      // A called step keeps its name in an `input.called-tc`; read it only when present so a normal
+      // text step doesn't wait out the action timeout looking for an input that isn't there.
+      const callInput = cell.locator('input.called-tc');
+      const callVal = (await callInput.count()) > 0
+        ? (await callInput.first().inputValue().catch(() => '')).trim() : '';
+      out.push(`${text} ${callVal}`.replace(/\s+/g, ' ').trim());
+    }
+    return out;
+  }
+
+  /** Clicks the Move-Up arrow of the saved step at `index` and waits for the step order to change. */
+  async moveStepUp(index: number): Promise<void> {
+    const before = JSON.stringify(await this.getStepDescriptions());
+    await this.stepMoveUp(index).click();
+    await expect.poll(async () => JSON.stringify(await this.getStepDescriptions()),
+      { timeout: 10000, intervals: [300, 700, 1500] }).not.toBe(before);
+  }
+
+  /** Clicks the Move-Down arrow of the saved step at `index` and waits for the step order to change. */
+  async moveStepDown(index: number): Promise<void> {
+    const before = JSON.stringify(await this.getStepDescriptions());
+    await this.stepMoveDown(index).click();
+    await expect.poll(async () => JSON.stringify(await this.getStepDescriptions()),
+      { timeout: 10000, intervals: [300, 700, 1500] }).not.toBe(before);
   }
 
   async isStepArrowDisabled(arrow: Locator): Promise<boolean> {

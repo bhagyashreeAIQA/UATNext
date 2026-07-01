@@ -21,10 +21,10 @@
  * Expected: Projects dropdown shows the selected project; Releases render as a tree; expanding a
  *   Release reveals its associated Cycles; release names are fully visible.
  *
- * DATA NOTE: the UATNext Dev workspace exposes a SINGLE project (Testdata_Module) — the documented
- *   "at least two projects / no cross-project Release data" cannot be exercised against this data, so
- *   this test asserts the single project's tree is correct and that the only project shown is the
- *   selected one (no foreign projects leak in). Only Testdata_Release_P01 carries Cycles (P02/P03
+ * DATA NOTE: the UATNext Dev workspace now exposes two projects (the default "SET Dealer CRM" plus
+ *   "Testdata_Module"). This test selects Testdata_Module — whose Releases carry the Cycle data — and
+ *   asserts its Release tree renders correctly and that the tree is scoped to the selected project
+ *   only (no foreign project's releases leak in). Only Testdata_Release_P01 carries Cycles (P02/P03
  *   expand to an empty child list).
  *
  * Post-condition: no data is mutated (read-only navigation).
@@ -49,13 +49,16 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     // ─── Step 2: Projects dropdown + Release tree render immediately after load ─────
     await be.verifyLeftPanelDisplayed();
     await expect(be.projectsLabel).toBeVisible();
+    // The panel defaults to another project ("SET Dealer CRM"); select Testdata_Module, whose
+    // Releases carry the Cycle data this test validates.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     expect(await be.getProjectsValue()).toBe(data.expectedProject);
     // Releases display as a tree under the dropdown — scoped to the selected project only.
     const releases = await be.getReleaseNames();
     expect(releases.length).toBeGreaterThan(0);
     expect(releases).toContain(data.releaseWithCycles);
-    // The dropdown offers only the selected project (no cross-project data on this workspace).
-    expect(await be.getProjectOptions()).toEqual([data.expectedProject]);
+    // The workspace now exposes two projects; the dropdown must offer the selected one among them.
+    expect(await be.getProjectOptions()).toContain(data.expectedProject);
     await captureScreenshot(page, "Step 2: Projects dropdown + Release tree displayed");
 
     // ─── Step 3: expand a Release chevron → its Cycles are revealed ─────────────────

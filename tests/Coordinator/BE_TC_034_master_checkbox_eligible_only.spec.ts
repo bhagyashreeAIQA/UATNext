@@ -35,6 +35,8 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     const { bulkExecutionPage: be } = await loginAndOpenBulkExecution(page, data.workspace);
 
     await be.openBulkExecution();
+    // Panel defaults to another project ("SET Dealer CRM"); select Testdata_Module first.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns);
 
     // ─── Step 1: page has both eligible and non-eligible rows; CREATE LOG disabled ──

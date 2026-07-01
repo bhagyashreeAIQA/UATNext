@@ -180,6 +180,17 @@ export class BulkExecutionPage {
     await expect(this.projectsInput).toHaveValue(name, { timeout: 15000 });
   }
 
+  /**
+   * Ensures `name` is the selected Project. The Bulk Execution panel defaults to a different project
+   * ("SET Dealer CRM") under UATNext Dev, so the Testdata_Module data the specs exercise must be
+   * selected explicitly rather than assumed pre-selected. Waits for the Release tree to re-render with
+   * `expectedRelease` (the tree reloads asynchronously after the dropdown value updates).
+   */
+  async ensureProjectSelected(name: string, expectedRelease: string): Promise<void> {
+    if ((await this.getProjectsValue()) !== name) await this.selectProject(name);
+    await expect.poll(() => this.getReleaseNames(), { timeout: 20000 }).toContain(expectedRelease);
+  }
+
   /** Clicks a Release node by name and waits for its Test Run grid to load. */
   async selectRelease(name: string): Promise<void> {
     await this.releaseTree.getByText(name, { exact: true }).click();

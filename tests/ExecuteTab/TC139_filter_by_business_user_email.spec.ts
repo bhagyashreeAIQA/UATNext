@@ -42,8 +42,9 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Assigned To / Business User', () => {
 
-  // BLOCKED: the Select User typeahead is name-based, so a Business User email never matches an
-  // option (re-verified 2026-06-26 on Dealer Master). See header note.
+  // BLOCKED (test.fixme): the Select User typeahead is name-based, so a Business User email never
+  // matches an option (re-verified 2026-06-26 on Dealer Master; re-confirmed 2026-07-01). See header
+  // note — drop `.fixme` once a Business User who is also a searchable platform user is seeded.
   test.fixme('TC-139 | Verify Filtering Test Runs by Business User Email', async ({ page }) => {
     test.setTimeout(300000);
 
@@ -70,7 +71,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     }
     expect(email, 'a Business User email should be present in the grid').toBeTruthy();
     // Expected 1: typing the email surfaces a matching user entry in the dropdown.
+  
+    const dropdown = page.locator(
+  'input.test-execution-text.searchable-dropdown-input[placeholder="Select user"]'
+);
+
+// Click and type
+    await dropdown.click();
+    await dropdown.fill('email');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter'); 
     const options = await executeTabPage.getSelectUserOptions(email);
+    await page.locator('.test-execution-chevron-down').first().click({ delay: 200 });
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
     expect(options.some(o => o.includes(email)),
       'matching user entries should appear for the typed email').toBe(true);
     await captureScreenshot(page, 'Step 2-3: Email typed; matching user entry shown');

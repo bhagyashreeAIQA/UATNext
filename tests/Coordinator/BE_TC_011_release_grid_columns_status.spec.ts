@@ -44,6 +44,7 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
     // ─── Step 1-2: open Bulk Execution and click a Release → grid loads ─────────────
     await be.openBulkExecution();
+    await be.selectProject(data.expectedProject);
     await be.selectRelease(data.releaseWithRuns);
     await be.verifyTestRunGridLoaded();
     await captureScreenshot(page, "Step 1-2: Release selected, grid loaded");

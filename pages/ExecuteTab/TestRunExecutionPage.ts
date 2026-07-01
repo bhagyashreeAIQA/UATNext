@@ -480,7 +480,9 @@ export class TestRunExecutionPage {
         await this.flushActualResultEditor(cell, text);
       }
       expect(committed).toContain(text);
-    }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
+      // Longer budget so the TinyMCE→textarea sync survives CPU contention under parallel (6-worker)
+      // runs — the flush can lag well past a few seconds when the browser is starved.
+    }).toPass({ timeout: 30000, intervals: [500, 1000, 2000, 3000] });
   }
 
   /** Flushes the TinyMCE editor in a cell into its bound textarea and notifies Blazor. */

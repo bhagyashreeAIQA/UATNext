@@ -40,8 +40,11 @@ import { TestRunExecutionPage } from '../../pages/ExecuteTab/TestRunExecutionPag
 import { EXPECTED } from '../../utils/testData';
 import { captureScreenshot } from '../../utils/screenshot';
 
-// Validate the default state on a run the mutating tests leave untouched (TC-075 uses row 1).
-const RUN_ROW_INDEX = 2;
+// The default-Unexecuted state can only be validated on a run with no executed steps. Runs get
+// executed as the data evolves (a fixed row is no longer reliably clean — verified 2026-07-01: the
+// suite's page-1 rows are all Failed/Blocked/InProgress/Passed/Incomplete), so the test filters the
+// grid to Status = Unexecuted and opens one of those clean runs (row 0) rather than a fixed index.
+const RUN_ROW_INDEX = 0;
 
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Test Step Status', () => {
 
@@ -54,6 +57,20 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
 
+    // Filter to Status = Unexecuted so the opened run is guaranteed clean (all steps default state).
+    let hasCleanRun = true;
+    try {
+      await executeTabPage.openStatusDropdown();
+      await executeTabPage.selectFirstNonEmptyStatus(['Unexecuted']);
+    } catch {
+      hasCleanRun = false;
+    }
+    test.skip(!hasCleanRun, 'No Unexecuted (clean) run in this suite to validate the default step state.');
+
+    // Dismiss the status dropdown overlay so it does not intercept the Run-button click, and let the
+    // filtered grid settle before opening a run.
+    await page.keyboard.press('Escape').catch(() => undefined);
+    await executeTabPage.verifyTotalEntriesPositive();
     await executeTabPage.clickRunButton(RUN_ROW_INDEX);
 
     const executionPage = new TestRunExecutionPage(page);

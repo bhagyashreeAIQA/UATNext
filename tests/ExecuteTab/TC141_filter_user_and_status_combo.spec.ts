@@ -49,7 +49,8 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     await executeTabPage.verifyTotalEntriesPositive();
 
     // ─── Step 1 (TC-138): filter by a real user who has runs ─────────────────────
-    const assignee = (await executeTabPage.getAssignedToDisplay(0)).trim();
+    // Some rows have a BLANK assignee — scan for the first row that carries one.
+    const assignee = await executeTabPage.deriveFilterableAssignee();
     await executeTabPage.selectAssignedToBusinessUser();
     const chosen = await executeTabPage.selectUserAndWaitForRefresh(assignee.split(/\s+/)[0], assignee);
     await executeTabPage.verifyAllRowsMatchUser(chosen);

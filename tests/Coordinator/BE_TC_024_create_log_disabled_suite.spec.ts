@@ -37,6 +37,8 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
     // ─── Step 1: open Bulk Execution, expand to the Test Suite and click it ─────────
     await be.openBulkExecution();
+    // Panel defaults to another project ("SET Dealer CRM"); select Testdata_Module first.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     await be.expandRelease(data.releaseWithCycles);
     await be.expandCycle(data.cycleWithRuns);
     await be.expandCycle(data.subCycleWithSuite);

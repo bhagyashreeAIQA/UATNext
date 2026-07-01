@@ -45,10 +45,13 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     await be.openBulkExecution();
     await be.verifyBulkExecutionActive();
     await be.verifyLeftPanelDisplayed();
+    // The panel defaults to another project ("SET Dealer CRM"); select the Testdata_Module project
+    // whose releases carry the test-run data this test needs.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithRuns);
     await be.verifyRightPanelEmpty();
     await captureScreenshot(page, "Step 2: open Bulk Execution → active; left panel shown; right empty");
 
-    // ─── Step 3: Project pre-selected; Releases displayed ──────────────────────
+    // ─── Step 3: Project selected; Releases displayed ──────────────────────────
     await be.verifyProjectSelected();
     expect(await be.getProjectsValue()).toBe(data.expectedProject);
     await be.verifyReleasesVisible();

@@ -296,7 +296,8 @@
       "Bash(grep -nA1 \"selectFeature\\(data.featureA\\)\" tests/AuthorTab/AT_TC_021_requirement_details_display.spec.ts)",
       "Bash(grep -rnB2 \"epicACount\" tests/AuthorTab/AT_TC_003_epic_filter_requirements.spec.ts tests/AuthorTab/AT_TC_005_feature_filter_requirements.spec.ts)",
       "Bash(iconv -f UTF-16 -t UTF-8 \"/c/Users/BhagyashreePanigrahi/AppData/Local/Temp/drift.txt\")",
-      "Bash(xargs -I{} sh -c 'echo \"NEWEST: {}\"; ls -la {}')"
+      "Bash(xargs -I{} sh -c 'echo \"NEWEST: {}\"; ls -la {}')",
+      "Bash(tee \"C:/Users/BHAGYA~1/AppData/Local/Temp/claude/C--Users-BhagyashreePanigrahi-PlaywrightCLI/38bc56fc-4c6d-4513-83f7-958c506b8458/scratchpad/fullrun.log\")"
     ]
   }
 }

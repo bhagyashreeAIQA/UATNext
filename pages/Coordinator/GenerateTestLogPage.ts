@@ -253,6 +253,15 @@ export class GenerateTestLogPage {
     return table.locator('.table-row-cell.step-number').count();
   }
 
+  /**
+   * Waits for a generated log's step rows to stream in. `clickGenerate` returns once the log table
+   * mounts, but Blazor streams the step rows a beat later (SignalR), so assertions that read step data
+   * immediately can see zero rows. Poll the step count until the rows arrive.
+   */
+  async waitForSteps(which: 'last' | 'new', timeout = 20000): Promise<void> {
+    await expect.poll(() => this.getStepCount(which), { timeout }).toBeGreaterThan(0);
+  }
+
   /** Actual-result cells of a log grid. */
   actualResultCells(which: 'last' | 'new'): Locator {
     const table = which === 'last' ? this.lastLogTable : this.newLogTable;

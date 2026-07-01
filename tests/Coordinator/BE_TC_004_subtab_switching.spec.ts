@@ -43,6 +43,8 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     await be.verifyCoordinatorTabActive();
     await be.openBulkExecution();
     await be.verifyBulkExecutionActive();
+    // The panel defaults to another project ("SET Dealer CRM"); select Testdata_Module explicitly.
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithRuns);
     await be.verifyProjectSelected();
     expect(await be.getProjectsValue()).toBe(data.expectedProject);
     await be.selectRelease(data.releaseWithRuns);
@@ -59,8 +61,10 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     await be.openBulkExecution();
     await be.verifyBulkExecutionActive();
     await be.verifyGenerateTestLogInactive();
-    // Project + Releases reload properly (no stale data / broken layout).
+    // Panel reloads cleanly (no stale data / broken layout). Switching sub-tabs resets the Projects
+    // dropdown to its default, so re-select Testdata_Module and confirm its Releases reload properly.
     await be.verifyLeftPanelDisplayed();
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithRuns);
     await be.verifyProjectSelected();
     expect(await be.getProjectsValue()).toBe(data.expectedProject);
     await be.verifyReleasesVisible();
