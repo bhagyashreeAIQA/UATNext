@@ -6,9 +6,9 @@
  * focused on what it validates.
  *
  * The COORDINATOR tab is permission-gated; the test account must hold the coordinator role (see the
- * GenerateTestLogPage note). Tests run on the default qConnect - Sample Project BU, which exposes the
- * tab and has approved test cases with runs — the documented "UATNext Dev" BU has no executable test
- * data (the same data deviation the Defect-tab specs document).
+ * GenerateTestLogPage note). Tests run on the "UATNext Dev" BU by default (see
+ * EXPECTED.generateTestLog.workspace), which exposes the tab and owns the approved test cases with
+ * runs the GTL specs exercise.
  */
 
 import { Page } from '@playwright/test';
@@ -16,7 +16,7 @@ import { LoginPage } from '../../pages/LoginPage';
 import { HomePage }  from '../../pages/HomePage';
 import { GenerateTestLogPage } from '../../pages/Coordinator/GenerateTestLogPage';
 import { BulkExecutionPage } from '../../pages/Coordinator/BulkExecutionPage';
-import { CREDENTIALS, URLS } from '../../utils/testData';
+import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
 
 export interface CoordinatorContext {
   loginPage: LoginPage;
@@ -25,11 +25,14 @@ export interface CoordinatorContext {
 }
 
 /**
- * @param workspace When given, switches the header workspace before opening the COORDINATOR tab.
- *   Most GTL data lives on the default qConnect BU (omit it), but some test cases (e.g. TC-26300 used
- *   by GTL_TC_010) only exist under "UATNext Dev".
+ * @param workspace Header workspace to switch to before opening the COORDINATOR tab. Defaults to the
+ *   Generate Test Log workspace ("UATNext Dev", EXPECTED.generateTestLog.workspace), where the GTL
+ *   test data lives; pass an explicit value to override.
  */
-export async function loginAndOpenGenerateTestLog(page: Page, workspace?: string): Promise<CoordinatorContext> {
+export async function loginAndOpenGenerateTestLog(
+  page: Page,
+  workspace: string = EXPECTED.generateTestLog.workspace,
+): Promise<CoordinatorContext> {
   const loginPage = new LoginPage(page);
   const homePage  = new HomePage(page);
   const generateTestLogPage = new GenerateTestLogPage(page);

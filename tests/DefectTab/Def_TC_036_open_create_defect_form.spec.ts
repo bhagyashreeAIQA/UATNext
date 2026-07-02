@@ -26,6 +26,7 @@
 
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
@@ -33,7 +34,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
   test('Def_TC_036 | Verify Open Create Defect Form', async ({ page }) => {
     // ─── Steps 1-2: Defect tab open, project defects loaded ───────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyProjectSelected();
     await defectTabPage.verifyDefectsLoaded();

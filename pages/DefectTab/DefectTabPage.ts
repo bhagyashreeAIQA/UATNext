@@ -281,30 +281,37 @@ export class DefectTabPage {
 
   /** Opens the named dropdown and selects the option whose text exactly matches `value`. */
   async selectDropdownValue(label: string, value: string): Promise<void> {
-    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const field = this.sidebarField(label);
     const list = field.locator('.searchable-dropdown-list');
-    const item = field.locator('.searchable-dropdown-item').filter({ hasText: new RegExp(`^${escaped}$`) });
+    const items = field.locator('.searchable-dropdown-item');
 
-    // The options stream in from qTest when the dropdown opens; under load that fetch can
-    // briefly return nothing ("No results found"). (Re)open and wait until the target
-    // option is actually present, toggling closed between attempts so each pass re-fetches.
+    // The options stream in from qTest when the dropdown opens; under load that fetch can briefly
+    // return nothing ("No results found"). (Re)open and wait until the target option is present, then
+    // click it BY INDEX on its TRIMMED text — an anchored `hasText` regex misses options whose raw
+    // DOM text carries surrounding whitespace/newlines (which `getDropdownOptions` trims away).
     await expect(async () => {
       if (!(await list.isVisible().catch(() => false))) {
         await this.sidebarInput(label).click();
         await list.waitFor({ state: 'visible', timeout: 5000 });
       }
       await this.page.waitForTimeout(500);
-      if ((await item.count()) === 0) {
+      const texts = (await items.allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim());
+      const idx = texts.indexOf(value.replace(/\s+/g, ' ').trim());
+      if (idx === -1) {
         await this.sidebarInput(label).click().catch(() => {});
         await list.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
-        throw new Error(`Dropdown "${label}" has not loaded option "${value}" yet`);
+        throw new Error(`Dropdown "${label}" has not loaded option "${value}" yet (options: ${texts.join(', ')})`);
       }
+      await items.nth(idx).click();
     }).toPass({ timeout: 25000 });
 
-    await item.first().click();
-    // The list collapses once a value is committed.
-    await expect(this.sidebarInput(label)).toHaveValue(value);
+    // The list collapses once a value is committed. Compare on normalized whitespace: some options
+    // commit with inconsistent spacing (e.g. the grid shows "1 - Critical" but the field receives
+    // "1 -  Critical"), which an exact toHaveValue would spuriously reject.
+    const want = value.replace(/\s+/g, ' ').trim();
+    await expect
+      .poll(async () => (await this.sidebarInput(label).inputValue()).replace(/\s+/g, ' ').trim(), { timeout: 10000 })
+      .toBe(want);
   }
 
   /** Types a value into the named dropdown's search box without committing a selection. */

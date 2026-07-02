@@ -35,13 +35,13 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
-  test.fixme('Def_TC_045 | Verify Successful Save When Team is Mandatory and Selected', async ({ page }) => {
+  test('Def_TC_045 | Verify Successful Save When Team is Mandatory and Selected', async ({ page }) => {
     test.setTimeout(480000);
     const summary = `Automated defect Def_TC_045 ${Date.now()}`;
 
     // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
     // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
@@ -53,6 +53,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
 
     // ─── Step 4: enter valid values in ALL required fields including Team ─────────────
     await createDefect.fillRequiredForSave({ summary });
+    await createDefect.selectFirstAvailable(CreateDefectPage.PLACEHOLDER.team);
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.team)).not.toBe('');
     await captureScreenshot(page, 'Step 4: Required fields filled, Team selected');
 

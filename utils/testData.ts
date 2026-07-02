@@ -191,6 +191,9 @@ export const EXPECTED = {
   // to assert against; the project that owns the seeded defects is used instead so
   // the list, search and filter behaviours are exercisable.
   defect: {
+    // Workspace/Business Unit to switch to for the Team-mandatory case (Def_TC_043),
+    // where Team is configured as a required field on the New Defect form.
+    workspace: 'UATNext Dev',
     // Left-panel filter controls expected by Def_TC_001, in top-to-bottom order. The
     // SEARCH/CLEAR buttons are present but rendered disabled until a filter is entered.
     leftPanelControls: [
@@ -260,13 +263,15 @@ export const EXPECTED = {
   // which exposes approved test cases with runs (the documented "UATNext Dev" BU has no executable
   // test data — the same deviation the Defect-tab specs note). Values verified live 2026-06-18.
   generateTestLog: {
+    // Workspace/Business Unit the Generate Test Log flow runs against.
+    workspace: 'UATNext Dev',
     // An approved test case (under qConnect) with multiple associated test runs. Read at use; if
     // the seed data changes, update this PID. Version auto-populates to "6.0".
-    validTestCasePid: 'TC-3017',
+    validTestCasePid: 'TC-25944',
     // The latest approved version auto-populated for validTestCasePid.
-    expectedVersion: '6.0',
+    expectedVersion: '5.0',
     // A test run id belonging to validTestCasePid (its Test Runs dropdown lists TR-2235/2251/2267/2283).
-    validTestRun: 'TR-2235',
+    validTestRun: 'TR-1205',
     // A validly-formatted but non-existent Test Case PID — search returns no version/runs and an
     // error message (GTL_TC_004). NOTE: the live message is "Error fetching test runs. Please try
     // again." (the spec wording is "No test runs found"), matched leniently below.

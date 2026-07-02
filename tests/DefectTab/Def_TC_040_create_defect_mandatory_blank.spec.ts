@@ -32,6 +32,7 @@
 
 import { test } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
@@ -39,7 +40,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
 
   test('Def_TC_040 | Verify Defect Creation with Mandatory Fields Blank', async ({ page }) => {
     // ─── Steps 1-3: open the Create Defect form ───────────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 

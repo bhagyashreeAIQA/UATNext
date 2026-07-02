@@ -20,6 +20,7 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect List', () => {
@@ -27,7 +28,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect List', () => {
   test('Def_TC_003 | Verify Defect List Display', async ({ page }) => {
     // ─── Step 1: Click on the Defect tab ──────────────────────────────────────
     // Expected: Defect page should be displayed
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await captureScreenshot(page, "Step 1: Click on the Defect tab");
 

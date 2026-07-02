@@ -39,7 +39,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     test.fixme(true, 'No selectable Created By value returns defects in this data (creators are a non-listed qTest integration account).');
 
     // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");

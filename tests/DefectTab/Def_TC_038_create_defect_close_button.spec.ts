@@ -33,6 +33,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
@@ -44,7 +45,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     const summary = `Def_TC_038 unsaved-changes ${Date.now()}`;
 
     // ─── Steps 1-3: open the Create Defect form ───────────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 

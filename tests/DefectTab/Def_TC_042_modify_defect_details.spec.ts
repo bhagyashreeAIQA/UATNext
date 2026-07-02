@@ -50,7 +50,7 @@ test.describe('Feature: Defect | Sub-Feature: Modify Defect', () => {
     const summary = `Automated defect Def_TC_042 ${Date.now()}`;
 
     // ─── Setup: seed a fully-valid defect to modify (Step 3 precondition) ──────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 

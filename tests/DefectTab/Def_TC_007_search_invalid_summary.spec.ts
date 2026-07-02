@@ -31,7 +31,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
   test('Def_TC_007 | Verify Defect Search by Invalid Defect Summary', async ({ page }) => {
     // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
     // Expected: Defect page displayed; project defects loaded
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");

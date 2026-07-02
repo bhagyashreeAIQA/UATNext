@@ -10,7 +10,7 @@ import { Page } from '@playwright/test';
 import { LoginPage }     from '../../pages/LoginPage';
 import { HomePage }      from '../../pages/HomePage';
 import { DefectTabPage } from '../../pages/DefectTab/DefectTabPage';
-import { CREDENTIALS, URLS } from '../../utils/testData';
+import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
 
 export interface DefectContext {
   loginPage: LoginPage;
@@ -19,11 +19,17 @@ export interface DefectContext {
 }
 
 /**
- * Logs in (if needed), opens the DEFECT tab and waits for the defect page — grid
- * header, CREATE DEFECT button and pagination — to be fully rendered. The default
- * project carries seeded defect data, so the grid loads populated.
+ * Logs in (if needed), switches to the workspace that owns the seeded defect data,
+ * opens the DEFECT tab and waits for the defect page — grid header, CREATE DEFECT
+ * button and pagination — to be fully rendered, so the grid loads populated.
+ *
+ * The seeded defects live in the UATNext Dev workspace (EXPECTED.defect.workspace),
+ * so callers switch there by default; pass an explicit `workspace` to override.
  */
-export async function loginAndOpenDefectTab(page: Page): Promise<DefectContext> {
+export async function loginAndOpenDefectTab(
+  page: Page,
+  workspace: string = EXPECTED.defect.workspace,
+): Promise<DefectContext> {
   const loginPage     = new LoginPage(page);
   const homePage      = new HomePage(page);
   const defectTabPage = new DefectTabPage(page);
@@ -34,7 +40,7 @@ export async function loginAndOpenDefectTab(page: Page): Promise<DefectContext> 
   }
   await homePage.waitForPageLoad();
   await homePage.verifyHomePageLoaded();
-
+  if (workspace) await homePage.switchWorkspace(workspace);
   await defectTabPage.open();
   await defectTabPage.ensureDefectsLoaded();
 

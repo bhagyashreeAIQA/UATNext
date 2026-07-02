@@ -41,7 +41,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search – Date validation'
     const { after } = EXPECTED.createDefectPage.dateValidation;
 
     // ─── Steps 1-2: Defect tab open, defects loaded ───────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, "Steps 1-2: Defect tab open, defects loaded");
 

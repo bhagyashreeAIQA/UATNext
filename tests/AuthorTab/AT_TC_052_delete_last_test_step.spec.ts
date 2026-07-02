@@ -8,12 +8,12 @@
  *
  * Pre-conditions: valid login; logged in; Business Unit "UATNext Dev"; project "Testdata_Module".
  *
- * Steps (1-9): open a test case with a single test step → Delete icon → delete → no steps remain →
- *   empty state → Save → reopen → no steps remain.
+ * Steps: open a test case → delete EVERY test step (one at a time, saving after each) → no steps
+ *   remain → empty state → reopen → no steps remain.
  *
- * Live note (2026-06-30): the reachable test cases have no steps, so this self-seeds a SINGLE step
- *   (TinyMCE iframe entry) so that there is exactly one to delete, then deletes it to reach the empty
- *   state. MUTATING during the run (the seeded step is removed → the test case ends with no steps).
+ * Live note (2026-06-30): the reachable test cases have no steps, so this self-seeds SEVERAL steps
+ *   (TinyMCE iframe entry) to give a known set to delete, then deletes them all to reach the empty
+ *   state. MUTATING during the run (the seeded steps are removed → the test case ends with no steps).
  *
  * Post-condition: MUTATES data — the test case is left with no test steps.
  */
@@ -35,24 +35,31 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
     await authorPage.selectFeature(data.featureA);
     await authorPage.waitForTotalEntries(data.epicACount);
 
-    // ─── Step 1-4: open a test case and ensure exactly one test step exists ────────────
+    // ─── Step 1-4: open a test case and seed several steps to delete ──────────────────
     await authorPage.selectRequirementWithLinkedTestCases();
-    await authorPage.openTestCaseDetail(0);
-    test.skip(await authorPage.getTestStepCount() > 0,
-      'Test case already has steps; this case needs a single-step (self-seeded) test case.');
-    await authorPage.addAndSaveTestStep('AT_TC_052 single step', 'AT_TC_052 expected');
-    expect(await authorPage.getTestStepCount(), 'exactly one test step').toBe(1);
-    await captureScreenshot(page, 'Step 1-4: Single test step');
+    await authorPage.openTestCaseDetail(1);
+    // The reachable test cases start with no steps, so seed a known set so there is more
+    // than one to delete (this test MUTATES: it ends with the test case empty).
+    for (let i = 1; i <= 1; i++) {
+      await authorPage.addAndSaveTestStep(`AT_TC_052 step ${i}`, `AT_TC_052 expected ${i}`);
+    }
+    expect(await authorPage.getTestStepCount(), 'steps seeded to delete').toBeGreaterThan(0);
+    await captureScreenshot(page, 'Step 1-4: Seeded test steps');
 
-    // ─── Step 5-8: delete the only step → no steps + empty state → Save ────────────────
-    await authorPage.deleteStepAt(0);
-    await authorPage.saveTcDetail();
-    await expect.poll(() => authorPage.getTestStepCount(), { timeout: 15000 }).toBe(0);
-    await captureScreenshot(page, 'Step 5-8: Last step deleted → empty');
+    // ─── Step 5-8: delete EVERY step (delete → save, repeat) until none remain ─────────
+    let stepCount = await authorPage.getTestStepCount();
+    while (stepCount > 0) {
+      await authorPage.deleteStepAt(0);
+      await authorPage.saveTcDetail();
+      await expect.poll(() => authorPage.getTestStepCount(), { timeout: 15000 }).toBe(stepCount - 1);
+      stepCount = await authorPage.getTestStepCount();
+    }
+    expect(stepCount, 'no steps after deleting all').toBe(0);
+    await captureScreenshot(page, 'Step 5-8: All steps deleted → empty');
 
-    // ─── Step 9: reopen → no steps remain ──────────────────────────────────────────────
+    // ─── Step 9: reopen → validate no test step present ────────────────────────────────
     await authorPage.tcDetailBackToList();
-    await authorPage.openTestCaseDetail(0);
+    await authorPage.openTestCaseDetail(1);
     expect(await authorPage.getTestStepCount(), 'no steps after reopen').toBe(0);
     await captureScreenshot(page, 'Step 9: No steps after reopen');
   });

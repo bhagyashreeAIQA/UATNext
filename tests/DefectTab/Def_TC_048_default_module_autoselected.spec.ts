@@ -31,15 +31,16 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module', () => {
 
-  test.fixme('Def_TC_048 | Verify Default Module is Auto-Selected for Configured Project', async ({ page }) => {
+  test('Def_TC_048 | Verify Default Module is Auto-Selected for Configured Project', async ({ page }) => {
     // ─── Steps 1-2: (project with default module) → Defect tab loaded ────────────────
     // TODO: select a project configured with a default module before opening the Defect tab.
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 

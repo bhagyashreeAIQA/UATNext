@@ -22,13 +22,14 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
   test('Def_TC_016 | Verify Defect Search by Valid Priority', async ({ page }) => {
     // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
 
@@ -41,7 +42,10 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
     // ─── Step 3: Select a valid Priority value ────────────────────────────────
     // Expected: Selected Priority value should be displayed in the field
     await defectTabPage.selectDropdownValue('Priority', priority!);
-    await expect(defectTabPage.priorityDropdown).toHaveValue(priority!);
+    // Normalize whitespace: the field can commit an option with inconsistent spacing (e.g. the grid
+    // shows "1 - Critical" but the field receives "1 -  Critical").
+    const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
+    expect(norm(await defectTabPage.priorityDropdown.inputValue())).toBe(norm(priority!));
     await captureScreenshot(page, "Step 3: Select a valid Priority value");
 
     // ─── Step 4: Click the Search button ──────────────────────────────────────

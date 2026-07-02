@@ -30,17 +30,14 @@ test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
   test('Def_TC_010 | Verify Defect Search by Valid Status', async ({ page }) => {
     // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
     // Expected: Defect page displayed; project defects loaded
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await defectTabPage.verifyDefectsLoaded();
 
-    // Pick a real Status option: the configured value if present, else the first
-    // non-placeholder option, so the test stays data-independent.
-    const options = await defectTabPage.getDropdownOptions('Status');
-    const status =
-      options.find(o => o.toLowerCase() === EXPECTED.defect.validStatus.toLowerCase()) ??
-      options.find(o => o && !/please select/i.test(o));
-    expect(status, 'Status dropdown should expose at least one status').toBeTruthy();
+    // Pick a Status that actually owns defects by reading it from the loaded grid, so the filter is
+    // guaranteed to return matches (a dropdown option like "New" may have zero defects → empty grid).
+    const status = (await defectTabPage.getFirstNonEmptyColumnValue('Status'))?.trim();
+    expect(status, 'A loaded defect should expose a Status value').toBeTruthy();
     await captureScreenshot(page, "Steps 1-2: Open Defect tab, project defects loaded");
 
     // ─── Step 3: Select a valid Status value ──────────────────────────────────

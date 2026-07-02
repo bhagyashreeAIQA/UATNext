@@ -29,7 +29,7 @@ test.describe('Feature: Defect | Sub-Feature: Defect Tab UI', () => {
   test('Def_TC_002 | Verify Defect Tab UI for Right Panel', async ({ page }) => {
     // ─── Step 1: Click on the Defect tab ──────────────────────────────────────
     // Expected: Defect page should be displayed
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();
     await captureScreenshot(page, "Step 1: Click on the Defect tab");
 

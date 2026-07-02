@@ -46,7 +46,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     const summary = `Automated defect Def_TC_037 ${Date.now()}`;
 
     // ─── Steps 1-3: open the Create Defect form ───────────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 

@@ -31,15 +31,18 @@
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
+import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
-  test.fixme('Def_TC_043 | Verify Team Field is Mandatory for Specific Business Unit', async ({ page }) => {
+  test('Def_TC_043 | Verify Team Field is Mandatory for Specific Business Unit', async ({ page }) => {
     // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
-    // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
-    const { defectTabPage } = await loginAndOpenDefectTab(page);
+    // The shared helper switches to the UATNext Dev workspace (where Team is configured mandatory)
+    // before opening the Defect tab.
+    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
+    
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 
