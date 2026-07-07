@@ -51,10 +51,10 @@ export class HomePage {
     await this.page.waitForURL(/\/defect/);
   }
 
-  /** Opens the COORDINATOR tab, which lands on the Generate Test Log screen (`/generate-test-log`). */
+  /** Opens the COORDINATOR tab, which lands on the Generate Test Log screen (route `/coordinator`). */
   async navigateToCoordinatorTab(): Promise<void> {
     await this.coordinatorTab.click();
-    await this.page.waitForURL(/\/generate-test-log/);
+    await this.page.waitForURL(/\/(coordinator|generate-test-log)/);
   }
 
   async getActiveProject(): Promise<string> {

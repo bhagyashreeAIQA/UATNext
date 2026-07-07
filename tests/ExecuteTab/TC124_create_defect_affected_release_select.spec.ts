@@ -36,7 +36,7 @@ const RUN_ROW_INDEX = 0;
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Create Defect', () => {
 
   // NOT APPLICABLE: Affected Release/Build is display-only (no dropdown) in this build — see header.
-  test.fixme('TC-124 | Verify Affected Release/Build Field Value Selection', async ({ page }) => {
+  test('TC-124 | Verify Affected Release/Build Field Value Selection', async ({ page }) => {
     test.setTimeout(300000);
 
     // ─── Step 1: reach the suite grid and open a Test Run ────────────────────────────

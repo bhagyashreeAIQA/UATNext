@@ -41,7 +41,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Detail Vi
       if ((await authorPage.getTestStepCount()) > 0) { opened = tcId; break; }
       await authorPage.tcDetailBackToList();
     }
-    test.skip(opened === '', 'No linked test case with test steps is available.');
+    //test.skip(opened === '', 'No linked test case with test steps is available.');
     expect(opened).toMatch(/^TC-\d+$/);
     await captureScreenshot(page, 'Step 1-4: Test Case (with steps) opened');
 

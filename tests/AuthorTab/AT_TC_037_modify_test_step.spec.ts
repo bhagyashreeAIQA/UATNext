@@ -37,6 +37,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
     await authorPage.selectFeature(data.featureA);
 
     // ─── Step 1-4: open a test case with existing steps ────────────────────────────────
+    await page.waitForTimeout(5000); // Waits for 5 seconds
     await authorPage.selectRequirementWithLinkedTestCases();
     await authorPage.openTestCaseDetail(0);
 

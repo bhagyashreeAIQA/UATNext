@@ -29,15 +29,6 @@ import { captureScreenshot } from '../../utils/screenshot';
 test.describe('Feature: Defect | Sub-Feature: Defect Search', () => {
 
   test('Def_TC_022 | Verify Defect Search by Valid Created By Value', async ({ page }) => {
-    // BLOCKED (data): No selectable Created By value owns any defects. The Created By
-    // dropdown exposes ~852 users, but the seeded defects were all created by a qTest
-    // integration account that is NOT present in that list — sampling 12+ users across the
-    // whole list (including every Assigned To / Business User who appears in the grid)
-    // returned "Total 0 Entries" for each. The SRS expectation "Matching defects should be
-    // displayed" therefore cannot be satisfied until a creator becomes selectable. The body
-    // below is the intended verification and will work once such data exists.
-    test.fixme(true, 'No selectable Created By value returns defects in this data (creators are a non-listed qTest integration account).');
-
     // ─── Steps 1-2: Open Defect tab, project defects loaded ───────────────────
     const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
     await defectTabPage.verifyDefectPageDisplayed();

@@ -29,7 +29,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
   // BLOCKED (test.fixme): adds a step via the TinyMCE `.testcase-prototype` editor, whose programmatic
   // text-commit is unreliable (same editor as Execute TC-100/101), and it MUTATES qTest irreversibly
   // (a real test step is created with no automated cleanup). See AT_TC_036's note.
-  test.fixme('AT_TC_040 | Verify User Can Add a Test Step Using Save Button', async ({ page }) => {
+  test('AT_TC_040 | Verify User Can Add a Test Step Using Save Button', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);

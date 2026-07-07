@@ -76,7 +76,7 @@ export class GenerateTestLogPage {
   // ─── Navigation / load ──────────────────────────────────────────────────────
 
   async waitForScreenLoad(): Promise<void> {
-    await this.page.waitForURL(/\/generate-test-log/);
+    await this.page.waitForURL(/\/(coordinator|generate-test-log)/);
     await expect(this.testCaseInput).toBeVisible({ timeout: 20000 });
     await expect(this.generateButton).toBeVisible();
   }
@@ -89,7 +89,7 @@ export class GenerateTestLogPage {
    * remembered one.
    */
   async ensureGenerateTestLogSubTab(): Promise<void> {
-    await this.page.waitForURL(/\/generate-test-log/);
+    await this.page.waitForURL(/\/(coordinator|generate-test-log)/);
     await expect(async () => {
       if (!(await this.testCaseInput.isVisible().catch(() => false))) {
         await this.generateTestLogSubTab.click({ timeout: 5000 }).catch(() => undefined);

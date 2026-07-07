@@ -116,7 +116,7 @@ Def_TC_018,tests/DefectTab/Def_TC_018_search_valid_assigned_to.spec.ts,DefectTab
 Def_TC_019,tests/DefectTab/Def_TC_019_search_invalid_assigned_to.spec.ts,DefectTab,Verify Defect Search by Invalid Assigned To Value,Passed,,
 Def_TC_020,tests/DefectTab/Def_TC_020_search_valid_business_user.spec.ts,DefectTab,Verify Defect Search by Valid Business User Value,Passed,,
 Def_TC_021,tests/DefectTab/Def_TC_021_search_invalid_business_user.spec.ts,DefectTab,Verify Defect Search by Invalid Business User Value,Passed,,
-Def_TC_022,tests/DefectTab/Def_TC_022_search_valid_created_by.spec.ts,DefectTab,Verify Defect Search by Valid Created By Value,Skipped,If any of the user isselected no defect is visible.,
+Def_TC_022,tests/DefectTab/Def_TC_022_search_valid_created_by.spec.ts,DefectTab,Verify Defect Search by Valid Created By Value,Skipped,If any of the user isselected no defect is visible.,"Using Sounak Sen , Set dealer"
 Def_TC_023,tests/DefectTab/Def_TC_023_search_invalid_created_by.spec.ts,DefectTab,Verify Defect Search by Invalid Created By Value,Passed,,
 Def_TC_024,tests/DefectTab/Def_TC_024_search_valid_submitted_after.spec.ts,DefectTab,Verify Defect Search by Valid Submitted After Date,Passed,,
 Def_TC_025,tests/DefectTab/Def_TC_025_search_valid_submitted_before.spec.ts,DefectTab,Verify Defect Search by Valid Submitted Before Date,Passed,,

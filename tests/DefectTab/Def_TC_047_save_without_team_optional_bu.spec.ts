@@ -40,7 +40,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     const summary = `Automated defect Def_TC_047 ${Date.now()}`;
 
     // ─── Steps 1-3: open the New Defect form ──────────────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, "qConnect - Sample Project");
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 
@@ -61,8 +61,10 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
 
     // ─── Step 5: Save → success even without a Team (Team optional) ────────────
     await createDefect.clickCreateSave();
+    
+    //await page.getByText('Error: Please select a valid').toBeVisible({ timeout: 20000 });
     await expect(createDefect.toast(EXPECTED.createDefectPage.createdSuccessMessage)).toBeVisible({ timeout: 20000 });
-
+    //EXPECTED.createDefectPage.createdSuccessMessage = new RegExp(`Defect ${summary} created successfully`, 'i');
     await defectTabPage.waitForResults();
     const newId = await defectTabPage.searchAndGetDefectIdBySummary(summary);
     await defectTabPage.verifyDefectVisible(newId);

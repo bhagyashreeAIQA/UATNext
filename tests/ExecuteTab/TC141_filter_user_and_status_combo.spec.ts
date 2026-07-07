@@ -48,13 +48,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Assignee Filter – Ass
     await reachFirstLayerCycleGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
 
-    // ─── Step 1 (TC-138): filter by a real user who has runs ─────────────────────
-    // Some rows have a BLANK assignee — scan for the first row that carries one.
-    const assignee = await executeTabPage.deriveFilterableAssignee();
+    // ─── Step 1 (TC-138): filter by Business User "Anubhav Ganguly" ──────────────
+    // Pinned to a specific Business User. The Select User typeahead filters on the LEADING name
+    // token, not the full string (see TC-139), so search "Anubhav" and select "Anubhav Ganguly".
+    const businessUser = 'Anubhav Ganguly';
+    const searchToken = businessUser.split(/\s+/)[0];   // "Anubhav"
     await executeTabPage.selectAssignedToBusinessUser();
-    const chosen = await executeTabPage.selectUserAndWaitForRefresh(assignee.split(/\s+/)[0], assignee);
+    const chosen = await executeTabPage.selectUserAndWaitForRefresh(searchToken, businessUser);
+    expect(chosen).toContain(businessUser);
     await executeTabPage.verifyAllRowsMatchUser(chosen);
-    await captureScreenshot(page, "Step 1 (TC-138): filter by a real user who has runs");
+    await captureScreenshot(page, "Step 1 (TC-138): filter by Business User Anubhav Ganguly");
 
     // ─── Steps 2-3 / Expected 1-2: status dropdown lists statuses; pick one ──────
     await executeTabPage.openStatusDropdown();

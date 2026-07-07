@@ -392,6 +392,31 @@ export class BulkExecutionPage {
     return out;
   }
 
+  /**
+   * Collects never-executed Test Runs straight from the grid — walking every page from the current one
+   * — returning the Test Case PID + Run ID of each row whose Status is "Unexecuted" AND whose Execution
+   * Date is blank (a run with no previous execution). Deduped by PID (one candidate per test case, since
+   * whether a generated New Log carries step rows depends on the test case, not the run) and capped at
+   * `limit`. Sourcing GTL_TC_010's data this way keeps it robust to data drift: a hard-coded run
+   * eventually gets executed and grows a Last Log, whereas this always finds a currently-blank one.
+   */
+  async collectUnexecutedBlankDateRuns(limit = 8): Promise<Array<{ pid: string; runId: string }>> {
+    const totalPages = await this.getTotalPages();
+    const out: Array<{ pid: string; runId: string }> = [];
+    const seenPids = new Set<string>();
+    for (let p = 1; p <= totalPages && out.length < limit; p++) {
+      if (p > 1) await this.goToNextPage();
+      for (const r of await this.getRows()) {
+        if (r.date === '' && /unexecuted/i.test(r.status) && r.pid && !seenPids.has(r.pid)) {
+          seenPids.add(r.pid);
+          out.push({ pid: r.pid, runId: r.runId });
+          if (out.length >= limit) break;
+        }
+      }
+    }
+    return out;
+  }
+
   /** First row whose checkbox is enabled (blank Execution Date). */
   firstEligibleRow(): Locator {
     return this.dataRows.filter({ has: this.page.locator('.gtl-checkbox-cell input:not([disabled])') }).first();
@@ -551,7 +576,10 @@ export class BulkExecutionPage {
     const before = await this.getTestRunIds();
     await this.navButton(alt).click();
     await expect.poll(() => this.getCurrentPage(), { timeout: 20000 }).toBe(expectedPage);
-    await expect.poll(() => this.getTestRunIds(), { timeout: 20000 }).not.toEqual(before);
+    // The page-number indicator updates before the new rows stream in. Under parallel load the
+    // grid (esp. a partial last page) can take >20s to repaint, so allow the same 30s the
+    // node-switch wait (waitForRunIdsChangedFrom) uses.
+    await expect.poll(() => this.getTestRunIds(), { timeout: 30000 }).not.toEqual(before);
   }
 
   async goToNextPage(): Promise<void>     { await this.navigateTo('Next', (await this.getCurrentPage()) + 1); }

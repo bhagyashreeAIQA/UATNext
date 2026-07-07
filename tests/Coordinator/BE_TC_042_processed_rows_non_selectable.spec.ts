@@ -79,8 +79,6 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     }).toPass({ timeout: 30000, intervals: [1000, 2000] });
     // Known build regression (2026-07-01): CREATE LOG errors for every run and leaves the row unlogged.
     // Skip rather than fail; the processed-row assertions below run once the build is fixed.
-    test.skip(await errorToast.count() > 0,
-      'CREATE LOG build regression: "Log creation failed for all selected test runs".');
     await expect(successToast).toBeVisible();
     await captureScreenshot(page, 'Step 2: Log creation success message');
 

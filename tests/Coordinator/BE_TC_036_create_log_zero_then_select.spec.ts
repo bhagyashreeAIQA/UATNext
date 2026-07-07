@@ -40,8 +40,7 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     // Panel defaults to another project ("SET Dealer CRM"); select Testdata_Module first.
     await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
     await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns);
-    test.skip(await be.getEligibleRowCount() === 0, 'No log-eligible row on this grid page.');
-
+   
     // ─── Step 1-2: CREATE LOG disabled with zero selection; clicking is a no-op ─────
     await be.verifyCreateLogVisibleAndDisabled();
     await expect(be.createLogButton).toBeDisabled(); // disabled button → click does nothing, no error

@@ -32,7 +32,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
 
   // BLOCKED (test.fixme): confirming the unlink permanently removes a real test-case ↔ requirement
   // link in qTest with no automated re-link restore — see header note (re-confirmed 2026-07-01).
-  test.fixme('AT_TC_024 | Verify Unlink Test Case Functionality in Existing Test Cases Section', async ({ page }) => {
+  test('AT_TC_024 | Verify Unlink Test Case Functionality in Existing Test Cases Section', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);
@@ -47,6 +47,8 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
     await authorPage.verifyLinkedTestCasesPresent(data.linkedTcColumns);
 
     // ─── Step 2-3: a linked test case + its Unlink icon are visible ────────────────────
+    const beforeCountText = await page.locator('#rd_paginationContainer > span').textContent();
+    const beforecount = Number(beforeCountText?.match(/\d+/)?.[0]);
     const before = await authorPage.getLinkedTcIds();
     expect(before.length, 'a linked test case to unlink').toBeGreaterThan(0);
     await expect(authorPage.unlinkIcons.first()).toBeVisible();
@@ -60,7 +62,11 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
 
     // ─── Step 5-7: confirm → test case removed + count updated (MUTATING) ──────────────
     await authorPage.confirmUnlink();
-    await expect.poll(() => authorPage.getLinkedTcCount(), { timeout: 15000 }).toBe(before.length - 1);
+    
+    await expect.poll(async () => {
+      const pageNumberText = await page.locator('#rd_paginationContainer > span').textContent();
+      return Number(pageNumberText?.match(/\d+/)?.[0]);
+    }, { timeout: 15000 }).toBe(beforecount - 1);
     const after = await authorPage.getLinkedTcIds();
     expect(after, 'unlinked test case no longer displayed').not.toContain(before[0]);
     await captureScreenshot(page, 'Step 5-7: Test case unlinked, count updated');

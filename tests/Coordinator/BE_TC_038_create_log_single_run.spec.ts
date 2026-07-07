@@ -86,8 +86,6 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     // Known build regression (2026-07-01): CREATE LOG errors "Log creation failed for all selected test
     // runs" for every run and leaves the row unlogged. Skip rather than fail; the success assertions
     // below run once the build is fixed. See BE_TC_039 for the same handling.
-    test.skip(await errorToast.count() > 0,
-      'CREATE LOG build regression: "Log creation failed for all selected test runs".');
     await expect(successToast).toBeVisible();
     await captureScreenshot(page, 'Step 4: Log creation success message');
 

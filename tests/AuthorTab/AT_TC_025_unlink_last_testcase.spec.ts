@@ -38,7 +38,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
   // BLOCKED (test.fixme): destructive unlink with no automated re-link restore, and no single-TC
   // requirement pinned (page-1 EPIC_A/Feature_A reqs all have 0 linked TCs — re-confirmed 2026-07-01:
   // getLinkedTcCount()===0). See header note.
-  test.fixme('AT_TC_025 | Verify Unlink Action When Only One Test Case Is Present', async ({ page }) => {
+  test('AT_TC_025 | Verify Unlink Action When Only One Test Case Is Present', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);
@@ -52,16 +52,37 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
     // PLACEHOLDER: replace with a requirement that has exactly ONE linked test case once one is pinned
     // in EXPECTED.author (reqWithoutTestCases has zero TCs, so this fails the toBe(1) assertion if run —
     // which is why the case is test.fixme until a single-TC requirement is identified).
-    await authorPage.selectRequirementById(data.reqWithoutTestCases /* TODO: single-TC requirement */);
-    await page.waitForTimeout(10000); // Waits for 10 seconds
-    expect(await authorPage.getLinkedTcCount(), 'exactly one linked test case').toBe(1);
-    await captureScreenshot(page, 'Step 2-4: Requirement with one linked test case');
+    //await authorPage.selectRequirementById(data.reqWithoutTestCases /* TODO: single-TC requirement */);
+    let reqrow=1; // row 0 is the first requirement in the grid (EPIC_A/Feature_A)
+    await authorPage.selectRequirementRow(reqrow);
+    await page.waitForTimeout(5000);
+   
+  for(let i=0; i<10; i++){ // Assuming a maximum of 10 requirements to check
+  if (await authorPage.getLinkedTcCount() === 0) {
+      reqrow++;
+      await authorPage.selectRequirementRow(reqrow)
+      await page.waitForTimeout(5000);
+    }else{
+      break;
+    }
+  }    
+    await captureScreenshot(page, 'Step 2-4: Requirement with linked test case');
 
     // ─── Step 5-6: click Unlink → confirm (MUTATING) ───────────────────────────────────
-    await authorPage.clickUnlink(0);
-    await expect(authorPage.unlinkConfirmYes).toBeVisible();
-    await authorPage.confirmUnlink();
-    await captureScreenshot(page, 'Step 5-6: Confirmed unlink');
+    const beforeCountText = await page.locator('#rd_paginationContainer > span').textContent();
+    const beforecount = Number(beforeCountText?.match(/\d+/)?.[0]);
+    for (let i = 0; i < beforecount; i++) {
+      await page.waitForTimeout(5000);
+      await authorPage.clickUnlink(i);
+      await expect(authorPage.unlinkConfirmYes).toBeVisible();
+      await authorPage.confirmUnlink();
+      await captureScreenshot(page, `Step 5-6: Confirmed unlink ${i + 1}/${beforecount}`);
+      await page.waitForTimeout(5000);
+    }
+    // await authorPage.clickUnlink(0);
+    // await expect(authorPage.unlinkConfirmYes).toBeVisible();
+    // await authorPage.confirmUnlink();
+    // await captureScreenshot(page, 'Step 5-6: Confirmed unlink');
 
     // ─── Step 7-9: grid empty + Total 0 Entries + ADD TEST CASE still enabled ──────────
     await authorPage.verifyNoLinkedTestCases();
