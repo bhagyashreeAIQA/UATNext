@@ -58,6 +58,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Creation 
     // ─── Step 7-8: valid Name + Priority → Save → created ──────────────────────────────
     const tcName = `Auto TC ${Date.now()}`;
     await authorPage.fillCreateTestCase({ name: tcName });
+    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
     await authorPage.clickCreateSave();
     await expect(authorPage.createNotification(/name is required|priority is required/i)).toHaveCount(0);
     if (await authorPage.createPopup.isVisible().catch(() => false)) {

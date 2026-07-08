@@ -732,6 +732,33 @@ export class AuthorTestCasesPage {
     return val;
   }
 
+  /**
+   * Selects an "Assigned To" person for the first create-form row from a list of preferred names,
+   * trying each in order until one is available. The create popup labels this column "QA User"
+   * (the detail view calls the same field "Assigned To"). Returns the chosen name.
+   */
+  async selectCreateAssignedTo(preferred: string[]): Promise<string> {
+    const dropdown = this.createDropdowns.nth(1); // Priority=0, QA User=1, Business User=2
+    const items = this.page.locator('.searchable-dropdown-item');
+    // The preceding Priority selection can leave its dropdown open (its options overlay the QA User
+    // input), so dismiss any open dropdown first, then open QA User — retrying until the user list
+    // (rather than the stale Priority options) is actually showing.
+    let options: string[] = [];
+    await expect.poll(async () => {
+      await this.page.keyboard.press('Escape').catch(() => undefined);
+      await dropdown.click();
+      await expect(items.first()).toBeVisible({ timeout: 10000 });
+      options = (await items.allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim());
+      return preferred.some(n => options.includes(n));
+    }, { timeout: 15000, intervals: [300, 600, 1000] }).toBe(true);
+
+    const name = preferred.find(n => options.includes(n))!;
+    const idx = options.indexOf(name);
+    await items.nth(idx).scrollIntoViewIfNeeded();
+    await items.nth(idx).click();
+    return name;
+  }
+
   async clickCreateSave(): Promise<void> {
     await this.createPopupSave.click();
   }

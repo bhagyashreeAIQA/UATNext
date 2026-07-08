@@ -46,6 +46,8 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
     // ─── Step 5-7: update a field → SAVE → "Successfully updated" ───────────────────────
     const newPriority = await authorPage.changeTcDetailDropdown('Priority');
     expect(newPriority, 'a different priority was chosen').not.toBe(originalPriority);
+    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
+    
     await authorPage.saveTcDetail();
     await captureScreenshot(page, 'Step 5-7: Saved with "Successfully updated"');
 
