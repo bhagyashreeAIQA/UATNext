@@ -53,12 +53,14 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
 
     await be.openBulkExecution();
     // SET Dealer CRM → Cycle "SET Dealer CRM" → Sales Ops: the cycle context CREATE LOG needs.
-    await be.selectProject('SET Dealer CRM');
-    await be.expandRelease('SET Dealer CRM');
-    await be.expandCycle('SET Dealer CRM');
-    await be.selectCycle('Sales Ops');
-    await be.verifyCycleActive('Sales Ops');
+    
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
+    await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns)
+    ;
+    await be.verifyCycleActive(data.cycleWithRuns);
     await be.verifyTestRunGridLoaded();
+    await captureScreenshot(page, `Step 1: ${data.cycleWithRuns} grid loaded`);
+ 
 
     // ─── Step 1: follow BE_TC_038 — select an eligible run and CREATE LOG ──────────────
     const target = await be.findFirstEmptyExecutionDateRow();

@@ -44,7 +44,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
   test('TC-110 | Verify Default Module Value in Create Defect Screen', async ({ page }) => {
     test.setTimeout(300000);
 
-    const { executeTabPage } = await loginAndOpenExecuteTab(page);
+    const { executeTabPage } = await loginAndOpenExecuteTab(page)
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();

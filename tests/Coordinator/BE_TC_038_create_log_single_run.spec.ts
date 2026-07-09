@@ -55,13 +55,13 @@ test.describe('Feature: Coordinator Tab | Sub-Feature: Bulk Execution', () => {
     // ─── Step 1: select SET Dealer CRM and drill the cycle tree down to Sales Ops ────
     // Tree: Release "SET Dealer CRM" → Cycle "SET Dealer CRM" → Sales Ops. Selecting the Sales Ops
     // cycle loads its Test Run grid.
-    await be.selectProject('SET Dealer CRM');
-    await be.expandRelease('SET Dealer CRM');
-    await be.expandCycle('SET Dealer CRM');
-    await be.selectCycle('Sales Ops');
-    await be.verifyCycleActive('Sales Ops');
+  
+    await be.ensureProjectSelected(data.expectedProject, data.releaseWithCycles);
+    await be.openCycleGrid(data.releaseWithCycles, data.cycleWithRuns)
+    ;
+    await be.verifyCycleActive(data.cycleWithRuns);
     await be.verifyTestRunGridLoaded();
-    await captureScreenshot(page, 'Step 1: Sales Ops grid loaded');
+    await captureScreenshot(page, `Step 1: ${data.cycleWithRuns} grid loaded`);
 
     // ─── Step 2: search the grid pages for ONE blank-Execution-Date (eligible) row ───
     const target = await be.findFirstEmptyExecutionDateRow();

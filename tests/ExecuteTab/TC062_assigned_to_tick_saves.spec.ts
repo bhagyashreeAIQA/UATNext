@@ -48,7 +48,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
     await captureScreenshot(page, "Step 1 (follows TC-061): reach the grid and open the Assigned To editor");
 
     // ─── Step 2: select a user from the dropdown ─────────────────────────────────
-    const selectedUser = await executeTabPage.selectAssigneeInEditor(0);
+    const selectedUser = await executeTabPage.selectAssigneeInEditor(0, ['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
     await executeTabPage.verifySaveAndCancelIconsVisible(0);
     await captureScreenshot(page, "Step 2: select a user from the dropdown");
 

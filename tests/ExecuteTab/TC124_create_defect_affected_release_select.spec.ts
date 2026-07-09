@@ -22,7 +22,7 @@
  *   Enable this only if Affected Release/Build becomes an editable dropdown.
  */
 
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   loginAndOpenExecuteTab,
   switchProjectAndLoadReleases,
@@ -36,8 +36,10 @@ const RUN_ROW_INDEX = 0;
 test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Details – Create Defect', () => {
 
   // NOT APPLICABLE: Affected Release/Build is display-only (no dropdown) in this build — see header.
-  test('TC-124 | Verify Affected Release/Build Field Value Selection', async ({ page }) => {
+  test.fixme('TC-124 | Verify Affected Release/Build Field Value Selection', async ({ page }) => {
     test.setTimeout(300000);
+
+    const AFFECTED_RELEASE = 'Affected Release/Build';
 
     // ─── Step 1: reach the suite grid and open a Test Run ────────────────────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
@@ -45,13 +47,24 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.clickRunButton(RUN_ROW_INDEX);
 
-    // ─── Step 1: open the Create Defect form ─────────────────────────────────────────
+    // ─── Step 1 / Expected 1: open the Create Defect form ────────────────────────────
     const executionPage = new TestRunExecutionPage(page);
     await executionPage.verifyDetailsPageOpen();
-    await executionPage.openCreateDefectForm();
+    await executionPage.openCreateDefectForm();          // Expected 1: form opens
     await captureScreenshot(page, 'Step 1: Create Defect form open');
 
-    // Affected Release/Build has no dropdown to open/select — display-only (see header note).
+    // ─── Step 2: open the Affected Release/Build dropdown ────────────────────────────
+    // (Intended flow — runs once the field becomes an editable dropdown; see header note.)
+    const optionCount = await executionPage.getDefectDropdownOptionCount(AFFECTED_RELEASE);
+    expect(optionCount, 'Affected Release/Build should list selectable values').toBeGreaterThan(0);
+    await captureScreenshot(page, 'Step 2: Affected Release/Build dropdown open');
+
+    // ─── Expected 2: select a value and confirm it is retained ───────────────────────
+    const selected = await executionPage.selectFirstAvailableDefectDropdownValue(AFFECTED_RELEASE);
+    expect(await executionPage.getDefectDropdownValue(AFFECTED_RELEASE)).toBe(selected);
+    await captureScreenshot(page, `Expected 2: Affected Release/Build set to "${selected}"`);
+
+    await executionPage.closeCreateDefectForm();
   });
 
 });

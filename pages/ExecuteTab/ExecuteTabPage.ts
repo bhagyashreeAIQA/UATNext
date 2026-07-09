@@ -1367,8 +1367,8 @@ export class ExecuteTabPage {
     return this.readAssigneeOptionsIn(this.assignedToCell(rowIndex));
   }
 
-  async selectAssigneeInEditor(rowIndex = 0): Promise<string> {
-    return this.selectAssigneeIn(this.assignedToCell(rowIndex));
+  async selectAssigneeInEditor(rowIndex = 0, preferred?: string[]): Promise<string> {
+    return this.selectAssigneeIn(this.assignedToCell(rowIndex), '', preferred);
   }
 
   async selectDifferentAssigneeInEditor(rowIndex = 0, exclude = ''): Promise<string> {

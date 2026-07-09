@@ -54,6 +54,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     // ─── Steps 1-2 (follows TC-068): reach the grid and open a run ───────────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
     await switchProjectAndLoadReleases(executeTabPage);
+    await executeTabPage.selectSidebarProject('Testdata_Module');
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
 

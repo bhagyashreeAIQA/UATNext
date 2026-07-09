@@ -299,7 +299,14 @@
       "Bash(xargs -I{} sh -c 'echo \"NEWEST: {}\"; ls -la {}')",
       "Bash(tee \"C:/Users/BHAGYA~1/AppData/Local/Temp/claude/C--Users-BhagyashreePanigrahi-PlaywrightCLI/38bc56fc-4c6d-4513-83f7-958c506b8458/scratchpad/fullrun.log\")",
       "Bash(tee \"C:/Users/BHAGYA~1/AppData/Local/Temp/claude/C--Users-BhagyashreePanigrahi-PlaywrightCLI/38bc56fc-4c6d-4513-83f7-958c506b8458/scratchpad/fullrun4.log\")",
-      "Bash(awk '/^  [0-9]+\\\\\\) \\\\[chromium\\\\]/{p=1} /^  [0-9]+ \\(passed|failed|flaky\\)/{p=0} p')"
+      "Bash(awk '/^  [0-9]+\\\\\\) \\\\[chromium\\\\]/{p=1} /^  [0-9]+ \\(passed|failed|flaky\\)/{p=0} p')",
+      "Bash(HEADLESS=1 npx playwright test --workers=6 --reporter=list)",
+      "Bash(HEADLESS=1 npx playwright test tests/Coordinator/BE_TC_001_bulk_execution_opens.spec.ts tests/Coordinator/GTL_TC_001_initial_state.spec.ts --workers=2 --reporter=list)",
+      "Bash(HEADLESS=1 npx playwright test tests/Coordinator --workers=6 --reporter=list)",
+      "PowerShell(npx playwright test --workers=6)",
+      "Bash([ -f \"$f\" ])",
+      "Bash(sed 's/\\\\x1b\\\\[[0-9;]*[A-Za-z]//g' C:/Users/BhagyashreePanigrahi/PlaywrightCLI/test-results/Coordinator-BE_TC_028_no_d-1e5a0-ng-Records-Across-All-Pages-chromium/error-context.md)",
+      "PowerShell($out = npx tsc --noEmit -p tsconfig.json 2>&1; $c = \\($out | Select-String -Pattern \"error TS\"\\).Count; \"error TS count: $c\"; $out | Select-String -Pattern \"AT_TC_0\\(37|40|42|51|52\\)\" | Select-Object -First 10)"
     ]
   }
 }

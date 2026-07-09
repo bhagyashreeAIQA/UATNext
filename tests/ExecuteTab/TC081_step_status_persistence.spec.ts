@@ -59,7 +59,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Execution Deta
     await executionPage.selectStepStatus(1, 'Failed');
     await executionPage.selectStepStatus(2, 'Blocked');
     await captureScreenshot(page, "Step 1 (follows TC-080): open the run and update three step statuses");
-
+    const selectedUser = await executeTabPage.selectAssigneeInEditor(0,['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
     // ─── Step 2: Save ─────────────────────────────────────────────────────────────
     await executionPage.save();
     await captureScreenshot(page, "Step 2: Save");
