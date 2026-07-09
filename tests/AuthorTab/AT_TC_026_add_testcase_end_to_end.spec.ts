@@ -48,6 +48,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Creation'
     const tcName = `Auto TC ${Date.now()}`;
     await authorPage.fillCreateTestCase({ name: tcName, description: 'Created by AT_TC_026' });
     await authorPage.selectCreatePriority();
+    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
     await authorPage.clickCreateSave();
     await expect(authorPage.createNotification(/error|required|fail/i)).toHaveCount(0);
     await captureScreenshot(page, 'Step 5-6: Saved');

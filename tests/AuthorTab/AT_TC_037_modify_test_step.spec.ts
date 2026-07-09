@@ -53,8 +53,6 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
     // ─── Step 5-7: modify the last step's Step Description + UAT Category → Save ────────
     await authorPage.enterStepDescription(' (edited)'); // re-opens the step editor; appends text
     const newCategory = await authorPage.changeUatCategory(); // switches to a different category
-    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
-    
     await authorPage.saveTcDetail();                    // waits for the "updated successfully" toast
     await captureScreenshot(page, 'Step 5-7: Step modified and saved');
 
