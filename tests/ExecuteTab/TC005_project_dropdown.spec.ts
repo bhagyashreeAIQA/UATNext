@@ -14,6 +14,11 @@
  *   3. User has access to qTest.
  *
  * Dependencies : TC-004 pre-conditions must hold (Project auto-fill is verified first).
+ *
+ * Note: pinned to the "UATNext Dev" Environment, same as TC-001/TC-004 — see TC-001's header
+ *       note. Step 4 below then switches this "Project" (Environment) dropdown to its other
+ *       option ("Aqua Sandbox Environment"), whose own default sidebar workspace
+ *       (UATNext_V2_P01_Module) does carry releases — verified live 2026-08-18.
  */
 
 import { test, expect } from '@playwright/test';
@@ -42,6 +47,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project Dropdown', () =
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see header note)
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyProjectTextVisible();
     await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);

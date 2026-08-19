@@ -14,6 +14,9 @@
  *   3. User has access to qTest.
  *
  * Dependencies : TC-001 pre-conditions must hold (Workspace is auto-filled on load).
+ *
+ * Note: pinned to the "UATNext Dev" Environment, same as TC-001 — see that spec's header
+ *       note.
  */
 
 import { test, expect } from '@playwright/test';
@@ -39,6 +42,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
     await homePage.waitForPageLoad();
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see header note)
     await captureScreenshot(page, "Pre-condition: TC-001 steps (login + navigate + auto-fill verified)");
 
     // ─── Step 1: Workspace field is auto-filled with qTest synced value ───────
@@ -62,11 +66,9 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
     // ─── Step 3: Select a workspace ──────────────────────────────────────────
     // Expected: Page should refresh and workspace input updates to selected value
     //
-    // Note: This environment exposes one workspace ("ADO Requirement") for this
-    // user account. When multiple workspaces are synced from qTest, selectDifferentWorkspace
-    // will prefer an option other than the current value. With a single option it
-    // re-selects the same workspace — the dropdown interaction and refresh cycle
-    // are still fully exercised.
+    // Note: under "UATNext Dev" this account's sidebar Projects dropdown lists 4 workspaces
+    // (CorePlus, PDC Accounting, SET Dealer CRM, Testdata_Module — verified live 2026-08-18),
+    // so selectDifferentWorkspace genuinely switches to a different one.
 
     const selectedWorkspace = await executeTabPage.selectDifferentWorkspace(initialWorkspace);
 

@@ -44,6 +44,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
 
     // ─── Step 1 (follows TC-047): reach a populated suite grid (View All) ────────
     const { executeTabPage } = await loginAndOpenExecuteTab(page);
+
     await switchProjectAndLoadReleases(executeTabPage);
     await reachTestSuiteGrid(executeTabPage, { viewAll: true });
     await executeTabPage.verifyTotalEntriesPositive();
@@ -60,7 +61,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Suite – Inline A
 
     // ─── Step 4: Validate action icons (✔ Save and ✖ Cancel) ─────────────────────
     // The Save (tick) appears once an assignee is selected; choose one to reveal it.
-    await executeTabPage.selectAssigneeInEditor(0);
+    await executeTabPage.selectAssigneeInEditor(0, ['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ojha', 'Anirban Saha']);
     await executeTabPage.verifySaveAndCancelIconsVisible(0);
 
     // Cancel so the change is not persisted (read-only state restored).

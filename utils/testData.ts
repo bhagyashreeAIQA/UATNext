@@ -39,7 +39,7 @@ export const CREDENTIALS = {
 };
 
 export const URLS = {
-  base: process.env.UATNEXT_BASE_URL ?? 'https://webapp-v1-blazor-uatnext-dev.azurewebsites.net',
+  base: process.env.UATNEXT_BASE_URL ?? 'https://webapp-v1-blazor-uatnext-stg.azurewebsites.net',
 };
 
 export const EXPECTED = {
