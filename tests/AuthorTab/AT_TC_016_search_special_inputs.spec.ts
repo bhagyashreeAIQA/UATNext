@@ -36,8 +36,8 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Requirement Search'
     await authorPage.searchRequirements(word.toLowerCase());
     await page.waitForTimeout(5000); // Waits for 5 seconds to ensure the requirement list is fully loaded
     
-    const initialReqCount = Number((await page.locator('.pagination .wrapper-2 .p').textContent())?.split(' ')[1] ?? '0');
-       
+    const initialReqCount = await authorPage.getTotalEntriesCount();
+
     console.log(`Initial requirement count for lowercase search: ${initialReqCount}`);
     await authorPage.searchAndWait(word.toLowerCase(), initialReqCount);
     await captureScreenshot(page, 'Step 2-3: lowercase search');

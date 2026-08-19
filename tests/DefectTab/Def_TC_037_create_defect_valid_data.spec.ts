@@ -59,7 +59,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect', () => {
     const selected = await createDefect.fillRequiredForSave({ summary });
     expect(await createDefect.getSummaryValue()).toBe(summary);
     expect(await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.affectedRelease)).not.toBe('');
-    expect(selected.reason, 'Reason value selected').toBeTruthy();
+    expect(selected.rootCause, 'Root Cause Category value selected').toBeTruthy();
     await captureScreenshot(page, "Step 4: enter valid data in the fields");
 
     // ─── Step 5: upload an attachment < 10 MB ─────────────────────────────────

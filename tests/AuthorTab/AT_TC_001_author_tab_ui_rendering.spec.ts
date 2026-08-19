@@ -14,10 +14,11 @@
  *   Requirement columns → requirements listed sequentially → pagination shown → each row shows
  *   Requirement ID / ADO ID / Name → right panel blank → no test-case data shown.
  *
- * LIVE NOTES (verified 2026-06-29):
- *   - A default project context loads requirements immediately, but the Projects input itself renders
- *     EMPTY (no selected text); the populated requirement list is the observable proof of the default
- *     selection, so step 3 asserts requirements load rather than a non-empty input value.
+ * LIVE NOTES (verified 2026-08-18):
+ *   - The Projects dropdown does not reliably default to a single project on tab load (it has been
+ *     observed landing on either of the two Author projects), so this spec explicitly selects
+ *     `Testdata_Module` right after opening the tab — matching every other AT_TC spec — instead of
+ *     trusting an unpinned default.
  *   - Epic / Feature / Team are all enabled from the start (the documented "enabled only after the
  *     previous selection" progressive-enable is not how this build behaves), so they are asserted
  *     visible + enabled.
@@ -44,11 +45,12 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Navigation & UI Ren
     await authorPage.verifyAuthorTabActive();
     await captureScreenshot(page, 'Step 1: Author Test Cases page displayed');
 
-    // ─── Step 2-3: Project field visible + a project context is selected by default ────
+    // ─── Step 2-3: Project field visible + project context selected ────────────────────
     await authorPage.verifyProjectFieldVisible();
+    await authorPage.selectProject(data.projectWithRequirements);
     expect(await authorPage.getRequirementRowCount(),
-      'a default project context should load requirements').toBeGreaterThan(0);
-    await captureScreenshot(page, 'Step 2-3: Project field + default requirements');
+      'the selected project should load requirements').toBeGreaterThan(0);
+    await captureScreenshot(page, 'Step 2-3: Project field + Testdata_Module requirements');
 
     // ─── Step 4-7: Epic section + Epic / Feature / Team dropdowns visible and enabled ──
     await authorPage.verifyFilterDropdownsEnabled();

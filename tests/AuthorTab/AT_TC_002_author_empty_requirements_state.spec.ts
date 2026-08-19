@@ -12,15 +12,17 @@
  *   columns (ID / ADO ID / Requirement) → requirement list empty → "There is no data" message →
  *   pagination disabled → filters + search still visible/usable → right panel blank.
  *
- * LIVE NOTE — spec deviation (verified 2026-06-29): under the UATNext Dev BU BOTH Author projects
- *   carry requirements (Testdata_Module ≈ 45, SET Dealer CRM ≈ 20), so a project with ZERO
- *   requirements is not available to select. The documented empty state this case validates ("There
- *   is no data", retained columns, disabled pagination, still-usable filters/search, blank right
- *   panel) is induced here by selecting an Epic with no mapped requirements (Sub_Testdata_Module_P5)
- *   after selecting the project — a genuinely empty requirement scope that renders the full documented
- *   empty state. (A no-match Requirement search reaches an empty list too, but the build leaves its
- *   pagination "Next" enabled in that path, so it does not satisfy "pagination disabled".) Switch to a
- *   genuinely empty project here if/when one exists.
+ * LIVE NOTE — spec deviation (verified 2026-08-14): under the UATNext Dev BU BOTH Author projects
+ *   carry requirements, so a project with ZERO requirements is not available to select. The epic
+ *   taxonomy under Testdata_Module has also since been replaced wholesale (real epic names, not the
+ *   old Sub_Testdata_Module_P* placeholders) and selecting an Epic no longer actually filters the
+ *   requirement list at all on this build (Total N Entries stays unchanged regardless of which epic is
+ *   picked) — so the previous "select an empty epic" induction no longer reaches an empty state. The
+ *   documented empty state this case validates ("There is no data", retained columns, disabled
+ *   pagination, still-usable filters/search, blank right panel) is induced here instead via a
+ *   no-match Requirement search: verified live that this build now correctly disables pagination in
+ *   that path too (previously, 2026-08-04, it left "Next" enabled — that limitation no longer holds).
+ *   Switch to a genuinely empty project (or a working empty-epic filter) here if/when one exists.
  *
  * Post-condition: read-only — no data is mutated.
  */
@@ -50,10 +52,10 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Empty Requirements 
     await authorPage.verifyAuthorTabActive();
     await captureScreenshot(page, 'Step 3: Author tab highlighted');
 
-    // Induce the empty requirement list (no project with zero requirements exists — see note):
-    // select an Epic that has no mapped requirements.
-    await authorPage.selectEpic(data.epicEmpty);
-    await authorPage.waitForTotalEntries(0);
+    // Induce the empty requirement list (no project with zero requirements exists, and Epic
+    // selection no longer filters the list on this build — see note): search for a term that
+    // matches no requirement.
+    await authorPage.searchRequirements(data.noMatchSearch);
 
     // ─── Step 4: Requirement panel still shows its columns ─────────────────────────────
     await authorPage.verifyColumns(data.requirementColumns);

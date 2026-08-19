@@ -25,7 +25,6 @@ export class HomePage {
     this.authorTestCasesTab  = page.getByRole('link', { name: 'AUTHOR TEST CASES' });
     this.executeTestCasesTab = page.getByRole('link', { name: 'EXECUTE TEST CASES' });
     this.defectTab           = page.getByRole('link', { name: 'DEFECT' });
-    // The COORDINATOR tab is only present for accounts granted the coordinator permission.
     this.coordinatorTab      = page.getByRole('link', { name: 'COORDINATOR' });
     this.userAvatar    = page.locator('[id*="chevron-logout"]');
     this.helpButton    = page.getByRole('button', { name: 'Help?' });
@@ -38,12 +37,29 @@ export class HomePage {
 
   async navigateToExecuteTab(): Promise<void> {
     await this.executeTestCasesTab.click();
-    await this.page.waitForURL(/webapp-v1-blazor-uatnext-dev\.azurewebsites\.net\//);
+    await this.page.waitForURL(/webapp-v1-blazor-uatnext-stg\.azurewebsites\.net\//);
   }
 
+  /**
+   * Navigates to the Author Test Cases tab.
+   * Retries the click until the URL stabilizes on /author.
+   *
+   * A workspace switch can land on a tab whose default active project (observed: "CorePlus") is not
+   * configured for that feature, which renders a full-page ".no-releases-overlay" modal ("The project
+   * is not yet fully configured. Please contact to your coordinator.") that intercepts EVERY click on
+   * the page, including this nav link — so blindly retrying the click just fights the overlay for the
+   * full timeout. When the overlay is up, a direct URL navigation bypasses the stuck tab instead.
+   */
   async navigateToAuthorTab(): Promise<void> {
-    await this.authorTestCasesTab.click();
-    await this.page.waitForURL(/\/author/);
+    await expect.poll(async () => {
+      if (await this.page.locator('.no-releases-overlay').isVisible().catch(() => false)) {
+        await this.page.goto('/author');
+      } else {
+        await this.authorTestCasesTab.click().catch(() => undefined);
+      }
+      await this.page.waitForTimeout(1000); // give SPA time
+      return this.page.url().includes('/author');
+    }, { timeout: 30000, intervals: [1000, 2000] }).toBe(true);
   }
 
   async navigateToDefectTab(): Promise<void> {
@@ -51,23 +67,20 @@ export class HomePage {
     await this.page.waitForURL(/\/defect/);
   }
 
-  /** Opens the COORDINATOR tab, which lands on the Generate Test Log screen (route `/coordinator`). */
   async navigateToCoordinatorTab(): Promise<void> {
     await this.coordinatorTab.click();
     await this.page.waitForURL(/\/(coordinator|generate-test-log)/);
   }
 
   async getActiveProject(): Promise<string> {
-    // Read the workspace/BU switcher container directly (the `text=/▼$/` matcher is unreliable — the
-    // ▼ glyph sits in a child node). The first line is the current value; when the dropdown is open
-    // the options follow on later lines, so take the first line and strip the chevron.
     const text = await this.page.locator('.project-dropdown-container').first().innerText();
     return text.split('\n')[0].replace('▼', '').trim();
   }
 
   /**
-   * Switches the header Workspace/Business-Unit dropdown to `name` (e.g. "UATNext Dev"). Selecting a
-   * workspace reloads the app to the home page, so this waits for the home tabs to re-render.
+   * Switches the header Workspace/Business-Unit dropdown to `name`.
+   * Selecting a workspace reloads the app, so this waits for the home tabs to re-render.
+   * Ensures navigation back to Author tab if needed.
    */
   async switchWorkspace(name: string): Promise<void> {
     if ((await this.getActiveProject()) === name) return;
@@ -77,6 +90,11 @@ export class HomePage {
       .click({ timeout: 10000 });
     await expect.poll(() => this.getActiveProject(), { timeout: 20000 }).toBe(name);
     await this.waitForPageLoad();
+
+    // Defensive: if reload dropped us back to Execute, re-click Author
+    if (!this.page.url().includes('/author')) {
+      await this.navigateToAuthorTab();
+    }
   }
 
   async verifyHomePageLoaded(): Promise<void> {

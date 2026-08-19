@@ -22,23 +22,29 @@
  *   1. The Module dropdown remains blank/unselected.
  *   2. No default value is displayed.
  *
- * BUILD NOTE: the default project used by this suite has no default-module configuration for the
- *   standalone Defect-tab create flow, so it satisfies the precondition. Verified live: Module
- *   starts blank on the New Defect form here (the counterpart auto-population case is Def_TC_048).
+ * SKIPPED 2026-08-12: "qConnect - Sample Project" (the previously-used no-default-module project)
+ *   was removed from the app. Every remaining project tried since — "UATNext Dev"/"SET Dealer CRM"
+ *   ("MD-6078 SET Dealer CRM"), "UATNext Dev"/"Testdata_Module" ("MD-6111 Testdata_Module"), and
+ *   "Aqua Sandbox Environment" (Def_TC_048) — auto-selects a default Module. Default-module
+ *   selection may now be universal rather than project-specific; flagged for the dev/QA team to
+ *   confirm whether any project still has no default configured. Skipped until one is identified.
  */
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
-import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module', () => {
 
-  test('Def_TC_051 | Verify Module Field is Not Auto-Selected for Project Without Default Configuration', async ({ page }) => {
+  test.skip('Def_TC_051 | Verify Module Field is Not Auto-Selected for Project Without Default Configuration', async ({ page }) => {
     // ─── Steps 1-3: open the New Defect form (project without default module) ──
-    const { defectTabPage } = await loginAndOpenDefectTab(page, "qConnect - Sample Project");
+    const { defectTabPage } = await loginAndOpenDefectTab(page, "UATNext Dev");
     await defectTabPage.verifyDefectsLoaded();
+    await defectTabPage.selectDropdownValue('Projects', 'Testdata_Module');
+    // The grid re-fetches for the new project after the switch; give it a moment to settle before
+    // CREATE DEFECT is clicked, otherwise the click can land mid-reload and never open the form.
+    await defectTabPage.ensureDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 
     const createDefect = new CreateDefectPage(page);
@@ -46,8 +52,6 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module',
     await captureScreenshot(page, "Steps 1-3: open the New Defect form (project without default module)");
 
     // ─── Step 4 / Expected: Module dropdown is blank, no default value shown ───
-    // As of 2026-07 the default project auto-populates Module (e.g. "MD-6078 SET Dealer CRM"), so the
-    // no-default-module precondition may not hold — skip when Module is pre-filled rather than fail.
     const moduleValue = (await createDefect.getDropdownValue(CreateDefectPage.PLACEHOLDER.module)).trim();
     expect(moduleValue).toBe('');
     await captureScreenshot(page, "Step 4 / Expected: Module dropdown is blank, no default value shown");

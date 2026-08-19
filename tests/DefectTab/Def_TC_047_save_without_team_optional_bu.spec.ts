@@ -23,7 +23,12 @@
  *   1. Defect is saved successfully.
  *   2. The new defect appears in the defect list.
  *
- * BUILD NOTE: runs on the default (Team-optional) BU — see Def_TC_046.
+ * 2026-08-12: "qConnect - Sample Project" (the previously-used Team-optional BU) was removed from
+ *   the app. Confirmed with the dev team that Team is now mandatory on every available Business
+ *   Unit ("UATNext Dev" and "Aqua Sandbox Environment" both verified live), so the Team-optional
+ *   precondition this test depends on no longer holds anywhere — it self-skips via the live
+ *   isFieldMandatory('Team') check below rather than a hardcoded skip, so it starts running again
+ *   automatically if a Team-optional BU is reintroduced.
  * MUTATING: creates a REAL qTest defect (timestamped Summary; run sparingly).
  */
 
@@ -40,7 +45,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     const summary = `Automated defect Def_TC_047 ${Date.now()}`;
 
     // ─── Steps 1-3: open the New Defect form ──────────────────────────────────
-    const { defectTabPage } = await loginAndOpenDefectTab(page, "qConnect - Sample Project");
+    const { defectTabPage } = await loginAndOpenDefectTab(page, "Aqua Sandbox Environment");
     await defectTabPage.verifyDefectsLoaded();
     await defectTabPage.openCreateDefectForm();
 
@@ -48,11 +53,10 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     await createDefect.waitForCreateFormOpen();
     await captureScreenshot(page, "Steps 1-3: open the New Defect form");
 
-    // As of 2026-07 the default BU marks Team mandatory (see Def_TC_046), so a defect cannot be saved
-    // without a Team — skip rather than create a doomed (and data-mutating) save attempt when the
-    // Team-optional precondition is not met.
-   
-    await createDefect.isFieldMandatory('Team')
+    // Team is mandatory on every currently available BU (see file header), so a defect cannot be
+    // saved without one — skip rather than create a doomed (and data-mutating) save attempt when
+    // the Team-optional precondition is not met.
+    test.skip(await createDefect.isFieldMandatory('Team'), 'Team is mandatory on this BU — the Team-optional precondition is not met.');
 
     // ─── Step 4: enter valid values in all fields EXCEPT Team ──────────────────
     await createDefect.fillRequiredForSave({ summary, skip: ['team'] });

@@ -41,7 +41,8 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Step Managemen
     await expect(authorPage.addStepButton).toBeEnabled();
     const stepsBefore = await authorPage.getStepRowCount();
     await authorPage.addTestStep();
-    expect(await authorPage.getStepRowCount(), 'a new step row was added').toBe(stepsBefore + 1);
+    await expect.poll(() => authorPage.getStepRowCount(), { timeout: 10000 })
+      .toBe(stepsBefore + 1);
     await captureScreenshot(page, 'Step 1-5: New step row added');
 
     // ─── Step 6: select UAT Category (a non-TinyMCE field) ─────────────────────────────

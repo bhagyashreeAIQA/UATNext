@@ -22,9 +22,10 @@
  *   1. Team field does NOT display a mandatory indicator (*).
  *   2. Team remains optional.
  *
- * BUILD NOTE: the default Business Unit/project used by this suite treats Team as optional — its New
- *   Defect form marks only Affected Release/Build with "*". That satisfies the precondition, so this
- *   test runs against the default BU and asserts Team carries no "*" (while the mandatory field does).
+ * 2026-08-12: confirmed with the dev team that Team is mandatory on every currently available
+ *   Business Unit, so the Team-optional precondition this test depends on no longer holds anywhere
+ *   — it self-skips via the live isFieldMandatory('Team') check below rather than asserting a stale
+ *   expectation, so it starts running again automatically if a Team-optional BU is reintroduced.
  */
 
 import { test, expect } from '@playwright/test';
@@ -48,11 +49,9 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configurati
     // ─── Step 4: observe the Team field ───────────────────────────────────────
     // Expected: Team has no "*"; the truly-mandatory field is still marked (sanity check that the
     // asterisk detection works, so a passing assertion is not a false negative).
-    // As of 2026-07 the default BU's Create Defect form now marks Team mandatory, so the "Team is
-    // optional" precondition may not hold — skip when it doesn't rather than assert a stale expectation.
     const teamMandatory = await createDefect.isFieldMandatory('Team');
-    //test.skip(teamMandatory, 'Team is now marked mandatory on this BU — the Team-optional precondition is not met (config changed 2026-07).');
-    expect(teamMandatory).toBe(true);
+    test.skip(teamMandatory, 'Team is mandatory on this BU — the Team-optional precondition is not met.');
+    expect(teamMandatory).toBe(false);
     expect(await createDefect.isFieldMandatory(EXPECTED.createDefectPage.markedMandatoryField)).toBe(true);
     await captureScreenshot(page, "Step 4: observe the Team field");
   });

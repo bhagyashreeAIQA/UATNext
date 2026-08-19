@@ -10,7 +10,7 @@ import { Page } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { HomePage }  from '../../pages/HomePage';
 import { AuthorTestCasesPage } from '../../pages/AuthorTab/AuthorTestCasesPage';
-import { CREDENTIALS, URLS } from '../../utils/testData';
+import { CREDENTIALS, URLS, EXPECTED } from '../../utils/testData';
 
 export interface AuthorContext {
   loginPage: LoginPage;
@@ -21,8 +21,16 @@ export interface AuthorContext {
 /**
  * @param workspace Header Business Unit to select before opening the tab (Author requirements are
  *   exposed under "UATNext Dev").
+ * @param project Project to select in the Author "Projects" filter, as soon as it's interactable —
+ *   the filter defaults to whatever project the app last had active (observed live: "CorePlus"), not
+ *   the one specs actually want ("Testdata_Module"), so this is selected before the requirement list
+ *   is allowed to settle rather than after, so callers never observe the wrong project's data.
  */
-export async function loginAndOpenAuthorTab(page: Page, workspace = 'UATNext Dev'): Promise<AuthorContext> {
+export async function loginAndOpenAuthorTab(
+  page: Page,
+  workspace = 'UATNext Dev',
+  project = EXPECTED.author.projectWithRequirements,
+): Promise<AuthorContext> {
   const loginPage  = new LoginPage(page);
   const homePage   = new HomePage(page);
   const authorPage = new AuthorTestCasesPage(page);
@@ -36,7 +44,7 @@ export async function loginAndOpenAuthorTab(page: Page, workspace = 'UATNext Dev
 
   await homePage.switchWorkspace(workspace);
   await homePage.navigateToAuthorTab();
-  await authorPage.waitForLoaded();
+  await authorPage.waitForLoaded(3, project);
 
   return { loginPage, homePage, authorPage };
 }

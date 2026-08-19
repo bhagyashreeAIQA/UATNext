@@ -32,7 +32,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
 
   // BLOCKED (test.fixme): confirming the unlink permanently removes a real test-case ↔ requirement
   // link in qTest with no automated re-link restore — see header note (re-confirmed 2026-07-01).
-  test('AT_TC_024 | Verify Unlink Test Case Functionality in Existing Test Cases Section', async ({ page }) => {
+  test.fixme('AT_TC_024 | Verify Unlink Test Case Functionality in Existing Test Cases Section', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);

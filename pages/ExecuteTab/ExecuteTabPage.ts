@@ -1284,7 +1284,7 @@ export class ExecuteTabPage {
    * cell's starting value, if Save does not appear after the first pick the method reselects
    * the next distinct user. The change is only persisted on Save.
    */
-  private async selectAssigneeIn(cell: Locator, exclude = ''): Promise<string> {
+    private async selectAssigneeIn(cell: Locator, exclude = '', preferred?: string[]): Promise<string> {
     const input   = cell.locator('input.assign-search-input');
     const saveBtn = cell.locator('button.assign-save[title="Save"]');
 
@@ -1294,12 +1294,23 @@ export class ExecuteTabPage {
       await expect(this.assigneeOptions().first()).toBeVisible({ timeout: 10000 });
       let candidate = this.assigneeOptions().filter({ hasNotText: 'Please Select' });
       for (const s of skip) if (s) candidate = candidate.filter({ hasNotText: s });
-      const target = candidate.first();
+
+      let target = candidate.first();
+      for (const name of preferred ?? []) {
+        if (skip.includes(name)) continue;
+        const match = candidate.filter({ hasText: name }).first();
+        if (await match.count() > 0) {
+          target = match;
+          break;
+        }
+      }
+
       const name = (await target.innerText()).trim();
       await target.click();
       await expect(input).toHaveValue(name);
       return name;
     };
+
 
     const skip = exclude ? [exclude] : [];
     let chosen = await pickExcluding(skip);

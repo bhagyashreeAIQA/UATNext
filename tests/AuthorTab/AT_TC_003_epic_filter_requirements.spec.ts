@@ -37,6 +37,11 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Epic Filter', () =>
 
     // ─── Step 1: Author Test Cases page + project Testdata_Module ───────────────────────
     await authorPage.selectProject(data.projectWithRequirements);
+    // DIAGNOSTIC: selectProject() only waits on the requirement table settling; the Epic
+    // dropdown is a separate SignalR stream that can still be repainting for the previous
+    // project when read immediately after. Testing whether a short wait here avoids the
+    // stale-epic-options race seen in the last run (received prior project's epics).
+    await page.waitForTimeout(3000);
     await captureScreenshot(page, 'Step 1: Author tab, Testdata_Module selected');
 
     // ─── Step 2-3: Epic label displayed + Epic dropdown enabled ────────────────────────

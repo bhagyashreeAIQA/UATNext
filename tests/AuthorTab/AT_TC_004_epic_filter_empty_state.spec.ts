@@ -34,7 +34,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Epic Filter Empty S
     await captureScreenshot(page, 'Step 1: Author tab, Testdata_Module selected');
 
     // ─── Step 2: select Epic_EMPTY (an Epic with no mapped requirements) ───────────────
-    await authorPage.selectEpic(data.epicEmpty);
+    await authorPage.selectEpic(data.epicEmpty, 0);
     await authorPage.waitForTotalEntries(0);
     await captureScreenshot(page, 'Step 2: Epic_EMPTY selected');
 

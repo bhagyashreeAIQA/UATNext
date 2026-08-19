@@ -27,7 +27,7 @@ export class LoginPage {
     await this.page.waitForURL(
       url =>
         /login\.microsoftonline\.com/.test(url.toString()) ||
-        /webapp-v1-blazor-uatnext-dev\.azurewebsites\.net/.test(url.toString()),
+        /webapp-v1-blazor-uatnext-stg\.azurewebsites\.net/.test(url.toString()),
     );
   }
 
@@ -60,7 +60,7 @@ export class LoginPage {
     await this.enterEmail(email);
     await this.enterPassword(password);
     await this.handleStaySignedIn();
-    await this.page.waitForURL(/webapp-v1-blazor-uatnext-dev\.azurewebsites\.net/);
+    await this.page.waitForURL(/webapp-v1-blazor-uatnext-stg\.azurewebsites\.net/);
   }
 
   async verifyOnLoginPage(): Promise<void> {
