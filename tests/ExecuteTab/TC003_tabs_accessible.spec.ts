@@ -13,6 +13,12 @@
  *   3. User has access to qTest.
  *
  * Dependencies : TC-001 pre-conditions must hold (Workspace auto-fill is verified first).
+ *
+ * Note: pinned to the "UATNext Dev" Environment, same as TC-001 — see that spec's header
+ *       note. UATNext Dev's own default sidebar workspace ("CorePlus") is unconfigured and
+ *       throws up an app-wide blocking modal ("The project is not yet fully configured...")
+ *       that intercepts the tab-navigation clicks below — verified live 2026-08-18 — so
+ *       "Testdata_Module" is explicitly selected first to dismiss it.
  */
 
 import { test, expect } from '@playwright/test';
@@ -45,8 +51,13 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Tab Navigation', () => 
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see header note)
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await captureScreenshot(page, "Step 1 (follows TC-001): Login and verify Workspace is auto-filled");
+
+    // Dismiss the "not yet fully configured" blocking modal (see header note) so the tab
+    // navigation clicks below are not intercepted.
+    await executeTabPage.selectSidebarProject('Testdata_Module');
 
     // ─── Verify all three tabs are visible in the navigation bar ─────────────
 

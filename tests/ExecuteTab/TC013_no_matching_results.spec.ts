@@ -63,19 +63,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Empty State', () => {
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see TC-001)
     await executeTabPage.verifyWorkspaceLabelVisible();
     await executeTabPage.verifyWorkspaceDropdownVisible();
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyWorkspaceNotEmpty();
 
-    // Switch to the project that exposes releases, then load them.
-    const workspaceBeforeSwitch = await executeTabPage.getWorkspaceValue();
-    await executeTabPage.openProjectDropdown();
-    const currentProject  = await executeTabPage.getProjectValue();
-    const selectedProject = await executeTabPage.selectDifferentProject(currentProject);
-    await executeTabPage.verifyProjectUpdatedTo(selectedProject);
-    await executeTabPage.waitForProjectSwitchComplete(workspaceBeforeSwitch);
-    await executeTabPage.waitForReleasesLoad();
+    // Reach real data: the Environment is already pinned to "UATNext Dev" (above), but its
+    // own default sidebar workspace ("CorePlus") has no releases, so select "Testdata_Module"
+    // explicitly (same as executeNavHelpers.switchProjectAndLoadReleases).
+    await executeTabPage.selectSidebarProject('Testdata_Module');
     await captureScreenshot(page, "Step 2: Navigate to the Execute Test Cases tab");
 
     // ─── Step 3: Select a Release with no test runs ──────────────────────────────

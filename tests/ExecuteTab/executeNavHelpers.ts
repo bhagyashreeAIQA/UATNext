@@ -20,8 +20,11 @@ export interface ExecuteContext {
 }
 
 /**
- * Logs in (when no cached auth state applies), opens the Execute Test Cases tab and
- * verifies the qTest-synced Workspace + Project auto-fill (the TC-001/TC-004 baseline).
+ * Logs in (when no cached auth state applies), opens the Execute Test Cases tab, pins the
+ * top-nav Environment to "UATNext Dev" (see ExecuteTabPage.switchEnvironment — the suite's
+ * baseline; the account's raw default is "Aqua Sandbox Environment", which doesn't carry
+ * the seeded Testdata_Module data most specs assume) and verifies the qTest-synced
+ * Workspace + Environment auto-fill (the TC-001/TC-004 baseline).
  */
 export async function loginAndOpenExecuteTab(page: Page): Promise<ExecuteContext> {
   const loginPage      = new LoginPage(page);
@@ -37,6 +40,7 @@ export async function loginAndOpenExecuteTab(page: Page): Promise<ExecuteContext
 
   await homePage.navigateToExecuteTab();
   await executeTabPage.waitForSidebarLoad();
+  await executeTabPage.switchEnvironment('UATNext Dev');
   await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
   await executeTabPage.verifyProjectTextVisible();
   await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);
@@ -45,24 +49,15 @@ export async function loginAndOpenExecuteTab(page: Page): Promise<ExecuteContext
 }
 
 /**
- * Switches from the default project to the one that exposes releases (per TC-005), then
- * waits for the release tree to finish streaming in.
+ * Reaches the release tree that actually carries data. Under "UATNext Dev" (pinned above),
+ * the sidebar Workspace auto-fills to "CorePlus", which has NO releases ("not yet fully
+ * configured") — so this explicitly selects "Testdata_Module" from the sidebar, then waits
+ * for its release tree (Testdata_Release_P01/P02/P03) to finish streaming in. Kept as its own
+ * step (rather than folded into loginAndOpenExecuteTab) so specs that only need the Workspace/
+ * Environment auto-fill baseline aren't forced through it.
  */
 export async function switchProjectAndLoadReleases(executeTabPage: ExecuteTabPage): Promise<void> {
-  const workspaceBeforeSwitch = await executeTabPage.getWorkspaceValue();
-
-  await executeTabPage.openProjectDropdown();
-  await executeTabPage.verifyProjectDropdownOpen();
-  await executeTabPage.verifyProjectDropdownHasAtLeastOneOption();
-  await executeTabPage.verifyProjectDropdownContains([EXPECTED.activeProject]);
-
-  const currentProject  = await executeTabPage.getProjectValue();
-  const selectedProject = await executeTabPage.selectDifferentProject(currentProject);
-  await executeTabPage.verifyProjectDropdownClosed();
-  await executeTabPage.verifyProjectUpdatedTo(selectedProject);
-
-  await executeTabPage.waitForProjectSwitchComplete(workspaceBeforeSwitch);
-  await executeTabPage.waitForReleasesLoad();
+  await executeTabPage.selectSidebarProject('Testdata_Module');
   await executeTabPage.verifyReleasesVisible();
   await executeTabPage.verifyAtLeastOneRelease();
 }

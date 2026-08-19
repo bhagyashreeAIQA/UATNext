@@ -12,6 +12,12 @@
  *   1. User has valid login credentials.
  *   2. User is logged into the UATNext application.
  *   3. User has access to qTest.
+ *
+ * Note: the account's default top-nav Environment is "Aqua Sandbox Environment", but the
+ *       rest of this suite is pinned to "UATNext Dev" (it holds the seeded project data —
+ *       Testdata_Module, etc. — that the majority of the suite's EXPECTED test data assumes).
+ *       So this test switches Environment to "UATNext Dev" before asserting the Workspace
+ *       auto-fill, and checks the value that field auto-fills to under that Environment.
  */
 
 import { test, expect } from '@playwright/test';
@@ -47,6 +53,11 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Workspace', () => {
     await executeTabPage.verifyWorkspaceLabelVisible();
     await executeTabPage.verifyWorkspaceDropdownVisible();
     await captureScreenshot(page, "Step 2: Navigate to Execute Test Cases tab");
+
+    // ─── Step 2b: Pin the Environment to "UATNext Dev" ────────────────────────
+    // The suite's baseline Environment (see header note above).
+    await executeTabPage.switchEnvironment('UATNext Dev');
+    await captureScreenshot(page, "Step 2b: Pin the Environment to UATNext Dev");
 
     // ─── Step 3: Validate Workspace field value ───────────────────────────────
     // Expected: Workspace field should be auto-filled with qTest synced value

@@ -47,29 +47,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Release Filter', () => 
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see TC-001)
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyProjectTextVisible();
     await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);
 
-    // Follow TC-005: open dropdown → verify options → select a different project
-    // Capture the current workspace before switching so we can detect when Blazor
-    // has finished loading the new project's sidebar data.
-    const workspaceBeforeSwitch = await executeTabPage.getWorkspaceValue();
-
-    await executeTabPage.openProjectDropdown();
-    await executeTabPage.verifyProjectDropdownOpen();
-    await executeTabPage.verifyProjectDropdownHasAtLeastOneOption();
-    await executeTabPage.verifyProjectDropdownContains([EXPECTED.activeProject]);
-
-    const currentProject  = await executeTabPage.getProjectValue();
-    const selectedProject = await executeTabPage.selectDifferentProject(currentProject);
-    await executeTabPage.verifyProjectDropdownClosed();
-    await executeTabPage.verifyProjectUpdatedTo(selectedProject);
-
-    // Wait for the sidebar workspace to reflect the new project before loading releases.
-    // Without this, waitForReleasesLoad picks up the old project's stale releases.
-    await executeTabPage.waitForProjectSwitchComplete(workspaceBeforeSwitch);
-    await executeTabPage.waitForReleasesLoad();
+    // Reach real data: the Environment is already pinned to "UATNext Dev" (above), but its
+    // own default sidebar workspace ("CorePlus") has no releases, so select "Testdata_Module"
+    // explicitly (same as executeNavHelpers.switchProjectAndLoadReleases — TC-005 already
+    // covers exercising the "Project"/Environment dropdown mechanic itself).
+    await executeTabPage.selectSidebarProject('Testdata_Module');
     await executeTabPage.verifyReleasesVisible();
     await executeTabPage.verifyAtLeastOneRelease();
     await captureScreenshot(page, "Step 1 (follows TC-005): Login, navigate, verify workspace + project");

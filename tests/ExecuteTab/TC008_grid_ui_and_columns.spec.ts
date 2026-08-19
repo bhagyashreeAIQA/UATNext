@@ -53,24 +53,16 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Grid UI', () =
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see TC-001)
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await executeTabPage.verifyProjectTextVisible();
     await executeTabPage.verifyProjectAutoFilled(EXPECTED.activeProject);
 
-    const workspaceBeforeSwitch = await executeTabPage.getWorkspaceValue();
-
-    await executeTabPage.openProjectDropdown();
-    await executeTabPage.verifyProjectDropdownOpen();
-    await executeTabPage.verifyProjectDropdownHasAtLeastOneOption();
-    await executeTabPage.verifyProjectDropdownContains([EXPECTED.activeProject]);
-
-    const currentProject  = await executeTabPage.getProjectValue();
-    const selectedProject = await executeTabPage.selectDifferentProject(currentProject);
-    await executeTabPage.verifyProjectDropdownClosed();
-    await executeTabPage.verifyProjectUpdatedTo(selectedProject);
-
-    await executeTabPage.waitForProjectSwitchComplete(workspaceBeforeSwitch);
-    await executeTabPage.waitForReleasesLoad();
+    // Reach real data: the Environment is already pinned to "UATNext Dev" (above), but its
+    // own default sidebar workspace ("CorePlus") has no releases, so select "Testdata_Module"
+    // explicitly (same as executeNavHelpers.switchProjectAndLoadReleases — TC-005 already
+    // covers exercising the "Project"/Environment dropdown mechanic itself).
+    await executeTabPage.selectSidebarProject('Testdata_Module');
     await executeTabPage.verifyReleasesVisible();
     await executeTabPage.verifyAtLeastOneRelease();
 
@@ -108,7 +100,13 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Test Run Grid UI', () =
 
     // ─── Step 5: Validate data under each column ─────────────────────────────────
     // Expected: Each row should display correct, readable data without UI overlap
+    //
+    // The grid streams rows over SignalR (row skeleton first, cell text after), so wait for
+    // it to settle before reading every row's text — otherwise a still-streaming row can be
+    // read with a blank cell (verified live 2026-08-18 against the 119-entry Testdata_Cycle_1
+    // grid).
 
+    await executeTabPage.waitForGridSettled();
     await executeTabPage.verifyEachRowHasReadableData();
     await captureScreenshot(page, "Step 5: Validate data under each column");
   });

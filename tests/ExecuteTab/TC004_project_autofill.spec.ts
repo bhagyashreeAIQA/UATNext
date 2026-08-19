@@ -13,6 +13,10 @@
  *   3. User has access to qTest.
  *
  * Dependencies : TC-001 pre-conditions must hold (Workspace auto-fill is verified first).
+ *
+ * Note: pinned to the "UATNext Dev" Environment, same as TC-001 — see that spec's header
+ *       note. Here, "Project" is the top-nav Environment switcher itself (`.project-selector`
+ *       — confirmed live 2026-08-18), not a separate per-workspace project badge.
  */
 
 import { test } from '@playwright/test';
@@ -41,6 +45,7 @@ test.describe('Feature: Execute Test Case | Sub-Feature: Project', () => {
 
     await homePage.navigateToExecuteTab();
     await executeTabPage.waitForSidebarLoad();
+    await executeTabPage.switchEnvironment('UATNext Dev'); // pin baseline Environment (see header note)
     await executeTabPage.verifyWorkspaceAutoFilled(EXPECTED.workspaceValue);
     await captureScreenshot(page, "Step 1 (follows TC-001): Login and verify Workspace is auto-filled");
 
