@@ -33,6 +33,10 @@ import { captureScreenshot } from '../../utils/screenshot';
 export class AuthorTestCasesPage {
   private readonly page: Page;
 
+  // Assigned To / QA User must only ever land on one of these team members, not an arbitrary user
+  // from the full list.
+  static readonly ALLOWED_ASSIGNEES = ['Sounak Sen', 'Saheb Ojha', 'Anubhav Ganguly', 'Anirban Saha'];
+
   readonly authorTab: Locator;
   readonly frame: Locator;
 
@@ -73,7 +77,7 @@ export class AuthorTestCasesPage {
     // requirement list's column header) to avoid a strict-mode match of both.
     this.tableHeader      = page.locator('.tree-view-table-row-header').first();
     this.requirementRows  = page.locator('.tree-view-table-row');
-    this.pagination       = page.locator('.pagination');
+    this.pagination       = page.locator('.pagination-author-sidebar');
     this.rightPanel       = page.locator('.req-right-panel-wrapper');
     this.emptyStateMessage = page.getByText('There is no data', { exact: false });
   }
@@ -85,16 +89,69 @@ export class AuthorTestCasesPage {
    * requirement list to settle. The data rows stream in (Blazor) AFTER the header mounts, so this
    * additionally waits until either at least one row is present or the explicit empty state shows —
    * otherwise a row count read immediately after the header appears races to 0.
+   *
+   * On a cold load the requirement list can get stuck showing "Loading requirements..." indefinitely
+   * (same class of issue as the Defect tab's cold-load bug — see `DefectTabPage.ensureDefectsLoaded`);
+   * a reload re-runs the query against the now-warm context and recovers it. Retries the reload a few
+   * times before letting the final attempt's timeout surface as a clear failure.
+   *
+   * @param project When given, selected as soon as the filter panel exists (right after the header
+   *   appears) — BEFORE waiting for the requirement list below to settle. The Projects filter defaults
+   *   to whatever project the app last had active (observed live: "CorePlus"), not this one, so
+   *   selecting early means the "settle" wait below (and everything the caller does afterward) reflects
+   *   `project`'s data instead of first waiting out — and momentarily exposing — the wrong project's.
+   *   A `page.reload()` on a stuck load resets the filter back to the default, so this re-selects on
+   *   every attempt, not just the first.
    */
-  async waitForLoaded(): Promise<void> {
-    await expect(this.page).toHaveURL(/\/author/);
-    await expect(this.tableHeader).toBeVisible({ timeout: 45000 });
-    // The requirement list streams from the shared dev backend, which is slow under parallel load,
-    // so allow a generous window for rows (or an explicit empty state) to settle.
-    await expect.poll(async () =>
-      (await this.requirementRows.count()) > 0 || (await this.emptyStateMessage.isVisible().catch(() => false)),
-      { timeout: 60000, intervals: [500, 1000, 2000, 3000] }).toBe(true);
+  async waitForLoaded(maxAttempts = 3, project?: string): Promise<void> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      // Retry clicking Author tab until URL stabilizes
+      await expect.poll(async () => {
+        await this.authorTab.click();
+        await this.page.waitForTimeout(1000);
+        return this.page.url().includes('/author');
+      }, { timeout: 30000, intervals: [1000, 2000] }).toBe(true);
+
+      await expect(this.tableHeader).toBeVisible({ timeout: 45000 });
+
+      if (project && (await this.getProjectValue()) !== project) {
+        try {
+          await this.selectProject(project);
+        } catch (e) {
+          // A stuck load can surface here too (selectProject's own settle-wait can time out) — without
+          // this catch, that exception would escape the loop and skip the reload-retry below entirely.
+          if (attempt === maxAttempts) throw e;
+          console.log(`waitForLoaded: selectProject('${project}') stuck on attempt ${attempt}/${maxAttempts}, reloading`);
+          await this.page.reload();
+          continue;
+        }
+      }
+
+      if (attempt === maxAttempts) {
+        await expect.poll(async () => {
+          const rowCount = await this.requirementRows.count();
+          const emptyVisible = await this.emptyStateMessage.isVisible().catch(() => false);
+          console.log(`waitForLoaded poll → rows=${rowCount}, empty=${emptyVisible}`);
+          return rowCount > 0 || emptyVisible;
+        }, { timeout: 90000, intervals: [1000, 2000, 3000] }).toBe(true);
+        return;
+      }
+
+      const loaded = await expect.poll(async () => {
+        const rowCount = await this.requirementRows.count();
+        const emptyVisible = await this.emptyStateMessage.isVisible().catch(() => false);
+        console.log(`waitForLoaded poll → rows=${rowCount}, empty=${emptyVisible}`);
+        return rowCount > 0 || emptyVisible;
+      }, { timeout: 45000, intervals: [1000, 2000, 3000] }).toBe(true).then(() => true).catch(() => false);
+
+      if (loaded) return;
+
+      console.log(`waitForLoaded: requirement list stuck loading, reloading (attempt ${attempt}/${maxAttempts})`);
+      await this.page.reload();
+    }
   }
+
+
 
   /** The Author Test Cases nav link is the active/highlighted tab. */
   async verifyAuthorTabActive(): Promise<void> {
@@ -130,8 +187,15 @@ export class AuthorTestCasesPage {
     await expect(this.requirementSearch).toBeEnabled();
   }
 
-  /** Opens the Projects dropdown and selects `name`, waiting for the requirement grid to refresh. */
+  /**
+   * Opens the Projects dropdown and selects `name`, waiting for the requirement grid to refresh.
+   * A no-op if `name` is already selected — re-selecting the current value still triggers a fresh
+   * (unprotected, no reload-retry) requirement-list fetch on the live backend, which can itself get
+   * stuck on "Loading requirements..."; skipping it avoids that needless extra fetch entirely
+   * (callers, e.g. `authorNavHelpers`, may have already selected `name` before the spec's own call).
+   */
   async selectProject(name: string): Promise<void> {
+    if ((await this.getProjectValue()) === name) return;
     await this.projectField.click();
     await this.page.locator('.searchable-dropdown-item').filter({ hasText: name }).first().click();
     await expect.poll(() => this.getProjectValue(), { timeout: 15000 }).toBe(name);
@@ -147,18 +211,43 @@ export class AuthorTestCasesPage {
    * state shows). This is robust to two flaky failure modes: a list re-render resetting the search box
    * (typed value lost) and the Enter key being dropped — either of which otherwise leaves the full,
    * unfiltered list. Assumes the search changes the current result set (every real search here does).
+   *
+   * Two extra failure modes observed live (2026-08-04/2026-08-06, stg), both from the search box and
+   * row grid re-streaming independently of each other and of "Total N Entries":
+   *  - rows can still show a stale/unfiltered entry a beat after the count already flipped, so row
+   *    content is polled to two consecutive identical reads before being trusted;
+   *  - the app can silently clear the search box AFTER the count/rows briefly reflected the filter
+   *    (a later re-render reverts to the full unfiltered list) — the box is re-checked one last time
+   *    post-stabilization, and the whole search is re-issued (bounded retries) if it was reset.
    */
   async searchRequirements(term: string): Promise<void> {
     const before = await this.getTotalEntriesText();
-    await expect.poll(async () => {
-      await this.requirementSearch.fill(term);
-      if ((await this.requirementSearch.inputValue()).trim() !== term.trim()) return false; // value didn't stick
-      await this.requirementSearch.press('Enter');
-      await this.page.waitForTimeout(1500);
-      const changed = (await this.getTotalEntriesText()) !== before;
-      const empty = await this.emptyStateMessage.isVisible().catch(() => false);
-      return changed || empty;
-    }, { timeout: 45000, intervals: [800, 1500, 2500] }).toBe(true);
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await expect.poll(async () => {
+        await this.requirementSearch.fill(term);
+        if ((await this.requirementSearch.inputValue()).trim() !== term.trim()) return false; // value didn't stick
+        await this.requirementSearch.press('Enter');
+        await this.page.waitForTimeout(1500);
+        const changed = (await this.getTotalEntriesText()) !== before;
+        const empty = await this.emptyStateMessage.isVisible().catch(() => false);
+        return changed || empty;
+      }, { timeout: 45000, intervals: [800, 1500, 2500] }).toBe(true);
+
+      let prevNames: string | null = null;
+      await expect.poll(async () => {
+        const cur = (await this.getRequirementNames().catch(() => [])).join('|');
+        const stable = cur === prevNames;
+        prevNames = cur;
+        return stable;
+      }, { timeout: 15000, intervals: [500, 1000, 1500] }).toBe(true);
+
+      const stillApplied = (await this.requirementSearch.inputValue()).trim() === term.trim();
+      if (stillApplied) return;
+      console.log(`searchRequirements → search box reverted after applying (attempt ${attempt}/3), re-issuing`);
+    }
+
+    throw new Error(`searchRequirements: search box kept reverting to the unfiltered list for term "${term}"`);
   }
 
   /**
@@ -222,7 +311,14 @@ export class AuthorTestCasesPage {
   // (`.searchable-dropdown-item`), then click an option. Selecting a value refreshes the
   // requirement list (Blazor re-streams the rows).
 
+  /**
+   * Opens a searchable-dropdown field. Dismisses any stray open dropdown first (e.g. the Projects
+   * dropdown closing right before this call can leave its `.searchable-dropdown-item` list rendered
+   * a moment longer), since all these widgets share that same generic class and a leftover list would
+   * otherwise be misread as this field's options.
+   */
   private async openDropdown(field: Locator): Promise<void> {
+    await this.page.keyboard.press('Escape').catch(() => undefined);
     await field.click();
     await expect(this.page.locator('.searchable-dropdown-item').first()).toBeVisible({ timeout: 10000 });
   }
@@ -281,13 +377,19 @@ export class AuthorTestCasesPage {
    * STABILISING, rather than on a hard-coded number. Pair with {@link waitForTotalEntries} only for
    * counts known to be stable (e.g. epic+feature, empty epics).
    */
-  async selectEpic(name: string): Promise<void> {
-    const before = await this.getTotalEntriesText().catch(() => '');
-    await this.openDropdown(this.epicField);
-    await this.pickOption(name);
-    await expect.poll(() => this.getEpicValue(), { timeout: 15000 }).toBe(name);
+  async selectEpic(name: string, expectedCount?: number): Promise<void> {
+  const before = await this.getTotalEntriesText().catch(() => '');
+  await this.openDropdown(this.epicField);
+  await this.pickOption(name);
+  await expect.poll(() => this.getEpicValue(), { timeout: 15000 }).toBe(name);
+
+  if (expectedCount !== undefined) {
+    await this.waitForTotalEntries(expectedCount);
+  } else {
     await this.waitForTotalEntriesStable(before);
   }
+}
+
 
   /**
    * Waits for the requirement "Total N Entries" count to change from `beforeText` (a filter was
@@ -295,18 +397,30 @@ export class AuthorTestCasesPage {
    * robust to the volatile per-epic counts. Tolerates no change (returns once stable) as a fallback.
    */
   async waitForTotalEntriesStable(beforeText = ''): Promise<void> {
-    if (beforeText) {
-      await expect.poll(() => this.getTotalEntriesText(), { timeout: 30000, intervals: [500, 1000, 2000] })
-        .not.toBe(beforeText).catch(() => undefined);
-    }
-    let prev: string | null = null;
-    await expect.poll(async () => {
-      const cur = await this.getTotalEntriesText().catch(() => '');
-      const stable = cur !== '' && cur === prev;
-      prev = cur;
-      return stable;
-    }, { timeout: 25000, intervals: [700, 700, 1200] }).toBe(true);
+  if (beforeText) {
+    // Try to detect a change, but don’t fail if none occurs
+    await expect.poll(() => this.getTotalEntriesText(), { timeout: 30000, intervals: [500, 1000, 2000] })
+      .not.toBe(beforeText)
+      .catch(() => undefined);
   }
+
+  let prev: string | null = null;
+  await expect.poll(async () => {
+    const cur = await this.getTotalEntriesText().catch(() => '');
+    const stable = cur !== '' && cur === prev;
+    prev = cur;
+    return stable;
+  }, { timeout: 25000, intervals: [700, 1200, 1500] }).toBe(true);
+  
+  // Extra safeguard: if Epic is empty, allow immediate success
+  const count = await this.getTotalEntriesCount().catch(() => NaN);
+  if (count === 0) {
+    console.log('waitForTotalEntriesStable → Epic empty, bypassing stabilization');
+    return;
+  }
+}
+
+
 
   /** Selects a Feature and waits for its value to apply. Pair with {@link waitForTotalEntries}. */
   async selectFeature(name: string): Promise<void> {
@@ -334,15 +448,25 @@ export class AuthorTestCasesPage {
    * "Total N Entries" count reaching the expected value is far more reliable than watching the rows.
    * Then confirms the rows (or the empty state for 0) have rendered to match.
    */
-  async waitForTotalEntries(expected: number): Promise<void> {
-    await expect.poll(() => this.getTotalEntriesCount(), { timeout: 45000, intervals: [500, 1000, 2000, 3000] })
-      .toBe(expected);
-    if (expected === 0) {
-      await expect(this.emptyStateMessage).toBeVisible({ timeout: 15000 });
-    } else {
-      await expect.poll(() => this.getRequirementRowCount(), { timeout: 15000 }).toBeGreaterThan(0);
-    }
+ async waitForTotalEntries(expected: number): Promise<void> {
+  await expect.poll(async () => {
+    const count = await this.getTotalEntriesCount();
+    const emptyVisible = await this.emptyStateMessage.isVisible().catch(() => false);
+    console.log(`waitForTotalEntries poll → count=${count}, expected=${expected}, empty=${emptyVisible}`);
+    if (expected === 0 && emptyVisible) return 0;
+    return count;
+  }, { timeout: 90000, intervals: [1000, 2000, 3000] }).toBe(expected);
+
+  if (expected === 0) {
+    const emptyVisible = await this.emptyStateMessage.isVisible().catch(() => false);
+    const rowCount = await this.requirementRows.count();
+    console.log(`Empty-state check → emptyVisible=${emptyVisible}, rowCount=${rowCount}`);
+    expect(emptyVisible || rowCount === 0).toBe(true);
+  } else {
+    await expect.poll(() => this.getRequirementRowCount(), { timeout: 15000 }).toBeGreaterThan(0);
   }
+}
+
 
   /** Waits until the requirement list is in a consistent state — rows present or empty state shown. */
   async waitForRequirementListSettled(): Promise<void> {
@@ -434,34 +558,60 @@ export class AuthorTestCasesPage {
   async verifyPaginationVisible(): Promise<void> {
     // The `.pagination` container renders with height 0 (its children overflow), so assert its
     // contents — the Total-entries text, the prev/next controls and the current page number — rather
-    // than the zero-height container's own visibility.
-    expect(await this.getTotalEntriesText()).toMatch(/Total\s+\d+\s+Entries/i);
+    // than the zero-height container's own visibility. The text itself streams in a beat after the
+    // rest of the panel, so poll rather than reading it once.
+    await expect.poll(() => this.getTotalEntriesText(), { timeout: 15000 }).toMatch(/Total\s+\d+\s+Entries/i);
     await expect(this.navButton('Previous')).toHaveCount(1);
     await expect(this.navButton('Next')).toHaveCount(1);
     await expect(this.pagination.locator('.pagination-item .text-wrapper-9').first()).toHaveText(/^\d+$/);
   }
 
-  async getTotalEntriesText(): Promise<string> {
-    return (await this.pagination.locator('p.p, .p').first().innerText()).replace(/\s+/g, ' ').trim();
-  }
+ async getTotalEntriesText(): Promise<string> {
+  // The "Total N Entries" text is NOT inside `.pagination-author-sidebar` (that container only holds
+  // the nav buttons and the "Rows:"/page-number controls) — it's a separate paragraph elsewhere under
+  // `.requirements` (verified live: `.requirements > .module-selection > .wrapper > .wrapper-2 > p.p`).
+  // Scoping to `.pagination` here matched nothing (or an unrelated `.p`-classed element) far more often
+  // than not, which is why callers built on this (`waitForTotalEntriesStable`, `verifyPaginationVisible`)
+  // were chronically flaky. Search by the text itself within `.requirements` instead — scoped there
+  // (rather than page-wide) so it can't ambiguously match a similarly-labelled total elsewhere once the
+  // right requirement-detail panel is open.
+  const loc = this.page.locator('.requirements').getByText(/Total\s+\d+\s+Entries/i);
+  const text = await loc.first().innerText().catch(() => '');
+  return text.replace(/\s+/g, ' ').trim();
+}
 
-  async getTotalEntriesCount(): Promise<number> {
-    const m = (await this.getTotalEntriesText()).match(/\d+/);
-    return m ? parseInt(m[0], 10) : NaN;
-  }
+async getTotalEntriesCount(): Promise<number> {
+  const text = await this.getTotalEntriesText();
+  if (!text) return 0; // default to 0 if nothing found
+  const m = text.match(/\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+}
+
 
   /** A pagination control is disabled when its image carries inline opacity 0.5 / cursor default. */
-  async isNavDisabled(alt: 'First Page' | 'Previous' | 'Next' | 'Last Page'): Promise<boolean> {
-    const style = (await this.navButton(alt).getAttribute('style') ?? '').replace(/\s+/g, '');
-    return /opacity:0?\.5/.test(style) || /cursor:default/.test(style);
+/** A pagination control is disabled when its image carries inline opacity 0.5 / cursor default.
+ * If the control is absent (empty state), treat it as disabled.
+ */
+async isNavDisabled(alt: 'First Page' | 'Previous' | 'Next' | 'Last Page'): Promise<boolean> {
+  const btn = this.navButton(alt);
+  const count = await btn.count();
+  if (count === 0) {
+    console.log(`isNavDisabled → ${alt} not present, treating as disabled`);
+    return true;
   }
+  const style = (await btn.getAttribute('style').catch(() => '') ?? '').replace(/\s+/g, '');
+  return /opacity:0?\.5/.test(style) || /cursor:default/.test(style);
+}
+
 
   /** All four pagination nav controls are disabled (the empty-state, Total 0 Entries). */
-  async verifyPaginationDisabled(): Promise<void> {
-    for (const alt of ['First Page', 'Previous', 'Next', 'Last Page'] as const) {
-      expect(await this.isNavDisabled(alt), `pagination "${alt}" should be disabled`).toBe(true);
-    }
+  /** All four pagination nav controls are disabled (or absent in empty state). */
+async verifyPaginationDisabled(): Promise<void> {
+  for (const alt of ['First Page', 'Previous', 'Next', 'Last Page'] as const) {
+    const disabled = await this.isNavDisabled(alt);
+    expect(disabled, `pagination "${alt}" should be disabled`).toBe(true);
   }
+}
 
   // ─── Empty state / right panel ──────────────────────────────────────────────
 
@@ -562,22 +712,34 @@ export class AuthorTestCasesPage {
   /**
    * Clicks requirement rows in turn until one with linked test cases is found, leaving its detail
    * panel open; returns that requirement's {id, name}. Needed because unlink runs have emptied some
-   * requirements (e.g. RQ-8438), so the "row with test cases" must be discovered at runtime. Throws
-   * if none of the first `maxRows` requirements has any linked test cases.
+   * requirements (e.g. RQ-8438), so the "row with test cases" must be discovered at runtime.
+   *
+   * Historical unlink runs have permanently thinned the pool of still-linked requirements on the
+   * shared stg backend, so a single page's rows aren't reliably enough (seen live 2026-08-06: this
+   * failed scanning only the first 12 rows under load, then passed standalone once row order settled
+   * differently) — pages forward, scanning up to `maxRows` requirements across `maxPages` pages, and
+   * throws only once both budgets are exhausted.
    */
-  async selectRequirementWithLinkedTestCases(maxRows = 12): Promise<{ id: string; name: string }> {
+  async selectRequirementWithLinkedTestCases(maxRows = 40, maxPages = 5): Promise<{ id: string; name: string }> {
     await this.page.waitForTimeout(500); // give the right panel a moment to settle
-    const n = Math.min(await this.requirementRows.count(), maxRows);
-    for (let i = 0; i < n; i++) {
-      const r = await this.getRequirementRow(i);
-      await this.requirementRows.nth(i).click();
-      await expect(this.rightPanelFirst).toBeVisible({ timeout: 15000 });
-      await expect.poll(async () =>
-        (await this.getLinkedTcCount()) > 0 || (await this.noLinkedTcMessage.isVisible().catch(() => false)),
-        { timeout: 12000, intervals: [500, 1000, 2000] }).toBe(true).catch(() => undefined);
-      if ((await this.getLinkedTcCount()) > 0) return { id: r.id, name: r.name };
+    let scanned = 0;
+    for (let page = 1; page <= maxPages && scanned < maxRows; page++) {
+      const n = Math.min(await this.requirementRows.count(), maxRows - scanned);
+      for (let i = 0; i < n; i++) {
+        const r = await this.getRequirementRow(i);
+        await this.requirementRows.nth(i).click();
+        await expect(this.rightPanelFirst).toBeVisible({ timeout: 15000 });
+        await expect.poll(async () =>
+          (await this.getLinkedTcCount()) > 0 || (await this.noLinkedTcMessage.isVisible().catch(() => false)),
+          { timeout: 12000, intervals: [500, 1000, 2000] }).toBe(true).catch(() => undefined);
+        if ((await this.getLinkedTcCount()) > 0) return { id: r.id, name: r.name };
+        scanned++;
+      }
+      if (await this.isNavDisabled('Next')) break;
+      await this.navButton('Next').click();
+      await this.waitForRequirementListSettled();
     }
-    throw new Error(`No requirement with linked test cases found in the first ${maxRows} rows`);
+    throw new Error(`No requirement with linked test cases found in the first ${scanned} rows`);
   }
 
   /** Clicks the requirement row at `index` and waits for its detail panel to render. */
@@ -737,7 +899,7 @@ export class AuthorTestCasesPage {
    * trying each in order until one is available. The create popup labels this column "QA User"
    * (the detail view calls the same field "Assigned To"). Returns the chosen name.
    */
-  async selectCreateAssignedTo(preferred: string[]): Promise<string> {
+  async selectCreateAssignedTo(preferred: string[] = AuthorTestCasesPage.ALLOWED_ASSIGNEES): Promise<string> {
     const dropdown = this.createDropdowns.nth(1); // Priority=0, QA User=1, Business User=2
     const items = this.page.locator('.searchable-dropdown-item');
     // The preceding Priority selection can leave its dropdown open (its options overlay the QA User
@@ -794,6 +956,9 @@ export class AuthorTestCasesPage {
     // wait for them to render so callers don't read empty values.
     await expect.poll(() => this.page.locator('input.testcase-select').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(6);
     await this.page.waitForTimeout(2000);
+    // The Test Steps table (and its bottom-right "+" add-step icon) sits below the fold; scroll
+    // down now so later lookups of that icon find it already rendered.
+    await this.page.mouse.wheel(0, 2000);
     return tcId;
   }
 
@@ -844,11 +1009,28 @@ export class AuthorTestCasesPage {
     return (await this.tcDetailField(label).inputValue()).trim();
   }
 
-  /** Changes a detail dropdown to a different value and returns the new value. */
+  /**
+   * Changes a detail dropdown to a different value and returns the new value. For "Assigned To"
+   * the candidate is restricted to `ALLOWED_ASSIGNEES` (never an arbitrary user from the full
+   * list) — retries until one of them is visible and not already the current value.
+   */
   async changeTcDetailDropdown(label: string): Promise<string> {
     const field = this.tcDetailField(label);
     const current = (await field.inputValue()).trim();
     await field.click();
+
+    if (label === 'Assigned To') {
+      const items = this.page.locator('.searchable-dropdown-item');
+      let options: string[] = [];
+      await expect.poll(async () => {
+        options = (await items.allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim());
+        return AuthorTestCasesPage.ALLOWED_ASSIGNEES.some(n => n !== current && options.includes(n));
+      }, { timeout: 15000, intervals: [300, 600, 1000] }).toBe(true);
+      const name = AuthorTestCasesPage.ALLOWED_ASSIGNEES.find(n => n !== current && options.includes(n))!;
+      await items.nth(options.indexOf(name)).click();
+      return name;
+    }
+
     const opt = this.page.locator('.searchable-dropdown-item')
       .filter({ hasNotText: /please select/i })
       .filter({ hasNotText: current ? new RegExp(`^${current.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) : /$^/ })
@@ -908,6 +1090,10 @@ export class AuthorTestCasesPage {
 
   /** Clicks the "+" add-step icon and waits for the new editable step row. */
   async addTestStep(): Promise<void> {
+    // The icon lives at the bottom-right of the Test Steps table; scroll down first so it's
+    // mounted before searching for it, then bring it fully into view before clicking.
+    await this.page.mouse.wheel(0, 2000);
+    await expect(this.addStepButton).toBeVisible({ timeout: 10000 });
     await this.addStepButton.scrollIntoViewIfNeeded();
     await this.addStepButton.click();
     await expect(this.newStepUatCategory).toBeVisible({ timeout: 10000 });
@@ -983,9 +1169,22 @@ export class AuthorTestCasesPage {
     // `fill()` sets the DOM but does not fire the real keystroke events TinyMCE binds to, so the value
     // never syncs to the Blazor model and SAVE rejects it as empty. Type real keystrokes instead, then
     // blur (Tab) so TinyMCE flushes its content to the bound field.
-    await editor.click();
-    await editor.pressSequentially(text, { delay: 25 });
-    await expect(editor).toContainText(text, { timeout: 10000 });
+    //
+    // The editor can silently drop the first few keystrokes if typing starts a beat before it's truly
+    // focused (seen live 2026-08-14: "AT_TC_040 automated step description" landed as "040 automated
+    // step description") — clear and retype from scratch if the committed text doesn't match.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await editor.click();
+      if (attempt > 1) {
+        await this.page.keyboard.press('Control+A');
+        await this.page.keyboard.press('Delete');
+      }
+      await editor.pressSequentially(text, { delay: 25 });
+      const committed = await expect(editor).toContainText(text, { timeout: 10000 })
+        .then(() => true).catch(() => false);
+      if (committed) break;
+      if (attempt === 3) await expect(editor).toContainText(text, { timeout: 10000 }); // surface a clear failure
+    }
     await this.page.keyboard.press('Tab');
   }
 

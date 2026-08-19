@@ -38,14 +38,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Requirement Search'
     await page.waitForTimeout(10000); // Waits for 10 seconds to ensure the requirement list is fully loaded
     // Safely read the initial requirement count from pagination; default to 0 if not available
     await authorPage.searchRequirements(data.searchAdoId);
-    let initialReqCount = 0;
-    try {
-      const txt = await page.locator('.pagination .wrapper-2 .p').textContent();
-      if (txt)
-        initialReqCount = Number(txt.split(' ')[1] ?? '0');
-    } catch (e) {
-      initialReqCount = 0;
-    }
+    const initialReqCount = await authorPage.getTotalEntriesCount();
     console.log(`Initial requirement count: ${initialReqCount}`);
     await authorPage.searchAndWait(data.searchAdoId, initialReqCount);
     await captureScreenshot(page, 'Step 4-5: Searched by ADO ID');

@@ -12,6 +12,14 @@
  *   click a Test Case ID → Test Steps section → table with columns Step / Step Description / UAT
  *   Category / Action / Expected Result → steps listed.
  *
+ * KNOWN FLAKY (2026-08-04, stg): the "Step Description" column check has failed even at a 15s
+ *   timeout, yet Playwright's auto-captured failure screenshot shows the column plainly rendered at
+ *   that same moment — ruling out "just needs more time". Suspect: the linked test case used here
+ *   (TC-26373, seeded/mutated repeatedly by other tests today — its step count shifted 5→6 between
+ *   runs) may re-render/flicker the table under shared-backend load, and the poll instant happens to
+ *   land mid-flicker. Needs the interactive trace (`npx playwright show-trace`) to confirm — not
+ *   diagnosed further yet.
+ *
  * Post-condition: read-only — no data is mutated.
  */
 
@@ -48,7 +56,10 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Detail Vi
     // ─── Step 5-7: Test Steps section + column headers ─────────────────────────────────
     await expect(page.getByText(/Test Steps/i).first()).toBeVisible();
     for (const col of ['Step', 'Step Description', 'UAT Category', 'Action', 'Expected Result']) {
-      await expect(page.getByText(col, { exact: true }).first(), `column "${col}"`).toBeVisible();
+      // "Step Description" is a mandatory field and renders with a trailing " *" marker, so an
+      // exact match on the bare label never matches — allow an optional "*" suffix for every column.
+      const locator = page.getByText(new RegExp(`^${col}\\s*\\*?$`)).first();
+      await expect(locator, `column "${col}"`).toBeVisible({ timeout: 15000 });
     }
     await captureScreenshot(page, 'Step 5-7: Test Steps columns');
 

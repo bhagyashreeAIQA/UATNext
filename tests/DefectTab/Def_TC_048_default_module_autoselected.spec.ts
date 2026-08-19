@@ -21,17 +21,14 @@
  * Expected:
  *   1. Module dropdown is auto-populated with the configured default module value.
  *
- * BLOCKED (test.fixme): the DEFECT-tab New Defect form has no test-case context, so Module starts
- *   blank for the default project (verified live — see Def_TC_051). Auto-population of Module is a
- *   per-project qTest configuration; no project available to this account is known to define a
- *   default module for the standalone Defect-tab create flow. Enable this test (and set
- *   EXPECTED.createDefectPage.defaultModulePattern) once such a project is provisioned and select
- *   it via the sidebar before opening the Defect tab.
+ * 2026-08-12: Module auto-select is Business-Unit-config-dependent, confirmed with the dev team —
+ *   not every BU has a default module configured. Neither "qConnect - Sample Project" (since
+ *   removed) nor "UATNext Dev" (default project "SET Dealer CRM") auto-select Module live.
+ *   Switched to "Aqua Sandbox Environment", which has default Module configured.
  */
 
 import { test, expect } from '@playwright/test';
 import { loginAndOpenDefectTab } from './defectNavHelpers';
-import { EXPECTED } from '../../utils/testData';
 import { CreateDefectPage } from '../../pages/DefectTab/CreateDefectPage';
 import { captureScreenshot } from '../../utils/screenshot';
 
@@ -39,8 +36,7 @@ test.describe('Feature: Defect | Sub-Feature: Create Defect – Default Module',
 
   test('Def_TC_048 | Verify Default Module is Auto-Selected for Configured Project', async ({ page }) => {
     // ─── Steps 1-2: (project with default module) → Defect tab loaded ────────────────
-    // TODO: select a project configured with a default module before opening the Defect tab.
-    const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);
+    const { defectTabPage } = await loginAndOpenDefectTab(page, 'Aqua Sandbox Environment');
     await defectTabPage.verifyDefectsLoaded();
     await captureScreenshot(page, 'Step 1-2: Defect tab loaded');
 

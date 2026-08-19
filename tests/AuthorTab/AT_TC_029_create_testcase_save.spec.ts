@@ -46,7 +46,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Creation'
     await authorPage.verifyCreatePopupFields();
     await authorPage.fillCreateTestCase({ name: tcName, description: 'Created by AT_TC_029' });
     await authorPage.selectCreatePriority();
-    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Anubhav Ganguly', 'Saheb Ohja']);
+    await authorPage.selectCreateAssignedTo(['Sounak Sen', 'Saheb Ojha', 'Anubhav Ganguly', 'Anirban Saha']);
     await captureScreenshot(page, 'Step 4-5: Valid data entered');
 
     // ─── Step 6-7: SAVE enabled → Save → test case created ─────────────────────────────

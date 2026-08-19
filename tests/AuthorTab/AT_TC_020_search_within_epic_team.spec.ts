@@ -40,7 +40,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Search Within Filte
     await authorPage.waitForTotalEntriesStable();
     await authorPage.selectTeam(data.teamWithRequirements);
      await page.waitForTimeout(5000);
-    const initialReqCount = Number((await page.locator('.pagination .wrapper-2 .p').textContent())?.split(' ')[1] ?? '0');
+    const initialReqCount = await authorPage.getTotalEntriesCount();
     console.log(`Initial requirement count: ${initialReqCount}`);
     await page.waitForTimeout(10000);
     await authorPage.waitForTotalEntries(initialReqCount);
@@ -53,7 +53,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Search Within Filte
 
     // ─── Step 5: clear search → all Team requirements again (scoped) ────────────────────
     await authorPage.clearSearch();
-    const initialReqCount1 = Number((await page.locator('.pagination .wrapper-2 .p').textContent())?.split(' ')[1] ?? '0');
+    const initialReqCount1 = await authorPage.getTotalEntriesCount();
     console.log(`Initial requirement count: ${initialReqCount1}`);
     await authorPage.clearSearchAndWait(initialReqCount1);
     //await authorPage.waitForTotalEntries(initialReqCount);

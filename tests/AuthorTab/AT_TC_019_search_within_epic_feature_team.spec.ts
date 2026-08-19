@@ -36,8 +36,8 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Search Within Filte
 
     // ─── Step 1: follow AT_TC_008 — EPIC_A + Feature_A + Team_A requirements ────────────
     await page.waitForTimeout(10000); // Waits for 5 seconds
-    const initialReqCount = Number((await page.locator('.pagination .wrapper-2 .p').textContent())?.split(' ')[1] ?? '0');
-    
+    const initialReqCount = await authorPage.getTotalEntriesCount();
+
     await authorPage.selectEpic(data.epicA);
     await authorPage.waitForTotalEntriesStable();
     await authorPage.selectFeature(data.featureA);

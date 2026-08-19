@@ -20,8 +20,8 @@
  * Expected:
  *   1. Defect page displayed and project defects visible.
  *   2. New Defect form opens with Save/Close, Summary, every dropdown (Affected/Fixed/Target
- *      Release, Severity, Type, Module, Reason, Category, Environment, Status, Priority, Assigned
- *      To, Team, Business User, Root Cause), Description, Browse File and Linked Test Run section.
+ *      Release, Severity, Type, Module, Category, Environment, Status, Priority, Assigned
+ *      To, Team, Business User, Root Cause Category), Description, Browse File and Linked Test Run section.
  */
 
 import { test } from '@playwright/test';

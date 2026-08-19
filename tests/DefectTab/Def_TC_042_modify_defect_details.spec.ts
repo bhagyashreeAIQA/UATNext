@@ -29,8 +29,9 @@
  *
  * BUILD NOTE: after Save the build keeps the user on the edit form (it does NOT auto-return to the
  *   grid), so the documented "User should return to the Defect page" is realised here by clicking
- *   Close. Update-validation enforces the same required fields as create (Reason, Business User, …),
- *   and many seeded defects predate those rules (e.g. DF-6 has a blank Reason), so modifying an
+ *   Close. Update-validation enforces the same required fields as create (Root Cause Category,
+ *   Business User, …), and many seeded defects predate those rules (e.g. DF-6 has a blank Root
+ *   Cause Category), so modifying an
  *   arbitrary existing defect would fail validation; this test instead seeds its own fully-valid
  *   defect and then modifies that, keeping it self-contained and deterministic.
  * MUTATING: creates one REAL qTest defect and updates it (timestamped Summary; run sparingly).

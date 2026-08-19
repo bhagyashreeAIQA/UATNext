@@ -34,17 +34,20 @@ export class CreateDefectPage {
     targetRelease:   '-- Select Target Release --',
     team:            '-- Select Team --',
     severity:        '-- Select Severity --',
-    reason:          '-- Select Reason --',
     status:          '-- Select Status --',
     businessUser:    '-- Select Business User --',
     fixedRelease:    '-- Select Fixed Release --',
     category:        '-- Select Category --',
     priority:        '-- Select Priority --',
-    rootCause:       '-- Select Root Cause --',
+    rootCause:       '-- Select Root Cause Category --',
     type:            '-- Select Type --',
     environment:     '-- Select Environment --',
     assignedTo:      '-- Select Assigned To User --',
   } as const;
+
+  // Assigned To must only ever land on one of these team members, not an arbitrary "first" user
+  // from the 800+ entry list.
+  static readonly ALLOWED_ASSIGNEES = ['Sounak Sen', 'Saheb Ojha', 'Anubhav Ganguly', 'Anirban Saha'];
 
   readonly breadcrumb: Locator;
   readonly saveCreateButton: Locator;
@@ -157,9 +160,38 @@ export class CreateDefectPage {
   }
 
   /**
+   * Selects Assigned To from the fixed `ALLOWED_ASSIGNEES` pool instead of an arbitrary first
+   * option. Types each candidate's name into the dropdown to filter the 800+ entry user list (the
+   * same filter-then-click pattern the left-panel Assigned To search uses), and picks the first
+   * candidate that actually has a matching option. Throws if none of the allowed users are found.
+   */
+  async selectAssignedToFromAllowedUsers(): Promise<string> {
+    const placeholder = CreateDefectPage.PLACEHOLDER.assignedTo;
+    const input = this.dropdownInput(placeholder);
+    const items = this.dropdownCard(placeholder).locator('.searchable-dropdown-item');
+
+    for (const candidate of CreateDefectPage.ALLOWED_ASSIGNEES) {
+      await input.scrollIntoViewIfNeeded();
+      await input.click();
+      await input.fill(candidate);
+      await this.page.waitForTimeout(800); // let the dropdown re-filter its options
+
+      const match = items.filter({ hasText: candidate });
+      if (await match.count() > 0) {
+        const value = (await match.first().innerText()).replace(/\s+/g, ' ').trim();
+        await match.first().click();
+        await expect(input).toHaveValue(/\S/, { timeout: 5000 });
+        return value;
+      }
+      await input.click().catch(() => undefined); // close before trying the next candidate
+    }
+    throw new Error(`None of the allowed Assigned To users (${CreateDefectPage.ALLOWED_ASSIGNEES.join(', ')}) were found in the dropdown`);
+  }
+
+  /**
    * Fills the fields needed for a successful Create Defect save. On the DEFECT tab nothing is
-   * pre-populated and validation is enforced field-by-field (Affected Release/Build, Reason,
-   * Business User, etc.), so every dropdown that loads options is given a value. `skip` lets a
+   * pre-populated and validation is enforced field-by-field (Affected Release/Build, Root Cause
+   * Category, Business User, etc.), so every dropdown that loads options is given a value. `skip` lets a
    * caller deliberately leave a field blank (e.g. Team for the Team-optional case). Returns the
    * map of fields it actually populated.
    */
@@ -170,13 +202,20 @@ export class CreateDefectPage {
     // Order roughly follows the form's own validation order so the save passes in one click.
     // Environment is intentionally omitted: it is optional (a save succeeds with it blank) and its
     // option list is slow/unreliable to load on the DEFECT tab, so attempting it only wastes time.
+    // Root Cause Category carries no "*" marker either (i.e. it's optional for save), and its option
+    // list can legitimately be empty for a given Affected Release/Build — best-effort only, a blank
+    // result here is not an error.
     const order: (keyof typeof CreateDefectPage.PLACEHOLDER)[] = [
-      'affectedRelease', 'reason', 'severity', 'status', 'priority', 'type',
+      'affectedRelease', 'severity', 'status', 'priority', 'type',
       'module', 'category', 'rootCause', 'team', 'businessUser', 'assignedTo',
       'targetRelease', 'fixedRelease',
     ];
     for (const key of order) {
       if (skip.has(key)) continue;
+      if (key === 'assignedTo') {
+        selected[key] = await this.selectAssignedToFromAllowedUsers();
+        continue;
+      }
       const ph = CreateDefectPage.PLACEHOLDER[key];
       selected[key] = await this.selectFirstAvailable(ph);
     }

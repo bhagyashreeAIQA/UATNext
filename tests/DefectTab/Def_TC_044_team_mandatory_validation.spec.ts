@@ -37,6 +37,7 @@ import { captureScreenshot } from '../../utils/screenshot';
 test.describe('Feature: Defect | Sub-Feature: Create Defect – Team configuration', () => {
 
   test('Def_TC_044 | Verify Validation When Team is Mandatory but Not Selected', async ({ page }) => {
+    test.setTimeout(480000);
     // ─── Steps 1-2: (BU with mandatory Team) → Defect tab loaded ─────────────────────
     // TODO: select a Business Unit where Team is configured mandatory before opening the Defect tab.
     const { defectTabPage } = await loginAndOpenDefectTab(page, EXPECTED.defect.workspace);

@@ -38,7 +38,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Test Case Managemen
   // BLOCKED (test.fixme): destructive unlink with no automated re-link restore, and no single-TC
   // requirement pinned (page-1 EPIC_A/Feature_A reqs all have 0 linked TCs — re-confirmed 2026-07-01:
   // getLinkedTcCount()===0). See header note.
-  test('AT_TC_025 | Verify Unlink Action When Only One Test Case Is Present', async ({ page }) => {
+  test.fixme('AT_TC_025 | Verify Unlink Action When Only One Test Case Is Present', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);

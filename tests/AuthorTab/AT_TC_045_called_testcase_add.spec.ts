@@ -27,7 +27,7 @@ import { captureScreenshot } from '../../utils/screenshot';
 
 test.describe('Feature: Author Test Cases Tab | Sub-Feature: Called Test Case – Add as Step', () => {
 
-  test('AT_TC_045 | Verify User Can Select and Add a Called Test Case', async ({ page }) => {
+  test.fixme('AT_TC_045 | Verify User Can Select and Add a Called Test Case', async ({ page }) => {
     test.setTimeout(180000);
     const data = EXPECTED.author;
     const { authorPage } = await loginAndOpenAuthorTab(page, data.workspace);

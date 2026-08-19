@@ -14,6 +14,13 @@
  * Live note (2026-06-29): the search magnifier is decorative (Enter triggers search). Searching the
  *   title word "Create" returns 20 requirements, each whose Name contains the term.
  *
+ * KNOWN FLAKY (2026-08-04, stg): searchRequirements()'s "did the Total Entries count change" signal
+ *   is not proof the grid ROWS finished re-rendering — a run was observed where the count had already
+ *   updated but getRequirementNames() still read a stale/unfiltered row (a result whose name did not
+ *   contain the search term). searchRequirements()'s own comments already note the app can silently
+ *   drop the Enter keystroke. A real fix needs the row CONTENT (not just the count) polled until it
+ *   matches the term, with a re-search retry if it doesn't — not attempted yet.
+ *
  * Post-condition: read-only — no data is mutated.
  */
 
@@ -35,8 +42,7 @@ test.describe('Feature: Author Test Cases Tab | Sub-Feature: Requirement Search'
     await captureScreenshot(page, 'Step 2-3: Requirement Search field visible + enabled');
     // ─── Step 4-5: enter a valid Requirement Title and search ──────────────────────────
     await authorPage.searchRequirements(data.searchTitleWord);
-    const initialReqCount = Number((await page.locator('.pagination .wrapper-2 .p').textContent())?.split(' ')[1] ?? '0');
-    await authorPage.searchAndWait(data.searchTitleWord, initialReqCount);
+    await authorPage.waitForTotalEntriesStable();
     await captureScreenshot(page, 'Step 4-5: Searched by Requirement Title');
 
     // ─── Step 6-7: only requirements matching the title are displayed ──────────────────
